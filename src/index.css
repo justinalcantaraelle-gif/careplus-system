@@ -1,0 +1,1181 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,600;1,700&family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --doc-beige: #F5F5DC;
+  --doc-cream: #FFFDF7;
+  --doc-gold: #D4AF37;
+  --doc-gold-dark: #B8860B;
+  --doc-gold-light: #FDF7E7;
+  --doc-gold-subtle: rgba(212, 175, 55, 0.12);
+  --doc-text-dark: #1F1B18;
+  --doc-text-muted: #6B7280;
+  --doc-border: #E8E2D8;
+  --doc-card-bg: #FFFFFF;
+  --doc-focus: rgba(212, 175, 55, 0.28);
+  --doc-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --doc-shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.06), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
+  --doc-shadow-lg: 0 16px 36px -6px rgba(0, 0, 0, 0.08), 0 6px 16px -3px rgba(0, 0, 0, 0.04);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background-color: var(--doc-beige);
+  color: var(--doc-text-dark);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.55;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings Typography */
+h1 {
+  font-size: calc(1.375rem + 1.2vw);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: calc(1.3rem + 0.8vw);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+h3 {
+  font-size: calc(1.175rem + 0.5vw);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+h5 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+h6 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.small,
+small {
+  font-size: 0.875em;
+}
+
+.form-control,
+.form-select {
+  font-size: 0.95rem;
+  border-color: #E2DDD5;
+  border-radius: 10px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn {
+  font-size: 0.95rem;
+  border-radius: 10px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   ADMIN / SUPERADMIN / STAFF SLIGHTLY ENLARGED TYPOGRAPHY SCALE
+   Enhanced clinical readability, reduced eye-strain, balanced proportions
+   ========================================================================== */
+.doc-layout-admin,
+.doc-layout-superadmin,
+.doc-layout-super-admin,
+.doc-layout-staff {
+  font-size: 1.075rem;
+  line-height: 1.6;
+}
+
+.doc-layout-admin p,
+.doc-layout-superadmin p,
+.doc-layout-super-admin p,
+.doc-layout-staff p {
+  font-size: 1.06rem;
+  line-height: 1.62;
+}
+
+/* Headings */
+.doc-layout-admin h1,
+.doc-layout-superadmin h1,
+.doc-layout-super-admin h1,
+.doc-layout-staff h1 {
+  font-size: calc(1.55rem + 0.9vw);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.doc-layout-admin h2,
+.doc-layout-superadmin h2,
+.doc-layout-super-admin h2,
+.doc-layout-staff h2 {
+  font-size: calc(1.38rem + 0.6vw);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.doc-layout-admin h3,
+.doc-layout-superadmin h3,
+.doc-layout-super-admin h3,
+.doc-layout-staff h3 {
+  font-size: calc(1.22rem + 0.4vw);
+  font-weight: 600;
+}
+
+.doc-layout-admin h4,
+.doc-layout-superadmin h4,
+.doc-layout-super-admin h4,
+.doc-layout-staff h4 {
+  font-size: 1.28rem;
+  font-weight: 600;
+}
+
+.doc-layout-admin h5,
+.doc-layout-superadmin h5,
+.doc-layout-super-admin h5,
+.doc-layout-staff h5 {
+  font-size: 1.16rem;
+  font-weight: 600;
+}
+
+.doc-layout-admin h6,
+.doc-layout-superadmin h6,
+.doc-layout-super-admin h6,
+.doc-layout-staff h6 {
+  font-size: 1.08rem;
+  font-weight: 600;
+}
+
+/* Small / Muted Text */
+.doc-layout-admin .small,
+.doc-layout-admin small,
+.doc-layout-superadmin .small,
+.doc-layout-superadmin small,
+.doc-layout-super-admin .small,
+.doc-layout-super-admin small,
+.doc-layout-staff .small,
+.doc-layout-staff small {
+  font-size: 0.94rem !important;
+}
+
+/* Buttons */
+.doc-layout-admin .btn,
+.doc-layout-superadmin .btn,
+.doc-layout-super-admin .btn,
+.doc-layout-staff .btn {
+  font-size: 1.02rem !important;
+}
+
+.doc-layout-admin .btn-sm,
+.doc-layout-superadmin .btn-sm,
+.doc-layout-super-admin .btn-sm,
+.doc-layout-staff .btn-sm {
+  font-size: 0.92rem !important;
+}
+
+.doc-layout-admin .doc-btn,
+.doc-layout-superadmin .doc-btn,
+.doc-layout-super-admin .doc-btn,
+.doc-layout-staff .doc-btn {
+  font-size: 0.95rem !important;
+}
+
+.doc-layout-admin .doc-btn-sm,
+.doc-layout-superadmin .doc-btn-sm,
+.doc-layout-super-admin .doc-btn-sm,
+.doc-layout-staff .doc-btn-sm {
+  font-size: 0.86rem !important;
+}
+
+.doc-layout-admin .doc-btn-lg,
+.doc-layout-superadmin .doc-btn-lg,
+.doc-layout-super-admin .doc-btn-lg,
+.doc-layout-staff .doc-btn-lg {
+  font-size: 1.05rem !important;
+}
+
+/* Form Controls & Inputs */
+.doc-layout-admin .form-control,
+.doc-layout-admin .form-select,
+.doc-layout-superadmin .form-control,
+.doc-layout-superadmin .form-select,
+.doc-layout-super-admin .form-control,
+.doc-layout-super-admin .form-select,
+.doc-layout-staff .form-control,
+.doc-layout-staff .form-select {
+  font-size: 1.02rem !important;
+}
+
+.doc-layout-admin .form-label,
+.doc-layout-superadmin .form-label,
+.doc-layout-super-admin .form-label,
+.doc-layout-staff .form-label {
+  font-size: 0.98rem !important;
+  font-weight: 600;
+}
+
+.doc-layout-admin .form-check-label,
+.doc-layout-superadmin .form-check-label,
+.doc-layout-super-admin .form-check-label,
+.doc-layout-staff .form-check-label {
+  font-size: 1.02rem !important;
+}
+
+.doc-layout-admin .input-group-text,
+.doc-layout-superadmin .input-group-text,
+.doc-layout-super-admin .input-group-text,
+.doc-layout-staff .input-group-text {
+  font-size: 1.02rem !important;
+}
+
+/* Cards & Content Containers */
+.doc-layout-admin .card,
+.doc-layout-superadmin .card,
+.doc-layout-super-admin .card,
+.doc-layout-staff .card {
+  font-size: 1.05rem;
+}
+
+.doc-layout-admin .card-title,
+.doc-layout-superadmin .card-title,
+.doc-layout-super-admin .card-title,
+.doc-layout-staff .card-title {
+  font-size: 1.22rem;
+}
+
+.doc-layout-admin .card-header,
+.doc-layout-superadmin .card-header,
+.doc-layout-super-admin .card-header,
+.doc-layout-staff .card-header {
+  font-size: 1.12rem;
+}
+
+/* Tables (Appointments, Patients, Reports, Price List, Audit Logs) */
+.doc-layout-admin .table,
+.doc-layout-superadmin .table,
+.doc-layout-super-admin .table,
+.doc-layout-staff .table {
+  font-size: 1.02rem !important;
+}
+
+.doc-layout-admin .table th,
+.doc-layout-superadmin .table th,
+.doc-layout-super-admin .table th,
+.doc-layout-staff .table th {
+  font-size: 0.93rem !important;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.doc-layout-admin .table td,
+.doc-layout-superadmin .table td,
+.doc-layout-super-admin .table td,
+.doc-layout-staff .table td {
+  font-size: 1.02rem !important;
+}
+
+/* Badges */
+.doc-layout-admin .badge,
+.doc-layout-superadmin .badge,
+.doc-layout-super-admin .badge,
+.doc-layout-staff .badge {
+  font-size: 0.86rem !important;
+  font-weight: 600;
+  padding: 0.42em 0.8em !important;
+}
+
+/* Sidebar Navigation Links */
+.doc-layout-admin .doc-sidebar-link,
+.doc-layout-superadmin .doc-sidebar-link,
+.doc-layout-super-admin .doc-sidebar-link,
+.doc-layout-staff .doc-sidebar-link {
+  font-size: 1.02rem !important;
+}
+
+.doc-layout-admin .doc-sidebar-link .small,
+.doc-layout-admin .doc-sidebar-link span,
+.doc-layout-superadmin .doc-sidebar-link .small,
+.doc-layout-superadmin .doc-sidebar-link span,
+.doc-layout-super-admin .doc-sidebar-link .small,
+.doc-layout-super-admin .doc-sidebar-link span,
+.doc-layout-staff .doc-sidebar-link .small,
+.doc-layout-staff .doc-sidebar-link span {
+  font-size: 1.02rem !important;
+}
+
+/* Navbar Welcome Text */
+.doc-layout-admin .navbar span.text-muted,
+.doc-layout-superadmin .navbar span.text-muted,
+.doc-layout-super-admin .navbar span.text-muted,
+.doc-layout-staff .navbar span.text-muted {
+  font-size: 0.98rem !important;
+}
+
+
+/* Patient View - Extra Large, Maximum Legibility Typography Scale */
+.doc-layout-patient {
+  font-size: 1.35rem;
+  line-height: 1.75;
+}
+
+.doc-layout-patient p {
+  font-size: 1.3rem;
+  line-height: 1.7;
+}
+
+.doc-layout-patient h1 {
+  font-size: calc(2.1rem + 1.3vw);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.doc-layout-patient h2 {
+  font-size: calc(1.85rem + 1vw);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.doc-layout-patient h3 {
+  font-size: calc(1.6rem + 0.7vw);
+  font-weight: 700;
+}
+
+.doc-layout-patient h4 {
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.doc-layout-patient h5 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.doc-layout-patient h6 {
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.doc-layout-patient .small,
+.doc-layout-patient small {
+  font-size: 1.15rem !important;
+}
+
+.doc-layout-patient .btn {
+  font-size: 1.25rem !important;
+  padding: 0.8rem 1.65rem !important;
+  border-radius: 14px;
+}
+
+.doc-layout-patient .btn-sm {
+  font-size: 1.1rem !important;
+  padding: 0.5rem 1.15rem !important;
+}
+
+.doc-layout-patient .form-control,
+.doc-layout-patient .form-select {
+  font-size: 1.25rem !important;
+  min-height: 54px !important;
+  padding: 0.75rem 1.25rem !important;
+  border-radius: 12px;
+}
+
+.doc-layout-patient .form-label {
+  font-size: 1.2rem !important;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.doc-layout-patient .form-check-label {
+  font-size: 1.25rem !important;
+  line-height: 1.6;
+}
+
+.doc-layout-patient .form-check-input {
+  width: 1.45em !important;
+  height: 1.45em !important;
+  margin-top: 0.25em !important;
+}
+
+.doc-layout-patient .card {
+  font-size: 1.28rem;
+  border-radius: 18px;
+}
+
+.doc-layout-patient .card-body {
+  font-size: 1.25rem;
+  padding: 1.75rem !important;
+}
+
+.doc-layout-patient .card-header {
+  font-size: 1.3rem;
+  padding: 1.25rem 1.75rem !important;
+}
+
+.doc-layout-patient .table {
+  font-size: 1.22rem !important;
+}
+
+.doc-layout-patient .table th {
+  font-size: 1.15rem !important;
+  padding: 1.1rem 1.25rem !important;
+  font-weight: 700;
+}
+
+.doc-layout-patient .table td {
+  font-size: 1.22rem !important;
+  padding: 1.1rem 1.25rem !important;
+}
+
+.doc-layout-patient .badge {
+  font-size: 1.05rem !important;
+  padding: 0.5em 1em !important;
+  border-radius: 50rem !important;
+}
+
+.doc-layout-patient .doc-sidebar-link {
+  font-size: 1.22rem !important;
+  padding: 0.95rem 1.25rem !important;
+  min-height: 52px;
+}
+
+.doc-layout-patient .doc-sidebar-link span {
+  font-size: 1.22rem !important;
+}
+
+.doc-layout-patient .input-group-text {
+  font-size: 1.25rem !important;
+  padding: 0.75rem 1.15rem !important;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Input Focus States with Clinical Gold */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--doc-gold);
+  box-shadow: 0 0 0 0.25rem var(--doc-focus);
+}
+
+.btn:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 3px solid var(--doc-focus);
+  outline-offset: 2px;
+}
+
+/* Cards & Elevations */
+.card {
+  border: none;
+  border-radius: 16px;
+  box-shadow: var(--doc-shadow-sm);
+  background-color: var(--doc-card-bg);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover-lift {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--doc-shadow-md) !important;
+}
+
+/* Tables */
+.table {
+  vertical-align: middle;
+}
+
+.table> :not(caption)>*>* {
+  padding: 0.85rem 1rem;
+}
+
+.table-hover>tbody>tr:hover>* {
+  background-color: rgba(212, 175, 55, 0.04);
+}
+
+.table-responsive {
+  scrollbar-color: var(--doc-gold) #f6f1e7;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 0.5rem;
+}
+
+/* Auth Cards */
+.auth-card {
+  width: min(100%, 480px);
+}
+
+.auth-small-card {
+  width: min(100%, 420px);
+}
+
+.password-rules {
+  background: #FFFDF5;
+  border: 1px solid #EBD9B6;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+/* Sidebar Styling */
+.doc-sidebar-link {
+  min-height: 48px;
+  border-radius: 10px;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.doc-sidebar-link:hover {
+  background-color: rgba(212, 175, 55, 0.14) !important;
+  color: #1f1b18 !important;
+  transform: translateX(2px);
+}
+
+.doc-profile-menu,
+.doc-layout-patient .doc-profile-menu {
+  width: min(330px, calc(100vw - 32px)) !important;
+  min-width: 290px !important;
+}
+
+.doc-profile-menu h6,
+.doc-layout-patient .doc-profile-menu h6 {
+  font-size: 1.1rem !important;
+}
+
+.doc-profile-menu .small,
+.doc-profile-menu small,
+.doc-layout-patient .doc-profile-menu .small,
+.doc-layout-patient .doc-profile-menu small,
+.doc-profile-menu .doc-profile-email,
+.doc-layout-patient .doc-profile-menu .doc-profile-email {
+  font-size: 0.85rem !important;
+  line-height: 1.4 !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+}
+
+.doc-profile-menu label.rounded-circle,
+.doc-layout-patient .doc-profile-menu label.rounded-circle {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  border: 2px solid #ffffff !important;
+  box-sizing: border-box !important;
+}
+
+/* Sidebar toggle button fix for patient layout */
+.doc-sidebar-toggle-btn,
+.doc-layout-patient .doc-sidebar-toggle-btn,
+.doc-layout-patient .navbar button.doc-sidebar-toggle-btn {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 10px !important;
+  color: #2B261F !important;
+  line-height: 1 !important;
+  box-sizing: border-box !important;
+  background-color: #f8f9fa !important;
+}
+
+.doc-sidebar-toggle-btn svg,
+.doc-layout-patient .doc-sidebar-toggle-btn svg,
+.doc-layout-patient .navbar button.doc-sidebar-toggle-btn svg {
+  width: 22px !important;
+  height: 22px !important;
+  min-width: 22px !important;
+  min-height: 22px !important;
+  display: block !important;
+  color: #2B261F !important;
+  fill: currentColor !important;
+}
+
+.doc-layout-patient .navbar .notification-bell-btn {
+  padding: 8px !important;
+  width: auto !important;
+  height: auto !important;
+  border-radius: 8px !important;
+}
+
+/* Calendar navigation arrow buttons and circular buttons fix for patient layout */
+.booking-calendar-nav-btn,
+.doc-layout-patient .booking-calendar-nav-btn,
+.doc-layout-patient button.booking-calendar-nav-btn {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  border-radius: 50% !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: #ffffff !important;
+  border: 1.5px solid #e2d8c8 !important;
+  color: #2B261F !important;
+  line-height: 1 !important;
+  box-sizing: border-box !important;
+  transition: all 0.2s ease !important;
+}
+
+.booking-calendar-nav-btn:hover,
+.doc-layout-patient .booking-calendar-nav-btn:hover {
+  background-color: #FAF5E8 !important;
+  border-color: var(--doc-gold) !important;
+  color: var(--doc-gold-dark) !important;
+}
+
+.booking-calendar-nav-btn svg,
+.doc-layout-patient .booking-calendar-nav-btn svg,
+.doc-layout-patient button.booking-calendar-nav-btn svg {
+  width: 22px !important;
+  height: 22px !important;
+  min-width: 22px !important;
+  min-height: 22px !important;
+  display: block !important;
+  color: currentColor !important;
+  fill: currentColor !important;
+}
+
+.doc-layout-patient .btn.rounded-circle,
+.doc-layout-patient button.rounded-circle {
+  border-radius: 50% !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+}
+
+.doc-layout-patient .btn.rounded-circle svg,
+.doc-layout-patient button.rounded-circle svg {
+  display: block !important;
+  fill: currentColor !important;
+}
+
+/* Custom Gold Buttons */
+.btn-gold {
+  background: linear-gradient(135deg, var(--doc-gold) 0%, var(--doc-gold-dark) 100%);
+  border: none;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(184, 134, 11, 0.25);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-gold:hover {
+  background: linear-gradient(135deg, #DFBE4B 0%, #A67807 100%);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(184, 134, 11, 0.35);
+}
+
+.btn-gold:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 6px rgba(184, 134, 11, 0.2);
+}
+
+.btn-outline-gold {
+  border: 1.5px solid var(--doc-gold);
+  color: var(--doc-gold-dark);
+  background-color: transparent;
+  font-weight: 600;
+  transition: all 0.25s ease;
+}
+
+.btn-outline-gold:hover {
+  background-color: var(--doc-gold-light);
+  border-color: var(--doc-gold-dark);
+  color: var(--doc-gold-dark);
+}
+
+/* Status Badge Design System */
+.badge-status-approved {
+  background-color: #D4EFDF !important;
+  color: #1E8449 !important;
+  font-weight: 600;
+}
+
+.badge-status-completed,
+.badge-status-done {
+  background-color: #E8F4F8 !important;
+  color: #1A73E8 !important;
+  font-weight: 600;
+}
+
+.badge-status-pending {
+  background-color: #FEF9E7 !important;
+  color: #B7950B !important;
+  font-weight: 600;
+}
+
+.badge-status-cancelled,
+.badge-status-declined {
+  background-color: #FADBD8 !important;
+  color: #C0392B !important;
+  font-weight: 600;
+}
+
+/* SweetAlert2 Overrides */
+.swal2-popup {
+  border-radius: 18px !important;
+  font-family: inherit !important;
+}
+
+.swal2-confirm {
+  background: linear-gradient(135deg, var(--doc-gold) 0%, var(--doc-gold-dark) 100%) !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 12px rgba(184, 134, 11, 0.25) !important;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F2ECE0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D4AF37;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #B8860B;
+}
+
+/* Mobile & Tablet Responsive Enhancements */
+@media (max-width: 991.98px) {
+  .login-watermark-pane {
+    display: none !important;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .doc-app-shell {
+    position: relative;
+    height: 100vh !important;
+    overflow: hidden !important;
+  }
+
+  .doc-main-content {
+    padding: 0.75rem !important;
+    height: calc(100vh - 70px) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .doc-sidebar {
+    position: fixed !important;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    height: 100vh !important;
+    z-index: 1040;
+    width: 260px !important;
+    min-width: 260px !important;
+    max-width: 260px !important;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 0 24px rgba(0, 0, 0, 0.15);
+  }
+
+  .doc-sidebar.show-mobile-sidebar {
+    transform: translateX(0) !important;
+  }
+
+  .card {
+    border-radius: 14px !important;
+  }
+
+  .card-body {
+    padding: 1rem !important;
+  }
+
+  .btn,
+  .form-control,
+  .form-select {
+    min-height: 42px;
+  }
+
+  .d-flex.flex-nowrap {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+
+  .d-flex.flex-nowrap::-webkit-scrollbar {
+    display: none;
+  }
+
+  .my-appointments-backdrop,
+  .availability-modal-backdrop {
+    padding: 12px !important;
+  }
+
+  .my-appointments-modal,
+  .availability-modal {
+    padding: 16px !important;
+    max-height: calc(100vh - 24px) !important;
+    border-radius: 14px !important;
+  }
+}
+
+@media (max-width: 575.98px) {
+  h2 {
+    font-size: 1.55rem !important;
+  }
+
+  h3 {
+    font-size: 1.3rem !important;
+  }
+
+  h4 {
+    font-size: 1.15rem !important;
+  }
+
+  h5 {
+    font-size: 1.02rem !important;
+  }
+
+  .booking-calendar-grid,
+  .availability-calendar-grid {
+    gap: 3px !important;
+  }
+
+  .booking-calendar-grid button,
+  .availability-calendar-grid button {
+    min-height: 52px !important;
+    padding: 4px !important;
+    font-size: 11px !important;
+  }
+}
+
+/* ==========================================================================
+   NEAT & CLEAN ADMIN / SUPERADMIN BUTTON SYSTEM
+   ========================================================================== */
+
+/* Button Toolbar - No outer platform container */
+.doc-btn-toolbar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  flex-wrap: wrap;
+}
+
+.doc-btn-toolbar.shadow-sm,
+.doc-btn-toolbar.border {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Base Clean Button */
+.doc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1.25;
+  padding: 7px 16px;
+  min-height: 38px;
+  border: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  color: #374151;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  user-select: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.doc-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+}
+
+.doc-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.doc-btn:disabled,
+.doc-btn.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Variant: Danger / Emergency Closure (Soft Red) */
+.doc-btn-danger,
+.doc-btn-red {
+  background-color: #fef2f2 !important;
+  border-color: #fca5a5 !important;
+  color: #dc2626 !important;
+}
+
+.doc-btn-danger:hover,
+.doc-btn-red:hover {
+  background-color: #fee2e2 !important;
+  border-color: #f87171 !important;
+  color: #b91c1c !important;
+  box-shadow: 0 3px 10px rgba(220, 38, 38, 0.16) !important;
+}
+
+.doc-btn-danger:active,
+.doc-btn-red:active {
+  background-color: #fecaca !important;
+}
+
+/* Variant: Warning / Unavailable Dates (Soft Gold/Amber) */
+.doc-btn-warning,
+.doc-btn-amber {
+  background-color: #fffbeb !important;
+  border-color: #fde047 !important;
+  color: #a16207 !important;
+}
+
+.doc-btn-warning:hover,
+.doc-btn-amber:hover {
+  background-color: #fef9c3 !important;
+  border-color: #eab308 !important;
+  color: #854d0e !important;
+  box-shadow: 0 3px 10px rgba(217, 119, 6, 0.16) !important;
+}
+
+.doc-btn-warning:active,
+.doc-btn-amber:active {
+  background-color: #fef08a !important;
+}
+
+/* Variant: Neutral / Export CSV (Crisp White / Subtle Border) */
+.doc-btn-neutral,
+.doc-btn-secondary {
+  background-color: #ffffff !important;
+  border-color: #e5e7eb !important;
+  color: #374151 !important;
+}
+
+.doc-btn-neutral:hover,
+.doc-btn-secondary:hover {
+  background-color: #f9fafb !important;
+  border-color: #9ca3af !important;
+  color: #111827 !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+.doc-btn-neutral:active,
+.doc-btn-secondary:active {
+  background-color: #f3f4f6 !important;
+}
+
+/* Variant: Refresh / Brand Outline (Warm Amber on White) */
+.doc-btn-refresh,
+.doc-btn-primary-outline,
+.doc-btn-gold-outline {
+  background-color: #ffffff !important;
+  border-color: #e5e7eb !important;
+  color: #a16207 !important;
+}
+
+.doc-btn-refresh:hover,
+.doc-btn-primary-outline:hover,
+.doc-btn-gold-outline:hover {
+  background-color: #fffbeb !important;
+  border-color: #fde047 !important;
+  color: #854d0e !important;
+  box-shadow: 0 3px 10px rgba(217, 119, 6, 0.14) !important;
+}
+
+.doc-btn-refresh:active,
+.doc-btn-primary-outline:active,
+.doc-btn-gold-outline:active {
+  background-color: #fef9c3 !important;
+}
+
+/* Variant: Success / Completed (Soft Emerald Mint) */
+.doc-btn-success,
+.doc-btn-green {
+  background-color: #ecfdf5 !important;
+  border-color: #a7f3d0 !important;
+  color: #059669 !important;
+}
+
+.doc-btn-success:hover,
+.doc-btn-green:hover {
+  background-color: #d1fae5 !important;
+  border-color: #34d399 !important;
+  color: #047857 !important;
+  box-shadow: 0 3px 10px rgba(5, 150, 105, 0.16) !important;
+}
+
+.doc-btn-success:active,
+.doc-btn-green:active {
+  background-color: #a7f3d0 !important;
+}
+
+/* Variant: Info / Blue (Soft Sky Blue) */
+.doc-btn-info,
+.doc-btn-blue {
+  background-color: #eff6ff !important;
+  border-color: #bfdbfe !important;
+  color: #2563eb !important;
+}
+
+.doc-btn-info:hover,
+.doc-btn-blue:hover {
+  background-color: #dbeafe !important;
+  border-color: #60a5fa !important;
+  color: #1d4ed8 !important;
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.16) !important;
+}
+
+.doc-btn-info:active,
+.doc-btn-blue:active {
+  background-color: #bfdbfe !important;
+}
+
+/* Variant: Solid Gold / Primary CTA */
+.doc-btn-gold-solid,
+.doc-btn-primary-solid {
+  background: linear-gradient(135deg, #b8860b 0%, #d4af37 100%) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 10px rgba(184, 134, 11, 0.25) !important;
+}
+
+.doc-btn-gold-solid:hover,
+.doc-btn-primary-solid:hover {
+  background: linear-gradient(135deg, #996f08 0%, #c49d28 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 5px 14px rgba(184, 134, 11, 0.35) !important;
+  transform: translateY(-1px);
+}
+
+.doc-btn-gold-solid:active,
+.doc-btn-primary-solid:active {
+  transform: translateY(0);
+}
+
+/* Clean Button Sizes */
+.doc-btn-sm {
+  padding: 4px 11px !important;
+  font-size: 0.775rem !important;
+  min-height: 30px !important;
+  border-radius: 8px !important;
+  gap: 5px !important;
+}
+
+.doc-btn-lg {
+  padding: 9px 22px !important;
+  font-size: 0.95rem !important;
+  min-height: 44px !important;
+  border-radius: 12px !important;
+  gap: 8px !important;
+}
+
+/* Admin/Superadmin/Staff global enhancements for standard .btn */
+.doc-layout-admin .btn,
+.doc-layout-superadmin .btn,
+.doc-layout-staff .btn {
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.doc-layout-admin .btn:hover,
+.doc-layout-superadmin .btn:hover,
+.doc-layout-staff .btn:hover {
+  transform: translateY(-1px);
+}
+
+.doc-layout-admin .btn:active,
+.doc-layout-superadmin .btn:active,
+.doc-layout-staff .btn:active {
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   LUXURY MARBLE BRANDING PANE (LOGIN SIDE BANNER)
+   ========================================================================== */
+.doc-login-brand-pane {
+  background: url('./assets/images/white_gold_marble.jpg') center center / cover no-repeat;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 60px rgba(180, 130, 25, 0.08);
+}
+
+.doc-login-brand-pane::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.45) 0%, rgba(255, 253, 247, 0.72) 100%);
+  pointer-events: none;
+}
+
+.doc-login-brand-content {
+  position: relative;
+  z-index: 2;
+}
+
+.doc-font-serif {
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+}
+
+.doc-font-cinzel {
+  font-family: 'Cinzel', 'Playfair Display', Georgia, serif;
+}
+
+/* Luxury Gold Gradient Metallic Text for SMILE */
+.doc-gold-text-shimmer {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 700;
+  background: linear-gradient(135deg, #a67c1e 0%, #d4af37 25%, #fff6bb 48%, #c59b27 72%, #8c6214 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 4px 10px rgba(180, 130, 30, 0.25));
+  letter-spacing: 0.12em;
+}
