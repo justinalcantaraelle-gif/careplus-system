@@ -41,10 +41,10 @@ const PriceListView = () => {
     const [priceData, setPriceData] = useState([]);
 
     const theme = {
-        beige: '#f5f5dc',
-        gold: '#d4af37',
-        goldDark: '#b8860b',
-        cardBg: '#fffdf5'
+        beige: '#f8fafc',
+        gold: '#0284c7',
+        goldDark: '#0369a1',
+        cardBg: '#ffffff'
     };
 
     useEffect(() => {
@@ -52,11 +52,12 @@ const PriceListView = () => {
             const raw = await getPricelist();
             if (raw && raw.length > 0) {
                 const grouped = raw.reduce((acc, item) => {
+                    const itemName = item.service || item.name || 'Clinical Service';
                     const found = acc.find(c => c.category === item.category);
                     if (found) {
-                        found.items.push({ name: item.name, price: item.price });
+                        found.items.push({ name: itemName, price: item.price });
                     } else {
-                        acc.push({ category: item.category, items: [{ name: item.name, price: item.price }] });
+                        acc.push({ category: item.category, items: [{ name: itemName, price: item.price }] });
                     }
                     return acc;
                 }, []);

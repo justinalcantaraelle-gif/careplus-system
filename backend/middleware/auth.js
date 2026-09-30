@@ -6,7 +6,7 @@
 
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'doc_dental_care_secure_jwt_secret_2026';
+const JWT_SECRET = process.env.JWT_SECRET || 'careplus_clinic_management_secure_jwt_secret_2026';
 
 const verifyAuth = async (req, res, next) => {
     const authHeader = req.headers['authorization'];

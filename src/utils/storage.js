@@ -4,7 +4,8 @@ import {
     INITIAL_CAREPLUS_APPOINTMENTS,
     INITIAL_CAREPLUS_CONSULTATIONS,
     INITIAL_CAREPLUS_LAB_REQUESTS,
-    INITIAL_CAREPLUS_BILLING
+    INITIAL_CAREPLUS_BILLING,
+    CLINIC_SERVICES_CATALOG
 } from './careplusData';
 
 let dbCache = null;
@@ -613,7 +614,7 @@ try {
     }
 } catch (e) {}
 
-export const defaultInitialPricelist = [];
+export const defaultInitialPricelist = CLINIC_SERVICES_CATALOG;
 
 // Pricelist wrapper (MySQL Backend)
 export const getPricelist = async () => {
@@ -622,7 +623,7 @@ export const getPricelist = async () => {
         const response = await fetch(`${getApiBaseUrl()}/api/pricelist`);
         if (response.ok) {
             const data = await response.json();
-            if (Array.isArray(data)) {
+            if (Array.isArray(data) && data.length > 0) {
                 pricelistCache = data;
                 return data;
             }
@@ -631,7 +632,8 @@ export const getPricelist = async () => {
         console.error('Error fetching pricelist from MySQL API:', e);
     }
 
-    return pricelistCache || [];
+    pricelistCache = CLINIC_SERVICES_CATALOG;
+    return pricelistCache;
 };
 
 export const savePricelist = async (newList) => {

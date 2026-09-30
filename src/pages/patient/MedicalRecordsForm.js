@@ -10,10 +10,10 @@ import {
 import Swal from 'sweetalert2';
 
 const theme = {
-    beige: '#f5f5dc',
-    gold: '#d4af37',
-    goldDark: '#b8860b',
-    cardBg: '#fffdf5'
+    beige: '#f8fafc',
+    gold: '#0284c7',
+    goldDark: '#0369a1',
+    cardBg: '#ffffff'
 };
 
 const RequiredMark = () => <span className="text-danger ms-1">*</span>;

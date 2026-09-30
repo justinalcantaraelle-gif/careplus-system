@@ -36,7 +36,7 @@ const MedicalReports = () => {
         const consults = (db.consultations || []).filter(c => c.branch === branchName).length;
         const labs = (db.laboratory_requests || []).filter(l => l.branch === branchName).length;
         const revenue = (db.billing_records || [])
-            .filter(b => b.branch === branchName && b.paymentStatus === 'Paid')
+            .filter(b => b.branch === branchName && (b.status === 'Paid' || b.paymentStatus === 'Paid'))
             .reduce((sum, b) => sum + (Number(b.amountPaid) || 0), 0);
 
         return { registered, appts, consults, labs, revenue };
@@ -50,7 +50,7 @@ const MedicalReports = () => {
         const consults = (db.consultations || []).filter(c => c.branch === branchName).length;
         const labs = (db.laboratory_requests || []).filter(l => l.branch === branchName).length;
         const revenue = (db.billing_records || [])
-            .filter(b => b.branch === branchName && b.paymentStatus === 'Paid')
+            .filter(b => b.branch === branchName && (b.status === 'Paid' || b.paymentStatus === 'Paid'))
             .reduce((sum, b) => sum + (Number(b.amountPaid) || 0), 0);
 
         return { registered, appts, consults, labs, revenue };

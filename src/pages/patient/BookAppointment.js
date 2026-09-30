@@ -54,31 +54,29 @@ const getCategorySortValue = (categoryString) => {
 };
 
 const getEstimatedDuration = (category, name) => {
-    if (!category || !name) return '';
+    if (!category || !name) return 'Approx. 30 to 45 mins';
     const cat = category.toUpperCase();
     const sName = name.toUpperCase();
 
     if (
-        (cat.includes("PROPHYLAXIS") && sName.includes("HEAVY")) ||
-        (cat.includes("EXTRACTION") && (sName.includes("DIFFICULT") || sName.includes("ODONTECTOMY"))) ||
-        (cat.includes("RESTORATION") && sName.includes("VENEER")) ||
-        cat.includes("ROOT CANAL") ||
-        cat.includes("WHITENING") ||
-        cat.includes("ORTHODONTIC")
+        cat.includes("PACKAGE") || cat.includes("EXAMINATION") || sName.includes("ANNUAL") || sName.includes("PRE-EMPLOYMENT")
     ) {
         return "Approx. 1 to 1.5 hours";
     }
 
     if (
-        cat.includes("CONSULTATION") || 
-        (cat.includes("PROPHYLAXIS") && sName.includes("MILD")) ||
-        (cat.includes("RESTORATION") && sName.includes("TEMPORARY")) ||
-        cat.includes("FLOURIDE") || cat.includes("OP/")
+        cat.includes("SPECIALIST") || cat.includes("INTERNAL") || cat.includes("CARDIOLOGY")
     ) {
-        return "Approx. 30 mins";
+        return "Approx. 45 mins";
     }
 
-    return "Approx. 30 to 45 mins";
+    if (
+        cat.includes("LABORATORY") || cat.includes("IMAGING") || cat.includes("ECG") || cat.includes("X-RAY")
+    ) {
+        return "Approx. 20 to 30 mins";
+    }
+
+    return "Approx. 30 mins";
 };
 
 const BookAppointment = () => {
@@ -119,10 +117,10 @@ const BookAppointment = () => {
     const serviceDropdownRef = useRef(null);
 
     const theme = {
-        beige: '#f5f5dc',
-        gold: '#d4af37',
-        goldDark: '#b8860b',
-        cardBg: '#fffdf5'
+        beige: '#f8fafc',
+        gold: '#0284c7',
+        goldDark: '#0369a1',
+        cardBg: '#ffffff'
     };
 
     const dynamicTimeSlots = useMemo(() => {

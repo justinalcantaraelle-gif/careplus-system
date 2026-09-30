@@ -188,6 +188,87 @@ const ensureDatabaseSchema = async (pool) => {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         `);
 
+        // CarePlus Multi-Branch Tables
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS clinic_branches (
+                id VARCHAR(50) PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                short_name VARCHAR(100) NOT NULL,
+                tag VARCHAR(100) NULL,
+                address TEXT NOT NULL,
+                phone VARCHAR(50) NULL,
+                hours VARCHAR(100) NULL,
+                email VARCHAR(255) NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        `);
+
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS consultations (
+                id BIGINT PRIMARY KEY,
+                patient_name VARCHAR(255) NOT NULL,
+                patient_email VARCHAR(255) NOT NULL,
+                doctor_name VARCHAR(255) NOT NULL,
+                branch VARCHAR(100) NOT NULL,
+                date VARCHAR(50) NOT NULL,
+                chief_complaint TEXT NULL,
+                vital_signs JSON NULL,
+                diagnosis TEXT NULL,
+                clinical_notes TEXT NULL,
+                prescriptions JSON NULL,
+                lab_orders JSON NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_cons_email (patient_email),
+                INDEX idx_cons_branch (branch)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        `);
+
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS laboratory_requests (
+                id BIGINT PRIMARY KEY,
+                patient_name VARCHAR(255) NOT NULL,
+                patient_email VARCHAR(255) NOT NULL,
+                test_code VARCHAR(50) NOT NULL,
+                test_name VARCHAR(255) NOT NULL,
+                category VARCHAR(100) NOT NULL,
+                branch VARCHAR(100) NOT NULL,
+                doctor VARCHAR(255) NOT NULL,
+                date VARCHAR(50) NOT NULL,
+                specimen VARCHAR(100) NULL,
+                status VARCHAR(50) DEFAULT 'Processing',
+                results JSON NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_lab_email (patient_email),
+                INDEX idx_lab_branch (branch)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        `);
+
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS billing_records (
+                id BIGINT PRIMARY KEY,
+                patient_name VARCHAR(255) NOT NULL,
+                patient_email VARCHAR(255) NOT NULL,
+                branch VARCHAR(100) NOT NULL,
+                date VARCHAR(50) NOT NULL,
+                items JSON NOT NULL,
+                total_amount DECIMAL(10, 2) NOT NULL,
+                discount DECIMAL(10, 2) DEFAULT 0,
+                amount_paid DECIMAL(10, 2) NOT NULL,
+                payment_method VARCHAR(50) NOT NULL,
+                status VARCHAR(50) DEFAULT 'Paid',
+                receipt_number VARCHAR(100) NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_bill_email (patient_email),
+                INDEX idx_bill_branch (branch)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        `);
+
+        try {
+            await pool.query('ALTER TABLE appointments ADD COLUMN branch VARCHAR(100) NULL');
+        } catch (e) {}
+        try {
+            await pool.query('ALTER TABLE appointments ADD COLUMN doctor VARCHAR(255) NULL');
+        } catch (e) {}
+
         // Automated Bcrypt Migration: Upgrade any legacy plaintext passwords to Bcrypt hashes
         try {
             const [plainUsers] = await pool.query("SELECT id, email, password FROM users WHERE password NOT LIKE '$2%'");
@@ -397,7 +478,11 @@ app.get(['/api/database', '/database'], verifyAuth, async (req, res) => {
             [patientChartsRes],
             [auditLogsRes],
             [consentRes],
-            [xrayRes]
+            [xrayRes],
+            [consultationsRes],
+            [labRes],
+            [billingRes],
+            [branchesRes]
         ] = await Promise.all([
             mysqlPool.query('SELECT id, email, role, full_name, phone, patient_type, otp_status, banned_until, created_at FROM users'),
             mysqlPool.query('SELECT * FROM appointments'),
@@ -407,8 +492,18 @@ app.get(['/api/database', '/database'], verifyAuth, async (req, res) => {
             mysqlPool.query('SELECT * FROM patient_charts'),
             mysqlPool.query('SELECT * FROM audit_logs ORDER BY timestamp DESC LIMIT 300'),
             mysqlPool.query('SELECT * FROM consent_records'),
-            mysqlPool.query('SELECT * FROM xray_records')
+            mysqlPool.query('SELECT * FROM xray_records'),
+            mysqlPool.query('SELECT * FROM consultations ORDER BY id DESC').catch(() => [[]]),
+            mysqlPool.query('SELECT * FROM laboratory_requests ORDER BY id DESC').catch(() => [[]]),
+            mysqlPool.query('SELECT * FROM billing_records ORDER BY id DESC').catch(() => [[]]),
+            mysqlPool.query('SELECT * FROM clinic_branches').catch(() => [[]])
         ]);
+
+        const parseJsonData = (val) => {
+            if (!val) return {};
+            if (typeof val === 'object') return val;
+            try { return JSON.parse(val); } catch (e) { return {}; }
+        };
 
         const db = {
             users: (usersRes || []).map(r => ({
@@ -435,10 +530,67 @@ app.get(['/api/database', '/database'], verifyAuth, async (req, res) => {
                 date: r.date,
                 time: r.time,
                 notes: r.notes,
+                branch: r.branch || 'CarePlus Metro Branch',
+                doctor: r.doctor || 'Dr. Robert Chen, MD',
                 status: r.status,
                 cancelledDueToEmergency: Boolean(r.cancelled_due_to_emergency),
                 emergencyReason: r.emergency_reason,
                 createdAt: r.created_at
+            })),
+            consultations: (consultationsRes || []).map(r => ({
+                id: Number(r.id),
+                patientName: r.patient_name,
+                patientEmail: (r.patient_email || '').trim().toLowerCase(),
+                doctorName: r.doctor_name,
+                branch: r.branch,
+                date: r.date,
+                chiefComplaint: r.chief_complaint,
+                vitalSigns: parseJsonData(r.vital_signs),
+                diagnosis: r.diagnosis,
+                clinicalNotes: r.clinical_notes,
+                prescriptions: Array.isArray(parseJsonData(r.prescriptions)) ? parseJsonData(r.prescriptions) : [],
+                labOrders: Array.isArray(parseJsonData(r.lab_orders)) ? parseJsonData(r.lab_orders) : [],
+                createdAt: r.created_at
+            })),
+            laboratory_requests: (labRes || []).map(r => ({
+                id: Number(r.id),
+                patientName: r.patient_name,
+                patientEmail: (r.patient_email || '').trim().toLowerCase(),
+                testCode: r.test_code,
+                testName: r.test_name,
+                category: r.category,
+                branch: r.branch,
+                doctor: r.doctor,
+                date: r.date,
+                specimen: r.specimen,
+                status: r.status,
+                results: Array.isArray(parseJsonData(r.results)) ? parseJsonData(r.results) : [],
+                createdAt: r.created_at
+            })),
+            billing_records: (billingRes || []).map(r => ({
+                id: Number(r.id),
+                patientName: r.patient_name,
+                patientEmail: (r.patient_email || '').trim().toLowerCase(),
+                branch: r.branch,
+                date: r.date,
+                items: Array.isArray(parseJsonData(r.items)) ? parseJsonData(r.items) : [],
+                totalAmount: Number(r.total_amount),
+                discount: Number(r.discount),
+                amountPaid: Number(r.amount_paid),
+                paymentMethod: r.payment_method,
+                status: r.status,
+                receiptNumber: r.receipt_number,
+                createdAt: r.created_at
+            })),
+            branches: (branchesRes || []).map(r => ({
+                id: r.id,
+                name: r.name,
+                shortName: r.short_name,
+                tag: r.tag,
+                address: r.address,
+                phone: r.phone,
+                hours: r.hours,
+                email: r.email
             })),
             medical_records: {},
             dental_charts: {},
@@ -457,12 +609,6 @@ app.get(['/api/database', '/database'], verifyAuth, async (req, res) => {
                 date_signed: r.date_signed
             })),
             xray_records: {}
-        };
-
-        const parseJsonData = (val) => {
-            if (!val) return {};
-            if (typeof val === 'object') return val;
-            try { return JSON.parse(val); } catch (e) { return {}; }
         };
 
         (medRecordsRes || []).forEach(r => {
@@ -486,9 +632,9 @@ app.get(['/api/database', '/database'], verifyAuth, async (req, res) => {
             const patientUser = db.users.filter(u => u.email === userEmail);
             const patientAppointments = db.appointments.filter(a => a.patientEmail === userEmail);
             const patientMed = db.medical_records[userEmail] ? { [userEmail]: db.medical_records[userEmail] } : {};
-            const patientDental = db.dental_charts[userEmail] ? { [userEmail]: db.dental_charts[userEmail] } : {};
-            const patientIntraoral = db.intraoral_charts[userEmail] ? { [userEmail]: db.intraoral_charts[userEmail] } : {};
-            const patientXray = db.xray_records[userEmail] ? { [userEmail]: db.xray_records[userEmail] } : {};
+            const patientConsultations = (db.consultations || []).filter(c => c.patientEmail === userEmail);
+            const patientLabs = (db.laboratory_requests || []).filter(l => l.patientEmail === userEmail);
+            const patientBilling = (db.billing_records || []).filter(b => b.patientEmail === userEmail);
             const patientConsent = db.consent_records.filter(c => c.email === userEmail);
             const patientCharts = {
                 clinic_settings: db.patient_charts?.clinic_settings || {},
@@ -501,17 +647,21 @@ app.get(['/api/database', '/database'], verifyAuth, async (req, res) => {
             return {
                 users: patientUser,
                 appointments: patientAppointments,
+                consultations: patientConsultations,
+                laboratory_requests: patientLabs,
+                billing_records: patientBilling,
+                branches: db.branches || [],
                 medical_records: patientMed,
-                dental_charts: patientDental,
-                intraoral_charts: patientIntraoral,
+                dental_charts: {},
+                intraoral_charts: {},
                 patient_charts: patientCharts,
                 consent_records: patientConsent,
-                xray_records: patientXray,
+                xray_records: {},
                 auditLogs: []
             };
         }
 
-        if (['superadmin', 'admin', 'staff'].includes(userRole)) {
+        if (['superadmin', 'admin', 'staff', 'doctor', 'laboratory', 'billing'].includes(userRole)) {
             return db;
         }
 
@@ -775,7 +925,115 @@ app.post(['/api/sync', '/sync'], verifyAuth, async (req, res) => {
             }
         }
 
-        res.json({ success: true, message: 'MySQL Database sync completed.' });
+        // 6. Sync Consultations
+        if (Array.isArray(newDb.consultations)) {
+            for (const c of newDb.consultations) {
+                if (c && c.id) {
+                    await mysqlPool.query(`
+                        INSERT INTO consultations (id, patient_name, patient_email, doctor_name, branch, date, chief_complaint, vital_signs, diagnosis, clinical_notes, prescriptions, lab_orders, created_at)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                        ON DUPLICATE KEY UPDATE
+                            patient_name = VALUES(patient_name),
+                            doctor_name = VALUES(doctor_name),
+                            branch = VALUES(branch),
+                            date = VALUES(date),
+                            chief_complaint = VALUES(chief_complaint),
+                            vital_signs = VALUES(vital_signs),
+                            diagnosis = VALUES(diagnosis),
+                            clinical_notes = VALUES(clinical_notes),
+                            prescriptions = VALUES(prescriptions),
+                            lab_orders = VALUES(lab_orders)
+                    `, [
+                        c.id,
+                        c.patientName || '',
+                        (c.patientEmail || '').toLowerCase().trim(),
+                        c.doctorName || '',
+                        c.branch || 'CarePlus Metro Branch',
+                        c.date || new Date().toISOString().split('T')[0],
+                        c.chiefComplaint || '',
+                        JSON.stringify(c.vitalSigns || {}),
+                        c.diagnosis || '',
+                        c.clinicalNotes || '',
+                        JSON.stringify(c.prescriptions || []),
+                        JSON.stringify(c.labOrders || [])
+                    ]).catch(e => console.warn('[Sync Consultations Warning]:', e.message));
+                }
+            }
+        }
+
+        // 7. Sync Laboratory Requests
+        if (Array.isArray(newDb.laboratory_requests)) {
+            for (const l of newDb.laboratory_requests) {
+                if (l && l.id) {
+                    await mysqlPool.query(`
+                        INSERT INTO laboratory_requests (id, patient_name, patient_email, test_code, test_name, category, branch, doctor, date, specimen, status, results, created_at)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                        ON DUPLICATE KEY UPDATE
+                            patient_name = VALUES(patient_name),
+                            test_code = VALUES(test_code),
+                            test_name = VALUES(test_name),
+                            category = VALUES(category),
+                            branch = VALUES(branch),
+                            doctor = VALUES(doctor),
+                            date = VALUES(date),
+                            specimen = VALUES(specimen),
+                            status = VALUES(status),
+                            results = VALUES(results)
+                    `, [
+                        l.id,
+                        l.patientName || '',
+                        (l.patientEmail || '').toLowerCase().trim(),
+                        l.testCode || 'LAB',
+                        l.testName || '',
+                        l.category || 'General',
+                        l.branch || 'CarePlus Metro Branch',
+                        l.doctor || '',
+                        l.date || new Date().toISOString().split('T')[0],
+                        l.specimen || 'Specimen',
+                        l.status || 'Processing',
+                        JSON.stringify(l.results || [])
+                    ]).catch(e => console.warn('[Sync Laboratory Warning]:', e.message));
+                }
+            }
+        }
+
+        // 8. Sync Billing Records
+        if (Array.isArray(newDb.billing_records)) {
+            for (const b of newDb.billing_records) {
+                if (b && b.id) {
+                    await mysqlPool.query(`
+                        INSERT INTO billing_records (id, patient_name, patient_email, branch, date, items, total_amount, discount, amount_paid, payment_method, status, receipt_number, created_at)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                        ON DUPLICATE KEY UPDATE
+                            patient_name = VALUES(patient_name),
+                            branch = VALUES(branch),
+                            date = VALUES(date),
+                            items = VALUES(items),
+                            total_amount = VALUES(total_amount),
+                            discount = VALUES(discount),
+                            amount_paid = VALUES(amount_paid),
+                            payment_method = VALUES(payment_method),
+                            status = VALUES(status),
+                            receipt_number = VALUES(receipt_number)
+                    `, [
+                        b.id,
+                        b.patientName || '',
+                        (b.patientEmail || '').toLowerCase().trim(),
+                        b.branch || 'CarePlus Metro Branch',
+                        b.date || new Date().toISOString().split('T')[0],
+                        JSON.stringify(b.items || []),
+                        Number(b.totalAmount || 0),
+                        Number(b.discount || 0),
+                        Number(b.amountPaid || 0),
+                        b.paymentMethod || 'Cash',
+                        b.status || 'Paid',
+                        b.receiptNumber || `OR-${b.id}`
+                    ]).catch(e => console.warn('[Sync Billing Warning]:', e.message));
+                }
+            }
+        }
+
+        res.json({ success: true, message: 'CarePlus MySQL Database sync completed.' });
     } catch (err) {
         console.error('[Backend API] Error executing MySQL database sync:', err);
         res.status(500).json({ error: err.message });

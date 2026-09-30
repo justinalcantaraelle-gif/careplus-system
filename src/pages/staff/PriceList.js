@@ -42,10 +42,10 @@ const PriceList = () => {
     const [editForm, setEditForm] = useState({ category: '', name: '', price: '' });
 
     const theme = {
-        beige: '#f5f5dc',
-        gold: '#d4af37',
-        goldDark: '#b8860b',
-        cardBg: '#fffdf5'
+        beige: '#f8fafc',
+        gold: '#0284c7',
+        goldDark: '#0369a1',
+        cardBg: '#ffffff'
     };
 
     useEffect(() => {
@@ -76,9 +76,9 @@ const PriceList = () => {
             html: `
                 <div class="text-start">
                     <label class="small fw-bold text-muted mb-1">Category Roman Numeral & Title:</label>
-                    <input id="swal-cat" class="swal2-input mb-3 mt-0 w-100" placeholder="e.g. XI. NEW SERVICES">
+                    <input id="swal-cat" class="swal2-input mb-3 mt-0 w-100" placeholder="e.g. V. SPECIALTY SERVICES">
                     <label class="small fw-bold text-muted mb-1">Procedure / Treatment Name:</label>
-                    <input id="swal-name" class="swal2-input mb-3 mt-0 w-100" placeholder="e.g. Dental Deep Scaling">
+                    <input id="swal-name" class="swal2-input mb-3 mt-0 w-100" placeholder="e.g. Comprehensive Physical Exam">
                     <label class="small fw-bold text-muted mb-1">Standard Fee (PHP):</label>
                     <input id="swal-price" class="swal2-input mb-1 mt-0 w-100" placeholder="e.g. 1500">
                 </div>

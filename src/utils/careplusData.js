@@ -75,6 +75,24 @@ export const LAB_TEST_CATALOG = [
     { code: 'ECG', name: '12-Lead Electrocardiogram (ECG)', category: 'Cardiology', price: 450, turnaround: '30 mins' }
 ];
 
+export const CLINIC_SERVICES_CATALOG = [
+    { id: 'srv-1', category: 'I. Clinical Consultation', service: 'General Physician Medical Consultation', price: 500 },
+    { id: 'srv-2', category: 'I. Clinical Consultation', service: 'Pediatric Health & Immunization Checkup', price: 600 },
+    { id: 'srv-3', category: 'I. Clinical Consultation', service: 'Internal Medicine Specialist Consultation', price: 700 },
+    { id: 'srv-4', category: 'I. Clinical Consultation', service: 'Follow-Up Clinical Review', price: 400 },
+    { id: 'srv-5', category: 'II. Diagnostic Laboratory', service: 'Complete Blood Count (CBC) with Platelets', price: 350 },
+    { id: 'srv-6', category: 'II. Diagnostic Laboratory', service: 'Fasting Blood Sugar (FBS)', price: 250 },
+    { id: 'srv-7', category: 'II. Diagnostic Laboratory', service: 'Full Lipid Profile Panel', price: 850 },
+    { id: 'srv-8', category: 'II. Diagnostic Laboratory', service: 'Routine Urinalysis (10-parameter)', price: 200 },
+    { id: 'srv-9', category: 'II. Diagnostic Laboratory', service: 'Routine Fecalysis Examination', price: 180 },
+    { id: 'srv-10', category: 'II. Diagnostic Laboratory', service: 'Serum Creatinine & eGFR (Renal Function)', price: 320 },
+    { id: 'srv-11', category: 'III. Diagnostic Imaging & Cardiology', service: 'Chest X-Ray PA View (Digital Radiography)', price: 500 },
+    { id: 'srv-12', category: 'III. Diagnostic Imaging & Cardiology', service: '12-Lead Electrocardiogram (ECG)', price: 450 },
+    { id: 'srv-13', category: 'IV. Health Packages & Certification', service: 'Pre-Employment Medical Examination Package', price: 1200 },
+    { id: 'srv-14', category: 'IV. Health Packages & Certification', service: 'Fit-to-Work / Medical Clearance Certificate', price: 450 },
+    { id: 'srv-15', category: 'IV. Health Packages & Certification', service: 'Comprehensive Annual Physical Exam (APE)', price: 1800 }
+];
+
 export const INITIAL_CAREPLUS_USERS = [
     {
         id: 1001,

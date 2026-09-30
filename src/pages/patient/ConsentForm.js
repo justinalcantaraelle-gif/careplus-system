@@ -26,7 +26,7 @@ const ConsentForm = () => {
     const [hasMedicalRecord, setHasMedicalRecord] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    const colors = { gold: '#D4AF37', goldDark: '#B8860B', beige: '#F5F5DC' };
+    const colors = { gold: '#0284c7', goldDark: '#0369a1', beige: '#f8fafc' };
 
     useEffect(() => {
         const loadConsentData = () => {

@@ -27,7 +27,7 @@ const targetConfig = {
 
 async function sync() {
     console.log('====================================================');
-    console.log('  DOC DENTAL CARE: LOCAL -> CLOUD DATABASE SYNC     ');
+    console.log('  CAREPLUS CLINIC: LOCAL -> CLOUD DATABASE SYNC     ');
     console.log('====================================================\n');
 
     if (!targetConfig.host || targetConfig.host === 'localhost' || targetConfig.host === '127.0.0.1') {
