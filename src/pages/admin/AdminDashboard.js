@@ -2,476 +2,411 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import {
-    RiUserHeartLine, 
-    RiHistoryLine, 
-    RiFlashlightLine, 
-    RiCheckboxCircleLine,
-    RiCalendarCheckLine,
-    RiInformationLine,
-    RiTimeLine
+    RiBuilding4Line, RiUserHeartLine, RiCalendarCheckLine,
+    RiStethoscopeLine, RiFlaskLine, RiMoneyDollarCircleLine,
+    RiArrowRightLine, RiTimeLine, RiFilterLine, RiSearchLine,
+    RiCheckDoubleLine, RiCloseCircleLine, RiInformationLine,
+    RiShieldCheckLine, RiNodeTree, RiPrinterLine, RiAddCircleLine,
+    RiUserAddLine, RiFileChartLine, RiHospitalLine
 } from 'react-icons/ri';
-import { 
-    readDatabase, 
-    writeDatabase, 
-    readSession, 
-    checkAndCompletePastAppointments 
+import {
+    readDatabase, writeDatabase, readSession,
+    checkAndCompletePastAppointments
 } from '../../utils/storage';
+import { CLINIC_BRANCHES, CLINIC_DOCTORS } from '../../utils/careplusData';
 import { sortAppointmentsBySchedule } from '../../utils/appointmentSort';
-import { addAppointmentNotification } from '../../utils/notificationStore';
 import { addAuditLog } from '../../services/auditLogger';
-import { sendAppointmentStatusEmail } from '../../utils/emailService';
-import { bracesColorHex } from '../patient/BookAppointment';
-
-const getPatientContact = (appointment = {}, db = {}) => {
-    const email = String(appointment.patientEmail || '').toLowerCase();
-    const matchingUser = (db.users || []).find(user => String(user.email || '').toLowerCase() === email) || {};
-    const matchingRecord = db.medical_records?.[email] || db.medical_records?.[appointment.patientEmail] || {};
-
-    return appointment.contactNumber ||
-        appointment.contactNo ||
-        appointment.phone ||
-        appointment.contact ||
-        matchingRecord.contactNumber ||
-        matchingRecord.contactNo ||
-        matchingRecord.phone ||
-        matchingRecord.contact ||
-        matchingUser.contactNumber ||
-        matchingUser.contactNo ||
-        matchingUser.phone ||
-        matchingUser.contact ||
-        '';
-};
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
-    
-    // Exact colors from your UI
-    const colors = { gold: '#D8B03B', goldDark: '#B48A18', beige: '#F8F7F2', textDark: '#333' };
-    
-    const [userName, setUserName] = useState("justin");
-    const [stats, setStats] = useState({ totalPatients: 0, appointmentsToday: 0 });
-    const [pendingAppointments, setPendingAppointments] = useState([]);
-    const [currentSession, setCurrentSession] = useState({});
-
-    // Role verification: admin and superadmin only
-    const sessionRole = (currentSession.role || '').toLowerCase().replace(/\s+/g, '');
-    const isSuperAdmin = (currentSession.email || '').toLowerCase().includes('superadmin') || sessionRole === 'superadmin' || sessionRole === 'super_admin';
-    const isAdmin = sessionRole === 'admin';
-    const isAdminOrSuperAdmin = isSuperAdmin || isAdmin || (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin'));
+    const session = readSession() || {};
+    const [selectedBranch, setSelectedBranch] = useState('All Branches');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [dbData, setDbData] = useState({
+        users: [],
+        appointments: [],
+        consultations: [],
+        laboratory_requests: [],
+        billing_records: []
+    });
 
     const loadData = useCallback(() => {
-        let db = readDatabase() || { users: [], appointments: [] };
-        
-        // Auto-complete past appointments and normalize Approved to Pending
+        let db = readDatabase() || {};
         const { db: updatedDb, updated } = checkAndCompletePastAppointments(db);
         if (updated) {
             db = updatedDb;
             writeDatabase(db);
         }
-
-        // Calculate Stats
-        const patientCount = (db.users || []).filter(u => u.role === 'Patient' || u.role === 'patient').length;
-        setStats(prev => ({ ...prev, totalPatients: patientCount }));
-
-        // Load all Pending appointments (including Approved which fall under Pending)
-        const rawPending = (db.appointments || [])
-            .filter(app => app && app.status !== 'Deleted' && (app.status === 'Pending' || app.status === 'Approved'))
-            .map(app => ({
-                ...app,
-                status: 'Pending',
-                contactNumber: getPatientContact(app, db)
-            }));
-
-        const sorted = sortAppointmentsBySchedule(rawPending);
-        setPendingAppointments(sorted);
+        setDbData({
+            users: db.users || [],
+            appointments: db.appointments || [],
+            consultations: db.consultations || [],
+            laboratory_requests: db.laboratory_requests || [],
+            billing_records: db.billing_records || []
+        });
     }, []);
 
     useEffect(() => {
-        const session = readSession() || {};
-        setCurrentSession(session);
-        setUserName(session.fullName || session.email?.split('@')[0] || "Admin");
         loadData();
-
         const handleUpdate = () => loadData();
         window.addEventListener('storage', handleUpdate);
-        window.addEventListener('doc_dental_db_updated', handleUpdate);
-        window.addEventListener('notificationUpdated', handleUpdate);
-
-        // Fallback interval for background sync
-        const interval = setInterval(loadData, 30000);
-
+        window.addEventListener('careplus_db_updated', handleUpdate);
         return () => {
-            clearInterval(interval);
             window.removeEventListener('storage', handleUpdate);
-            window.removeEventListener('doc_dental_db_updated', handleUpdate);
-            window.removeEventListener('notificationUpdated', handleUpdate);
+            window.removeEventListener('careplus_db_updated', handleUpdate);
         };
-    }, [navigate, loadData]);
+    }, [loadData]);
 
-    const filteredPending = pendingAppointments;
-
-    const handleViewDetails = (app) => {
-        Swal.fire({
-            title: 'Appointment Details',
-            html: `
-                <div class="text-start" style="font-size: 13.5px; line-height: 1.6;">
-                    <div class="p-3 mb-3 rounded-3" style="background-color: #fffdf8; border: 1px solid #e2d8c8;">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="badge rounded-pill" style="background-color: #f5f5dc; color: #1f1b18; font-size: 12px; padding: 5px 12px;">
-                                ${app.status || 'Pending'}
-                            </span>
-                            <span class="text-muted small">${app.date || 'No Date'} at ${app.time || 'TBA'}</span>
-                        </div>
-                        <h6 class="fw-bold mb-1" style="color: ${colors.goldDark};">${app.service || app.treatment || 'General Consultation'}</h6>
-                        ${app.category ? `<div class="small text-muted mb-1">Category: ${app.category}</div>` : ''}
-                        ${(app.braceColor || app.color || app.bracesColor) ? `<div class="small mt-1"><span class="badge bg-light text-dark border">Braces Color: <strong>${app.braceColor || app.color || app.bracesColor}</strong></span></div>` : ''}
-                    </div>
-
-                    <div class="mb-3">
-                        <strong class="d-block text-dark small mb-1">Patient Contact Info:</strong>
-                        <div class="p-2 px-3 rounded-2 bg-light border small text-secondary">
-                            <div><strong>Name:</strong> ${app.patientName || app.fullName || 'N/A'}</div>
-                            <div><strong>Email:</strong> ${app.patientEmail || app.email || 'N/A'}</div>
-                            <div><strong>Phone:</strong> ${app.contactNumber || app.phone || 'N/A'}</div>
-                        </div>
-                    </div>
-
-                    ${app.notes ? `
-                    <div class="mb-3">
-                        <strong class="d-block text-dark small mb-1">Patient Booking Remarks:</strong>
-                        <div class="p-2 px-3 rounded-2 bg-light border small text-muted fst-italic">
-                            "${app.notes}"
-                        </div>
-                    </div>
-                    ` : ''}
-                </div>
-            `,
-            confirmButtonColor: colors.goldDark,
-            confirmButtonText: 'Close'
+    // Multi-branch filtered datasets
+    const filteredAppointments = useMemo(() => {
+        return (dbData.appointments || []).filter(app => {
+            if (!app || app.status === 'Deleted') return false;
+            const matchesBranch = selectedBranch === 'All Branches' || 
+                app.branch === selectedBranch || 
+                (selectedBranch.includes('Metro') && (!app.branch || app.branch.includes('Metro'))) ||
+                (selectedBranch.includes('Northside') && app.branch && app.branch.includes('Northside'));
+            const matchesSearch = !searchQuery || 
+                (app.patientName && app.patientName.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                (app.service && app.service.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                (app.doctor && app.doctor.toLowerCase().includes(searchQuery.toLowerCase()));
+            return matchesBranch && matchesSearch;
         });
-    };
+    }, [dbData.appointments, selectedBranch, searchQuery]);
 
+    const filteredConsultations = useMemo(() => {
+        return (dbData.consultations || []).filter(c => {
+            if (selectedBranch === 'All Branches') return true;
+            return c.branch === selectedBranch || 
+                (selectedBranch.includes('Metro') && (!c.branch || c.branch.includes('Metro'))) ||
+                (selectedBranch.includes('Northside') && c.branch && c.branch.includes('Northside'));
+        });
+    }, [dbData.consultations, selectedBranch]);
+
+    const filteredLabs = useMemo(() => {
+        return (dbData.laboratory_requests || []).filter(l => {
+            if (selectedBranch === 'All Branches') return true;
+            return l.branch === selectedBranch || 
+                (selectedBranch.includes('Metro') && (!l.branch || l.branch.includes('Metro'))) ||
+                (selectedBranch.includes('Northside') && l.branch && l.branch.includes('Northside'));
+        });
+    }, [dbData.laboratory_requests, selectedBranch]);
+
+    const filteredBilling = useMemo(() => {
+        return (dbData.billing_records || []).filter(b => {
+            if (selectedBranch === 'All Branches') return true;
+            return b.branch === selectedBranch || 
+                (selectedBranch.includes('Metro') && (!b.branch || b.branch.includes('Metro'))) ||
+                (selectedBranch.includes('Northside') && b.branch && b.branch.includes('Northside'));
+        });
+    }, [dbData.billing_records, selectedBranch]);
+
+    // Financial KPIs
+    const financialStats = useMemo(() => {
+        let totalBilled = 0;
+        let totalPaid = 0;
+        let totalDiscounts = 0;
+        filteredBilling.forEach(b => {
+            totalBilled += Number(b.totalAmount || 0);
+            totalPaid += Number(b.amountPaid || 0);
+            totalDiscounts += Number(b.discount || 0);
+        });
+        return { totalBilled, totalPaid, totalDiscounts };
+    }, [filteredBilling]);
+
+    // Appointment status action
     const handleStatusUpdate = async (id, newStatus) => {
-        let db = readDatabase() || { appointments: [], users: [] };
-        const allAppts = db.appointments || [];
-        const currentAppt = allAppts.find(a => a.id === id);
-        if (!currentAppt) return;
+        const appt = (dbData.appointments || []).find(a => a.id === id);
+        if (!appt) return;
 
-        const patientName = currentAppt.patientName || currentAppt.fullName || 'Patient';
-        const formattedDate = currentAppt.date ? new Date(currentAppt.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'requested date';
-
-        if (newStatus === 'Completed') {
-            const confirmRes = await Swal.fire({
-                title: 'Mark as Completed?',
-                text: `Are you sure you want to mark the appointment for ${patientName} on ${formattedDate} as Completed?`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: colors.goldDark,
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, Mark Completed'
-            });
-            if (!confirmRes.isConfirmed) return;
-        }
-
-        let banApplied = false;
-        let banDaysVal = null;
-        let bannedUntilDateStr = null;
-
-        if (newStatus === "Didn't Come") {
-            const confirmRes = await Swal.fire({
-                title: "Mark as Didn't Come?",
-                text: `Mark appointment for ${patientName} on ${formattedDate} as missed (Didn't Come)?`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#dc3545',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: "Yes, Mark Didn't Come"
-            });
-            if (!confirmRes.isConfirmed) return;
-
-            const patientEmail = (currentAppt.patientEmail || currentAppt.email || '').trim().toLowerCase();
-            if (patientEmail) {
-                const missedCount = allAppts
-                    .map(a => a.id === id ? { ...a, status: "Didn't Come" } : a)
-                    .filter(a => (a.patientEmail?.trim().toLowerCase() === patientEmail || a.email?.trim().toLowerCase() === patientEmail) && a.status === "Didn't Come").length;
-
-                if (missedCount >= 3) {
-                    const { value: banDays } = await Swal.fire({
-                        title: `Restrict Booking for ${patientName}`,
-                        text: 'This patient has 3 consecutive missed visits. Enter the number of days to temporarily ban this patient from booking:',
-                        input: 'number',
-                        inputAttributes: { min: 1, step: 1 },
-                        inputValue: 7,
-                        showCancelButton: true,
-                        confirmButtonColor: colors.goldDark,
-                        cancelButtonColor: '#6c757d',
-                        confirmButtonText: 'Restrict Patient',
-                        cancelButtonText: 'Skip Restriction',
-                        preConfirm: (value) => {
-                            if (!value || parseInt(value, 10) <= 0) {
-                                Swal.showValidationMessage('Please enter a valid number of days.');
-                            }
-                            return value;
-                        }
-                    });
-
-                    if (banDays) {
-                        banApplied = true;
-                        banDaysVal = banDays;
-                        const dateLimit = new Date();
-                        dateLimit.setDate(dateLimit.getDate() + parseInt(banDays, 10));
-                        bannedUntilDateStr = dateLimit.toISOString();
-
-                        db.users = (db.users || []).map(u => {
-                            if (u.email?.trim().toLowerCase() === patientEmail.trim().toLowerCase()) {
-                                return { ...u, bannedUntil: bannedUntilDateStr };
-                            }
-                            return u;
-                        });
-                    }
-                }
-            }
-        }
-
-        let currentApptUpdated = null;
-        db.appointments = allAppts.map(app => {
-            if (app.id === id) {
-                const updated = { ...app, status: newStatus };
-                delete updated.unfinished;
-                delete updated.unfinishedReason;
-                currentApptUpdated = updated;
-                return updated;
-            }
-            return app;
+        const res = await Swal.fire({
+            title: `Mark as ${newStatus}?`,
+            text: `Update appointment status for ${appt.patientName || 'patient'} to ${newStatus}?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, update',
+            confirmButtonColor: '#0284c7'
         });
 
-        if (currentApptUpdated) {
-            let message = '';
-            if (newStatus === 'Completed') {
-                message = `Your appointment for ${currentApptUpdated.service || 'General Checkup'} on ${formattedDate} is marked as Completed. Thank you!`;
-            } else if (newStatus === "Didn't Come") {
-                message = `Your appointment on ${formattedDate} was marked as missed (Didn't Come).`;
-            }
+        if (!res.isConfirmed) return;
 
-            if (message) {
-                db = addAppointmentNotification(db, {
-                    id: Date.now().toString(),
-                    patientEmail: currentApptUpdated.patientEmail,
-                    message: message,
-                    type: newStatus,
-                    isRead: false,
-                    timestamp: new Date().toISOString()
-                });
+        let db = readDatabase() || {};
+        db.appointments = (db.appointments || []).map(a => {
+            if (a.id === id) {
+                return { ...a, status: newStatus };
             }
-
-            const patientEmail = currentApptUpdated.patientEmail || currentApptUpdated.email;
-            if (patientEmail && patientEmail.includes('@')) {
-                sendAppointmentStatusEmail(patientEmail, patientName, {
-                    status: newStatus,
-                    date: formattedDate,
-                    time: currentApptUpdated.time,
-                    service: currentApptUpdated.service || currentApptUpdated.category,
-                }).catch(err => console.error('Appointment status email error:', err));
-            }
-
-            const service = currentApptUpdated.service || currentApptUpdated.category || 'appointment';
-            addAuditLog(`Appointment ${newStatus}`, `${patientName} - ${service} on ${currentApptUpdated.date || 'unspecified date'}.`);
-            if (banApplied) {
-                addAuditLog('Patient Banned', `${patientName} was restricted from booking for ${banDaysVal} days due to 3 consecutive missed appointments.`);
-            }
-        }
+            return a;
+        });
 
         writeDatabase(db);
+        addAuditLog(`Appointment ${newStatus}`, `Patient ${appt.patientName} status updated to ${newStatus} at ${appt.branch || 'Clinic'}`);
         loadData();
 
         Swal.fire({
             toast: true,
             position: 'top-end',
             icon: 'success',
-            title: `Appointment marked as ${newStatus}`,
+            title: `Status updated to ${newStatus}`,
             showConfirmButton: false,
             timer: 2000
         });
     };
 
     return (
-        <>
-            {/* PRINT CSS */}
-            <style>
-                {`
-                    @media print {
-                        body * { visibility: hidden; }
-                        #printable-dashboard, #printable-dashboard * { visibility: visible; }
-                        #printable-dashboard {
-                            position: absolute; left: 0; top: 0; width: 100%;
-                            background-color: white !important; padding: 0 !important;
-                        }
-                        .no-print { display: none !important; }
-                        .print-only { display: block !important; }
-                        .card { box-shadow: none !important; border: 1px solid #ddd !important; }
-                    }
-                `}
-            </style>
-
-            <div id="printable-dashboard" className="p-4 p-md-5 w-100" style={{ backgroundColor: colors.beige, minHeight: '100vh' }}>
-                
-                {/* PRINT-ONLY HEADER */}
-                <div className="print-only d-none mb-4 text-center pb-3 border-bottom border-dark">
-                    <h2 className="fw-bold mb-0" style={{ color: colors.goldDark }}>Doc Dental Clinic</h2>
-                    <p className="text-muted mb-1">Official Administrative Report</p>
-                    <p className="text-muted small mb-0">Generated on: {new Date().toLocaleDateString()} | By: {userName}</p>
-                </div>
-
-                {/* Page Header */}
-                <div className="mb-4">
-                    <h2 className="fw-bold mb-1" style={{ color: colors.goldDark }}>Dashboard</h2>
-                    <p className="text-muted no-print">Welcome back, {userName}.</p>
-                </div>
-
-                {/* Top Summary Cards Row */}
-                <div className="row g-4 mb-4">
-                    
-                    {/* 1. Total Patients Card */}
-                    <div className="col-md-4">
-                        <div className="card border-0 shadow-sm p-4 h-100 d-flex flex-row align-items-center gap-3" style={{ borderRadius: '16px' }}>
-                            <div className="rounded-3 p-3 d-flex align-items-center justify-content-center" style={{ backgroundColor: '#FDF7E7', color: colors.gold, width: '65px', height: '65px' }}>
-                                <RiUserHeartLine className="fs-2" />
-                            </div>
-                            <div>
-                                <h6 className="mb-1 text-muted small fw-medium">Total Patients</h6>
-                                <h3 className="fw-bold mb-0 text-dark">{stats.totalPatients}</h3>
-                            </div>
-                        </div>
+        <div className="p-3 p-md-4 w-100" style={{ maxWidth: '1600px', margin: '0 auto' }}>
+            {/* Top Operational Header */}
+            <div className="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-4 bg-white p-3 p-md-4 rounded-4 border shadow-sm">
+                <div>
+                    <div className="d-flex align-items-center gap-2 mb-1">
+                        <span className="badge bg-primary bg-opacity-10 text-primary fw-semibold px-2 py-1 rounded-pill">
+                            CarePlus Healthcare Network
+                        </span>
+                        <span className="badge bg-success bg-opacity-10 text-success fw-semibold px-2 py-1 rounded-pill">
+                            Live Multi-Branch Sync
+                        </span>
                     </div>
+                    <h3 className="fw-bold mb-1 text-dark">Executive Clinical Overview</h3>
+                    <p className="text-muted small mb-0">
+                        Central command & real-time governance across Metro & Northside clinic branches.
+                    </p>
+                </div>
 
-                    {/* 2. Generate Report Card - NAVIGATES TO REPORTS PAGE */}
-                    <div className="col-md-4 no-print">
-                        <div 
-                            className="card border-0 shadow-sm p-4 h-100 d-flex flex-row align-items-center gap-3 transition-all" 
-                            style={{ borderRadius: '16px', cursor: 'pointer' }}
-                            onClick={() => navigate('/admin/reports')}
-                            onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                            onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                <div className="d-flex flex-wrap align-items-center gap-2">
+                    {/* Facility Switcher */}
+                    <div className="d-flex align-items-center gap-2 bg-light border px-3 py-2 rounded-3">
+                        <RiBuilding4Line className="text-primary fs-5" />
+                        <span className="small text-muted fw-semibold">View Facility:</span>
+                        <select
+                            className="form-select form-select-sm border-0 bg-transparent fw-bold text-dark py-0"
+                            style={{ width: 'auto', cursor: 'pointer' }}
+                            value={selectedBranch}
+                            onChange={(e) => setSelectedBranch(e.target.value)}
                         >
-                            <div className="rounded-3 p-3 d-flex align-items-center justify-content-center" style={{ backgroundColor: '#EBF4FF', color: '#2563EB', width: '65px', height: '65px' }}>
-                                <RiHistoryLine className="fs-2" />
-                            </div>
-                            <div>
-                                <h6 className="mb-0 text-muted small fw-medium">Analytics</h6>
-                                <h5 className="fw-bold mb-0 text-primary">Generate Report</h5>
-                                <span className="text-muted" style={{ fontSize: '12px' }}>Daily, Weekly, Monthly, Yearly</span>
-                            </div>
-                        </div>
+                            <option value="All Branches">CarePlus Network (All Branches)</option>
+                            {CLINIC_BRANCHES.map(b => (
+                                <option key={b.id} value={b.name}>{b.shortName}</option>
+                            ))}
+                        </select>
                     </div>
 
-                    {/* 3. Quick Action Card */}
-                    <div className="col-md-4 no-print">
-                        <div 
-                            className="card border-0 shadow-sm p-4 h-100 text-white d-flex flex-row align-items-center justify-content-between" 
-                            style={{ borderRadius: '16px', backgroundColor: colors.gold, cursor: 'pointer' }}
-                            onClick={() => navigate('/admin/book')} 
-                        >
-                            <div className="d-flex align-items-center gap-3">
-                                <div className="rounded-3 p-3 d-flex align-items-center justify-content-center" style={{ backgroundColor: 'rgba(255,255,255,0.2)', width: '65px', height: '65px' }}>
-                                    <RiFlashlightLine className="fs-2" />
-                                </div>
-                                <div>
-                                    <h6 className="mb-0 text-white-50 small fw-medium">Quick Action</h6>
-                                    <h4 className="fw-bold mb-0 text-white">Appointment Approval</h4>
-                                </div>
+                    <button
+                        onClick={() => window.print()}
+                        className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2 px-3 py-2 rounded-3"
+                    >
+                        <RiPrinterLine /> Print Summary
+                    </button>
+                    <button
+                        onClick={() => navigate('/admin/ea-blueprint')}
+                        className="btn btn-primary btn-sm d-flex align-items-center gap-2 px-3 py-2 rounded-3 shadow-sm"
+                    >
+                        <RiNodeTree /> EA Deliverables
+                    </button>
+                </div>
+            </div>
+
+            {/* 4 Core KPI Stat Cards */}
+            <div className="row g-3 mb-4">
+                <div className="col-12 col-sm-6 col-xl-3">
+                    <div className="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 transition-hover border-start border-primary border-4">
+                        <div className="d-flex align-items-center justify-content-between mb-2">
+                            <span className="text-muted small fw-bold text-uppercase">Registered Patients</span>
+                            <div className="p-2 rounded-3 bg-primary bg-opacity-10 text-primary">
+                                <RiUserHeartLine size={22} />
                             </div>
-                            <RiCheckboxCircleLine className="fs-3 text-white" />
+                        </div>
+                        <h2 className="fw-bold mb-1 text-dark">{dbData.users.filter(u => (u.role || '').toLowerCase() === 'patient').length}</h2>
+                        <div className="d-flex align-items-center justify-content-between text-muted small">
+                            <span>Active in Central EHR</span>
+                            <span className="text-primary fw-semibold cursor-pointer" onClick={() => navigate('/admin/registration')}>
+                                Add Patient &rarr;
+                            </span>
                         </div>
                     </div>
-
                 </div>
 
-                {/* Pending Appointments Section - Visible in Admin and Superadmin Only */}
-                {isAdminOrSuperAdmin && (
-                    <div className="card border-0 shadow-sm overflow-hidden mb-4 no-print animate__animated animate__fadeIn" style={{ borderRadius: '18px', backgroundColor: '#fffdf8', border: '1px solid #e2d8c8' }}>
-                        {/* Header Bar */}
-                        <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 p-4 border-bottom" style={{ borderColor: '#f0eae0' }}>
-                            <div>
-                                <div className="d-flex align-items-center gap-2">
-                                    <h5 className="fw-bold mb-0" style={{ color: '#1f1b18' }}>
-                                        Pending appointments
-                                    </h5>
-                                    <span className="badge rounded-pill text-white shadow-sm" style={{ backgroundColor: colors.goldDark, fontSize: '11px', padding: '4px 10px' }}>
-                                        {filteredPending.length}
-                                    </span>
+                <div className="col-12 col-sm-6 col-xl-3">
+                    <div className="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 transition-hover border-start border-info border-4">
+                        <div className="d-flex align-items-center justify-content-between mb-2">
+                            <span className="text-muted small fw-bold text-uppercase">Appointments & Triage</span>
+                            <div className="p-2 rounded-3 bg-info bg-opacity-10 text-info">
+                                <RiCalendarCheckLine size={22} />
+                            </div>
+                        </div>
+                        <h2 className="fw-bold mb-1 text-dark">{filteredAppointments.length}</h2>
+                        <div className="d-flex align-items-center justify-content-between text-muted small">
+                            <span>Pending: <strong className="text-warning">{filteredAppointments.filter(a => a.status === 'Pending').length}</strong></span>
+                            <span className="text-info fw-semibold cursor-pointer" onClick={() => navigate('/admin/book')}>
+                                Schedule &rarr;
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="col-12 col-sm-6 col-xl-3">
+                    <div className="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 transition-hover border-start border-warning border-4">
+                        <div className="d-flex align-items-center justify-content-between mb-2">
+                            <span className="text-muted small fw-bold text-uppercase">Diagnostic Lab Orders</span>
+                            <div className="p-2 rounded-3 bg-warning bg-opacity-10 text-warning">
+                                <RiFlaskLine size={22} />
+                            </div>
+                        </div>
+                        <h2 className="fw-bold mb-1 text-dark">{filteredLabs.length}</h2>
+                        <div className="d-flex align-items-center justify-content-between text-muted small">
+                            <span>Completed: <strong className="text-success">{filteredLabs.filter(l => l.status === 'Completed').length}</strong></span>
+                            <span className="text-warning fw-semibold cursor-pointer" onClick={() => navigate('/admin/laboratory')}>
+                                Lab Station &rarr;
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="col-12 col-sm-6 col-xl-3">
+                    <div className="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 transition-hover border-start border-success border-4">
+                        <div className="d-flex align-items-center justify-content-between mb-2">
+                            <span className="text-muted small fw-bold text-uppercase">Billing Collections</span>
+                            <div className="p-2 rounded-3 bg-success bg-opacity-10 text-success">
+                                <RiMoneyDollarCircleLine size={22} />
+                            </div>
+                        </div>
+                        <h2 className="fw-bold mb-1 text-success">₱{financialStats.totalPaid.toLocaleString()}</h2>
+                        <div className="d-flex align-items-center justify-content-between text-muted small">
+                            <span>Total Billed: ₱{financialStats.totalBilled.toLocaleString()}</span>
+                            <span className="text-success fw-semibold cursor-pointer" onClick={() => navigate('/admin/billing')}>
+                                Cashier &rarr;
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Quick Feature Launchpad */}
+            <div className="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+                <div className="d-flex align-items-center justify-content-between mb-3 px-1">
+                    <h6 className="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                        <RiHospitalLine className="text-primary" /> Integrated Clinic Command Center
+                    </h6>
+                    <span className="text-muted small">Group 2 Enterprise Architecture Modules</span>
+                </div>
+                <div className="row g-2">
+                    {[
+                        { title: 'Patient Registration', desc: 'Walk-in & Digital Intake', icon: <RiUserAddLine />, path: '/admin/registration', color: 'primary' },
+                        { title: 'Appointment Scheduling', desc: '2-Branch Calendar & Slots', icon: <RiCalendarCheckLine />, path: '/admin/book', color: 'info' },
+                        { title: 'Doctor Consultations', desc: 'Vitals, Diagnosis & Rx', icon: <RiStethoscopeLine />, path: '/admin/consultations', color: 'success' },
+                        { title: 'Laboratory Diagnostics', desc: 'Specimen, Tests & Results', icon: <RiFlaskLine />, path: '/admin/laboratory', color: 'warning' },
+                        { title: 'Billing & Cashier', desc: 'Invoices, Discounts & OR', icon: <RiMoneyDollarCircleLine />, path: '/admin/billing', color: 'danger' },
+                        { title: 'Medical Reports', desc: 'Cross-Branch Health BI', icon: <RiFileChartLine />, path: '/admin/medical-reports', color: 'dark' }
+                    ].map((mod, idx) => (
+                        <div key={idx} className="col-12 col-sm-6 col-md-4 col-xl-2">
+                            <div
+                                onClick={() => navigate(mod.path)}
+                                className="p-3 rounded-3 border bg-light h-100 cursor-pointer transition-hover d-flex flex-column justify-content-between"
+                                style={{ cursor: 'pointer' }}
+                            >
+                                <div className="d-flex align-items-center gap-2 mb-2">
+                                    <div className={`p-2 rounded-2 bg-${mod.color} text-white`}>
+                                        {mod.icon}
+                                    </div>
+                                    <span className="fw-bold text-dark small text-truncate">{mod.title}</span>
                                 </div>
-                                <p className="text-muted small mb-0 mt-1">Schedule and manage upcoming patient visits awaiting clinical consultation or action.</p>
+                                <div className="d-flex align-items-center justify-content-between text-muted" style={{ fontSize: '11px' }}>
+                                    <span>{mod.desc}</span>
+                                    <RiArrowRightLine />
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Main Operational Feeds Row: Patient Queue + Diagnostics Feed */}
+            <div className="row g-4">
+                {/* Left: Active Appointments & Triage Table */}
+                <div className="col-12 col-xl-8">
+                    <div className="card border-0 shadow-sm rounded-4 bg-white h-100 overflow-hidden">
+                        <div className="p-3 border-bottom d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2">
+                            <div>
+                                <h6 className="fw-bold text-dark mb-0">Active Appointment & Consultation Queue</h6>
+                                <span className="text-muted small">Managing visits across {selectedBranch}</span>
+                            </div>
+                            <div className="d-flex align-items-center gap-2">
+                                <div className="input-group input-group-sm" style={{ width: '220px' }}>
+                                    <span className="input-group-text bg-light border-0"><RiSearchLine /></span>
+                                    <input
+                                        type="text"
+                                        className="form-control bg-light border-0"
+                                        placeholder="Search patient/doc..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                    />
+                                </div>
                             </div>
                         </div>
 
-                        {/* Table */}
                         <div className="table-responsive">
-                            <table className="table table-hover align-middle mb-0" style={{ backgroundColor: 'transparent' }}>
-                                <thead style={{ backgroundColor: '#faf7ef' }}>
+                            <table className="table table-hover align-middle mb-0">
+                                <thead className="table-light small text-muted">
                                     <tr>
-                                        <th scope="col" className="py-3 px-4 text-muted small fw-bold">Date</th>
-                                        <th scope="col" className="py-3 text-muted small fw-bold">Patient</th>
-                                        <th scope="col" className="py-3 text-muted small fw-bold">Service</th>
-                                        <th scope="col" className="py-3 text-muted small fw-bold">Contact</th>
-                                        <th scope="col" className="py-3 text-muted small fw-bold">Status</th>
-                                        <th scope="col" className="py-3 text-muted small fw-bold">Reason</th>
-                                        <th scope="col" className="py-3 pe-4 text-muted small fw-bold text-end">Actions</th>
+                                        <th className="ps-3 py-3">Schedule</th>
+                                        <th className="py-3">Patient</th>
+                                        <th className="py-3">Branch & Physician</th>
+                                        <th className="py-3">Service</th>
+                                        <th className="py-3">Status</th>
+                                        <th className="pe-3 py-3 text-end">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filteredPending.length > 0 ? (
-                                        filteredPending.map(app => (
+                                    {filteredAppointments.length > 0 ? (
+                                        filteredAppointments.slice(0, 8).map(app => (
                                             <tr key={app.id}>
-                                                <td className="py-3 px-4">
-                                                    <div className="fw-bold text-dark">{app.date || 'N/A'}</div>
-                                                    <div className="small text-muted d-flex align-items-center gap-1">
-                                                        <RiTimeLine size={12} className="text-warning" />
-                                                        {app.time || 'TBA'}
+                                                <td className="ps-3 py-3">
+                                                    <div className="fw-semibold text-dark">{app.date || 'Today'}</div>
+                                                    <div className="text-muted small d-flex align-items-center gap-1">
+                                                        <RiTimeLine size={12} className="text-primary" /> {app.time || '09:00 AM'}
                                                     </div>
                                                 </td>
-                                                <td className="py-3 fw-semibold text-dark">
-                                                    {app.patientName || app.fullName || 'Unknown Patient'}
-                                                </td>
-                                                <td className="py-3 small text-dark">
-                                                    <div className="fw-semibold">{app.service || app.treatment || 'General Checkup'}</div>
-                                                    {(app.braceColor || app.color || app.bracesColor) && (
-                                                        <span className="badge rounded-pill border text-dark d-inline-flex align-items-center gap-1 mt-1 shadow-sm px-2 py-1" style={{ backgroundColor: '#fffdf5', fontSize: '10.5px' }}>
-                                                            <span className="rounded-circle border" style={{ width: '10px', height: '10px', display: 'inline-block', backgroundColor: bracesColorHex[app.braceColor || app.color || app.bracesColor] || '#d4af37' }}></span>
-                                                            <span>Color: <strong>{app.braceColor || app.color || app.bracesColor}</strong></span>
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td className="py-3 small">
-                                                    <div className="fw-semibold text-dark">{app.contactNumber || 'N/A'}</div>
-                                                    <div className="text-muted">{app.patientEmail || app.email || 'No Email'}</div>
+                                                <td className="py-3">
+                                                    <div className="fw-bold text-dark">{app.patientName || app.fullName || 'Patient'}</div>
+                                                    <div className="text-muted small text-truncate" style={{ maxWidth: '160px' }}>
+                                                        {app.patientEmail || app.contactNumber || 'No record'}
+                                                    </div>
                                                 </td>
                                                 <td className="py-3">
-                                                    <button 
-                                                        className="doc-btn doc-btn-warning doc-btn-sm"
-                                                        onClick={() => handleViewDetails(app)}
-                                                        title="Click to view full details"
-                                                    >
-                                                        Pending <RiInformationLine className="ms-1"/>
-                                                    </button>
+                                                    <span className={`badge rounded-pill px-2 py-1 mb-1 ${
+                                                        (app.branch || '').includes('Metro') ? 'bg-primary bg-opacity-10 text-primary' : 'bg-success bg-opacity-10 text-success'
+                                                    }`}>
+                                                        {app.branch || 'Metro Branch'}
+                                                    </span>
+                                                    <div className="text-dark small fw-medium">{app.doctor || 'Dr. Robert Chen, MD'}</div>
                                                 </td>
-                                                <td className="py-3 small" style={{ maxWidth: '200px' }}>
-                                                    <span className="text-muted text-truncate d-inline-block w-100" title={app.notes || app.reason || '-'}>
-                                                        {app.notes || app.reason || '-'}
+                                                <td className="py-3">
+                                                    <span className="badge bg-light text-secondary border">
+                                                        {app.service || app.treatment || 'Consultation'}
                                                     </span>
                                                 </td>
-                                                <td className="py-3 pe-4 text-end">
-                                                    <div className="d-flex justify-content-end gap-2 flex-wrap align-items-center">
-                                                        <button 
-                                                            className="doc-btn doc-btn-warning doc-btn-sm"
+                                                <td className="py-3">
+                                                    <span className={`badge rounded-pill px-2 py-1 ${
+                                                        app.status === 'Completed' ? 'bg-success text-white' :
+                                                        app.status === 'Approved' ? 'bg-info text-white' :
+                                                        app.status === 'Cancelled' ? 'bg-danger text-white' :
+                                                        'bg-warning text-dark'
+                                                    }`}>
+                                                        {app.status || 'Pending'}
+                                                    </span>
+                                                </td>
+                                                <td className="pe-3 py-3 text-end">
+                                                    <div className="btn-group btn-group-sm">
+                                                        <button
                                                             onClick={() => handleStatusUpdate(app.id, 'Completed')}
+                                                            className="btn btn-outline-success"
+                                                            title="Mark as Completed"
                                                         >
-                                                            Mark Completed
+                                                            <RiCheckDoubleLine /> Complete
                                                         </button>
-                                                        <button 
-                                                            className="doc-btn doc-btn-danger doc-btn-sm"
-                                                            onClick={() => handleStatusUpdate(app.id, "Didn't Come")}
+                                                        <button
+                                                            onClick={() => navigate('/admin/consultations')}
+                                                            className="btn btn-outline-primary"
+                                                            title="Launch Consultation Record"
                                                         >
-                                                            Didn't Come
+                                                            <RiStethoscopeLine />
                                                         </button>
                                                     </div>
                                                 </td>
@@ -479,26 +414,97 @@ const AdminDashboard = () => {
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan="7" className="text-center py-5">
-                                                <div className="text-muted opacity-50 mb-3">
-                                                    <RiCalendarCheckLine size={50} />
-                                                </div>
-                                                <h5 className="text-muted fw-normal">
-                                                    No pending appointments found.
-                                                </h5>
+                                            <td colSpan="6" className="text-center py-5 text-muted">
+                                                <RiCalendarCheckLine size={40} className="opacity-25 mb-2" />
+                                                <p className="mb-0">No active appointments found matching current filter.</p>
                                             </td>
                                         </tr>
                                     )}
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-                )}
 
+                        <div className="p-2 border-top bg-light text-center">
+                            <button
+                                onClick={() => navigate('/admin/book')}
+                                className="btn btn-link btn-sm text-decoration-none text-primary fw-semibold"
+                            >
+                                View Complete Appointment Scheduling Master &rarr;
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right: Laboratory Feed & Clinical Doctors Roster */}
+                <div className="col-12 col-xl-4 d-flex flex-column gap-4">
+                    {/* Recent Lab Diagnostics */}
+                    <div className="card border-0 shadow-sm rounded-4 bg-white p-3">
+                        <div className="d-flex align-items-center justify-content-between mb-3">
+                            <h6 className="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                                <RiFlaskLine className="text-warning" /> Diagnostic Lab Monitor
+                            </h6>
+                            <span className="badge bg-warning bg-opacity-10 text-warning rounded-pill">
+                                {filteredLabs.length} Orders
+                            </span>
+                        </div>
+                        <div className="d-flex flex-column gap-2">
+                            {filteredLabs.slice(0, 4).map(lab => (
+                                <div key={lab.id} className="p-2 border rounded-3 bg-light d-flex align-items-center justify-content-between">
+                                    <div className="overflow-hidden me-2">
+                                        <div className="fw-bold text-dark text-truncate small">{lab.testName}</div>
+                                        <div className="text-muted" style={{ fontSize: '11px' }}>
+                                            {lab.patientName} &bull; {lab.branch}
+                                        </div>
+                                    </div>
+                                    <span className={`badge rounded-pill ${
+                                        lab.status === 'Completed' ? 'bg-success bg-opacity-10 text-success' : 'bg-warning bg-opacity-10 text-warning'
+                                    }`} style={{ fontSize: '10px' }}>
+                                        {lab.status}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                        <button
+                            onClick={() => navigate('/admin/laboratory')}
+                            className="btn btn-outline-warning btn-sm mt-3 w-100 rounded-3"
+                        >
+                            Open Laboratory Results Portal
+                        </button>
+                    </div>
+
+                    {/* Attending Physicians & Branches */}
+                    <div className="card border-0 shadow-sm rounded-4 bg-white p-3">
+                        <div className="d-flex align-items-center justify-content-between mb-3">
+                            <h6 className="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                                <RiStethoscopeLine className="text-success" /> CarePlus Medical Staff
+                            </h6>
+                            <span className="badge bg-success bg-opacity-10 text-success rounded-pill">
+                                {CLINIC_DOCTORS.length} Doctors
+                            </span>
+                        </div>
+                        <div className="d-flex flex-column gap-2">
+                            {CLINIC_DOCTORS.map(doc => (
+                                <div key={doc.id} className="p-2 rounded-3 border bg-light d-flex align-items-center gap-2">
+                                    <div className="p-2 rounded-circle bg-primary bg-opacity-10 text-primary fw-bold" style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        MD
+                                    </div>
+                                    <div className="flex-grow-1 overflow-hidden">
+                                        <div className="fw-bold text-dark text-truncate small">{doc.name}</div>
+                                        <div className="text-muted" style={{ fontSize: '11px' }}>
+                                            {doc.specialty} &bull; {doc.branch}
+                                        </div>
+                                    </div>
+                                    <span className="badge bg-light text-secondary border" style={{ fontSize: '10px' }}>
+                                        {doc.schedule}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
             </div>
-        </>
+        </div>
     );
 };
 
 export default AdminDashboard;
-

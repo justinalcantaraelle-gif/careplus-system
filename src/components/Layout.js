@@ -27,6 +27,7 @@ const getInitials = (name = 'User') => {
 };
 
 const Layout = ({ children, role }) => {
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 992);
     const [collapsed, setCollapsed] = useState(window.innerWidth < 992);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [profilePic, setProfilePic] = useState(null);
@@ -38,10 +39,10 @@ const Layout = ({ children, role }) => {
 
     useEffect(() => {
         const handleResize = () => {
-            if (window.innerWidth < 992) {
+            const mobile = window.innerWidth < 992;
+            setIsMobile(mobile);
+            if (mobile) {
                 setCollapsed(true);
-            } else {
-                setCollapsed(false);
             }
         };
         window.addEventListener('resize', handleResize);
@@ -174,9 +175,9 @@ const Layout = ({ children, role }) => {
     return (
         <div className="d-flex overflow-hidden bg-light" style={{ height: '100vh', width: '100vw' }}>
             {/* Mobile backdrop */}
-            {!collapsed && (
+            {isMobile && !collapsed && (
                 <div
-                    className="d-lg-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 animate__animated animate__fadeIn"
+                    className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 animate__animated animate__fadeIn"
                     style={{ zIndex: 1040 }}
                     onClick={() => setCollapsed(true)}
                 />
@@ -184,13 +185,18 @@ const Layout = ({ children, role }) => {
 
             {/* SIDEBAR */}
             <div
-                className={`d-flex flex-column bg-white border-end shadow-sm ${!collapsed ? 'position-fixed position-lg-relative h-100' : ''}`}
+                className={`d-flex flex-column bg-white border-end shadow-sm ${
+                    isMobile ? 'position-fixed top-0 bottom-0' : 'position-relative'
+                }`}
                 style={{
-                    width: collapsed ? '80px' : '265px',
-                    minWidth: collapsed ? '80px' : '265px',
+                    width: isMobile ? '265px' : (collapsed ? '80px' : '265px'),
+                    minWidth: isMobile ? '265px' : (collapsed ? '80px' : '265px'),
+                    maxWidth: isMobile ? '265px' : (collapsed ? '80px' : '265px'),
+                    left: isMobile ? (collapsed ? '-280px' : '0') : undefined,
                     transition: 'all 0.25s ease-in-out',
                     zIndex: 1050,
-                    height: '100vh'
+                    height: '100vh',
+                    flexShrink: 0
                 }}
             >
                 {/* Brand Header */}
@@ -198,7 +204,7 @@ const Layout = ({ children, role }) => {
                     <div className="p-2 rounded-3 bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: '40px', height: '40px' }}>
                         <RiBuilding4Line size={24} />
                     </div>
-                    {!collapsed && (
+                    {(!collapsed || isMobile) && (
                         <div className="overflow-hidden">
                             <h6 className="fw-bold mb-0 text-dark text-truncate">CarePlus Clinic</h6>
                             <span className="text-muted text-uppercase small" style={{ fontSize: '10px', letterSpacing: '1px' }}>
@@ -217,7 +223,7 @@ const Layout = ({ children, role }) => {
                                 key={idx}
                                 to={item.path}
                                 onClick={() => {
-                                    if (window.innerWidth < 992) setCollapsed(true);
+                                    if (isMobile) setCollapsed(true);
                                 }}
                                 className={`d-flex align-items-center gap-3 px-3 py-2 mb-1 rounded-3 text-decoration-none transition ${isActive ? 'bg-primary text-white shadow-sm' : 'text-secondary hover-bg-light'}`}
                                 style={{
@@ -227,14 +233,14 @@ const Layout = ({ children, role }) => {
                                 title={item.label}
                             >
                                 <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>{item.icon}</span>
-                                {!collapsed && <span className="text-truncate">{item.label}</span>}
+                                {(!collapsed || isMobile) && <span className="text-truncate">{item.label}</span>}
                             </Link>
                         );
                     })}
                 </div>
 
                 {/* Sidebar Footer with Branch Tag */}
-                {!collapsed && (
+                {(!collapsed || isMobile) && (
                     <div className="p-3 border-top bg-light small">
                         <div className="d-flex align-items-center gap-2 mb-1">
                             <span className="badge bg-success bg-opacity-10 text-success rounded-pill px-2">Online</span>
@@ -248,7 +254,7 @@ const Layout = ({ children, role }) => {
             </div>
 
             {/* MAIN VIEW AREA */}
-            <div className="flex-grow-1 d-flex flex-column overflow-hidden h-100">
+            <div className="flex-grow-1 d-flex flex-column overflow-hidden h-100" style={{ minWidth: 0 }}>
                 {/* TOP NAVIGATION BAR */}
                 <nav className="navbar navbar-expand bg-white border-bottom px-3 px-md-4 shadow-sm" style={{ height: '72px', flexShrink: 0 }}>
                     <div className="container-fluid p-0 d-flex justify-content-between align-items-center">

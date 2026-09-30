@@ -108,7 +108,7 @@ const UserManagement = () => {
         db = addUserNotification(db, newStaff.email, {
             id: `welcome-staff-${Date.now()}`,
             title: 'Welcome to the Team',
-            message: 'Your staff account has been set up successfully. Welcome to Doc Dental Care Clinical System!',
+            message: 'Your staff account has been set up successfully. Welcome to CarePlus Clinic Management System!',
             date: new Date().toISOString(),
             read: false,
             type: 'system_welcome'

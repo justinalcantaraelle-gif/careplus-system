@@ -128,12 +128,12 @@ const ReportsDashboard = () => {
             <!DOCTYPE html>
             <html>
             <head>
-                <title>Doc Dental Clinic - Performance Report</title>
+                <title>CarePlus Clinic - Performance & Operations Report</title>
                 <style>
                     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 30px; color: #1f2937; line-height: 1.5; background: #ffffff; }
-                    .header { text-align: center; border-bottom: 2px solid #D8B03B; padding-bottom: 15px; margin-bottom: 20px; }
-                    .header h1 { color: #B48A18; margin: 0 0 5px 0; font-size: 26px; font-weight: 800; letter-spacing: 1px; }
-                    .header .period { background-color: #FDF7E7; display: inline-block; padding: 6px 18px; border-radius: 6px; font-size: 13px; font-weight: 600; color: #854d0e; margin-top: 8px; }
+                    .header { text-align: center; border-bottom: 2px solid #0284c7; padding-bottom: 15px; margin-bottom: 20px; }
+                    .header h1 { color: #0369a1; margin: 0 0 5px 0; font-size: 26px; font-weight: 800; letter-spacing: 1px; }
+                    .header .period { background-color: #f0f9ff; display: inline-block; padding: 6px 18px; border-radius: 6px; font-size: 13px; font-weight: 600; color: #0369a1; margin-top: 8px; }
                     .meta { display: flex; justify-content: space-between; font-size: 11px; color: #4b5563; margin-top: 15px; border-top: 1px solid #f3f4f6; padding-top: 10px; }
                     .summary-grid { display: flex; gap: 15px; margin: 20px 0; }
                     .summary-card { flex: 1; padding: 12px 18px; background: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb; }
@@ -148,7 +148,7 @@ const ReportsDashboard = () => {
             </head>
             <body>
                 <div class="header">
-                    <h1>DOC DENTAL CLINIC</h1>
+                    <h1>CAREPLUS CLINIC MANAGEMENT SYSTEM</h1>
                     <div class="period">Clinical Report: ${fromDate} to ${toDate}</div>
                     <div class="meta">
                         <span><strong>Issued By:</strong> ${session.fullName || session.name || 'Authorized Personnel'}</span>
@@ -228,12 +228,12 @@ const ReportsDashboard = () => {
     const handleDownload = async () => {
         addAuditLog('Downloaded Performance Report', `Downloaded clinic performance report for period ${fromDate} to ${toDate}.`);
         const printHtml = generateReportHtml();
-        const filename = `Doc_Dental_Performance_Report_${fromDate}_to_${toDate}.pdf`;
+        const filename = `CarePlus_Clinic_Performance_Report_${fromDate}_to_${toDate}.pdf`;
         await exportHtmlToPdf(printHtml, filename, { orientation: 'landscape', width: '950px' });
     };
 
     return (
-        <div className="report-container p-3 p-md-4 p-lg-5 animate__animated animate__fadeIn" style={{ backgroundColor: colors.beige, minHeight: '100vh', width: '100%' }}>
+        <div className="report-container p-3 p-md-4 p-lg-5 animate__animated animate__fadeIn" style={{ backgroundColor: '#f8fafc', minHeight: '100vh', width: '100%' }}>
             <style>{`
                 @media print {
                     body { background-color: white !important; -webkit-print-color-adjust: exact; }
@@ -255,8 +255,8 @@ const ReportsDashboard = () => {
             `}</style>
 
             {/* Print Header */}
-            <div className="d-none d-print-block text-center mb-4 pb-3" style={{ borderBottom: '2px solid ' + colors.gold }}>
-                <h2 className="fw-bold" style={{ color: colors.goldDark, margin: '0 0 5px 0', fontSize: '26pt' }}>DOC DENTAL CLINIC</h2>
+            <div className="d-none d-print-block text-center mb-4 pb-3" style={{ borderBottom: '2px solid #0284c7' }}>
+                <h2 className="fw-bold" style={{ color: '#0369a1', margin: '0 0 5px 0', fontSize: '26pt' }}>CAREPLUS CLINIC MANAGEMENT SYSTEM</h2>
                 <h5 className="text-uppercase px-4 py-1 d-inline-block mt-1" style={{ backgroundColor: colors.goldLight, borderRadius: '5px', fontSize: '13pt' }}>
                     Report from {fromDate} to {toDate}
                 </h5>
