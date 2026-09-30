@@ -317,39 +317,48 @@ const StaffDashboard = () => {
                 </div>
 
                 <div className="table-responsive">
-                    <table className="table table-hover align-middle mb-0">
+                    <table className="table table-hover align-middle mb-0" style={{ minWidth: '820px' }}>
                         <thead style={{ backgroundColor: '#f8fafc' }} className="small text-muted">
                             <tr>
-                                <th className="ps-4 py-3 fw-medium">Time &amp; Date</th>
-                                <th className="py-3 fw-medium">Patient Name</th>
-                                <th className="py-3 fw-medium">Facility &amp; Physician</th>
-                                <th className="py-3 fw-medium">Service</th>
-                                <th className="py-3 fw-medium">Status</th>
-                                <th className="pe-4 py-3 text-end fw-medium">Triage Actions</th>
+                                <th className="ps-4 py-3 fw-medium" style={{ width: '130px', minWidth: '130px', whiteSpace: 'nowrap' }}>Time &amp; Date</th>
+                                <th className="py-3 fw-medium" style={{ minWidth: '160px' }}>Patient Name</th>
+                                <th className="py-3 fw-medium" style={{ minWidth: '160px' }}>Facility &amp; Physician</th>
+                                <th className="py-3 fw-medium" style={{ minWidth: '160px' }}>Service</th>
+                                <th className="py-3 fw-medium" style={{ width: '120px', minWidth: '120px', whiteSpace: 'nowrap' }}>Status</th>
+                                <th className="pe-4 py-3 text-end fw-medium" style={{ width: '170px', minWidth: '170px', whiteSpace: 'nowrap' }}>Triage Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {filteredAppointments.length > 0 ? (
                                 filteredAppointments.map(app => (
                                     <tr key={app.id}>
-                                        <td className="ps-4 py-3">
+                                        <td className="ps-4 py-3" style={{ whiteSpace: 'nowrap' }}>
                                             <div className="fw-semibold text-dark">{app.time || '09:00 AM'}</div>
                                             <div className="text-muted small">{app.date || 'Today'}</div>
                                         </td>
                                         <td className="py-3">
-                                            <div className="fw-bold text-dark">{app.patientName || 'Patient'}</div>
-                                            <div className="text-muted small">{app.contactNumber || app.patientEmail || '-'}</div>
+                                            <div className="fw-bold text-dark text-truncate" style={{ maxWidth: '170px' }}>{app.patientName || 'Patient'}</div>
+                                            <div className="text-muted small text-truncate" style={{ maxWidth: '170px' }}>{app.contactNumber || app.patientEmail || '-'}</div>
                                         </td>
-                                        <td className="py-3">
+                                        <td className="py-3" style={{ whiteSpace: 'nowrap' }}>
                                             <div className="text-dark small fw-medium">{app.branch || 'Metro Branch'}</div>
                                             <div className="text-muted small">{app.doctor || 'Dr. Robert Chen, MD'}</div>
                                         </td>
                                         <td className="py-3">
-                                            <span className="badge px-2 py-1 rounded-pill fw-normal" style={{ backgroundColor: '#f1f5f9', color: '#475569' }}>
+                                            <span
+                                                className="badge px-2.5 py-1 rounded-pill fw-normal text-truncate d-inline-block"
+                                                style={{
+                                                    maxWidth: '180px',
+                                                    backgroundColor: '#f1f5f9',
+                                                    color: '#475569',
+                                                    verticalAlign: 'middle'
+                                                }}
+                                                title={app.service || app.treatment || 'General Checkup'}
+                                            >
                                                 {app.service || app.treatment || 'General Checkup'}
                                             </span>
                                         </td>
-                                        <td className="py-3">
+                                        <td className="py-3" style={{ whiteSpace: 'nowrap' }}>
                                             <span
                                                 className="badge rounded-pill px-3 py-1 fw-medium"
                                                 style={{
@@ -360,7 +369,7 @@ const StaffDashboard = () => {
                                                 {app.status || 'Pending'}
                                             </span>
                                         </td>
-                                        <td className="pe-4 py-3 text-end">
+                                        <td className="pe-4 py-3 text-end" style={{ whiteSpace: 'nowrap' }}>
                                             <div className="btn-group btn-group-sm">
                                                 <button
                                                     onClick={() => handleTriageAction(app.id, 'Completed')}
