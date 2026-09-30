@@ -316,41 +316,41 @@ const StaffDashboard = () => {
                     </div>
                 </div>
 
-                <div className="table-responsive">
-                    <table className="table table-hover align-middle mb-0" style={{ minWidth: '820px' }}>
+                <div className="table-responsive" style={{ overflowX: 'hidden' }}>
+                    <table className="table table-hover align-middle mb-0 w-100" style={{ tableLayout: 'fixed' }}>
                         <thead style={{ backgroundColor: '#f8fafc' }} className="small text-muted">
                             <tr>
-                                <th className="ps-4 py-3 fw-medium" style={{ width: '130px', minWidth: '130px', whiteSpace: 'nowrap' }}>Time &amp; Date</th>
-                                <th className="py-3 fw-medium" style={{ minWidth: '160px' }}>Patient Name</th>
-                                <th className="py-3 fw-medium" style={{ minWidth: '160px' }}>Facility &amp; Physician</th>
-                                <th className="py-3 fw-medium" style={{ minWidth: '160px' }}>Service</th>
-                                <th className="py-3 fw-medium" style={{ width: '120px', minWidth: '120px', whiteSpace: 'nowrap' }}>Status</th>
-                                <th className="pe-4 py-3 text-end fw-medium" style={{ width: '170px', minWidth: '170px', whiteSpace: 'nowrap' }}>Triage Actions</th>
+                                <th className="ps-3 py-3 fw-medium" style={{ width: '15%' }}>Schedule</th>
+                                <th className="py-3 fw-medium" style={{ width: '22%' }}>Patient Name</th>
+                                <th className="py-3 fw-medium" style={{ width: '20%' }}>Physician &amp; Branch</th>
+                                <th className="py-3 fw-medium" style={{ width: '18%' }}>Service</th>
+                                <th className="py-3 fw-medium" style={{ width: '12%' }}>Status</th>
+                                <th className="pe-3 py-3 text-end fw-medium" style={{ width: '13%' }}>Triage Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {filteredAppointments.length > 0 ? (
                                 filteredAppointments.map(app => (
                                     <tr key={app.id}>
-                                        <td className="ps-4 py-3" style={{ whiteSpace: 'nowrap' }}>
-                                            <div className="fw-semibold text-dark">{app.time || '09:00 AM'}</div>
-                                            <div className="text-muted small">{app.date || 'Today'}</div>
+                                        <td className="ps-3 py-3">
+                                            <div className="fw-semibold text-dark text-nowrap" style={{ fontSize: '13px' }}>{app.time || '09:00 AM'}</div>
+                                            <div className="text-muted text-nowrap" style={{ fontSize: '11px' }}>{app.date || 'Today'}</div>
                                         </td>
                                         <td className="py-3">
-                                            <div className="fw-bold text-dark text-truncate" style={{ maxWidth: '170px' }}>{app.patientName || 'Patient'}</div>
-                                            <div className="text-muted small text-truncate" style={{ maxWidth: '170px' }}>{app.contactNumber || app.patientEmail || '-'}</div>
+                                            <div className="fw-bold text-dark text-truncate" style={{ fontSize: '13px' }} title={app.patientName}>{app.patientName || 'Patient'}</div>
+                                            <div className="text-muted small text-truncate" style={{ fontSize: '11px' }} title={app.contactNumber || app.patientEmail}>{app.contactNumber || app.patientEmail || '-'}</div>
                                         </td>
-                                        <td className="py-3" style={{ whiteSpace: 'nowrap' }}>
-                                            <div className="text-dark small fw-medium">{app.branch || 'Metro Branch'}</div>
-                                            <div className="text-muted small">{app.doctor || 'Dr. Robert Chen, MD'}</div>
+                                        <td className="py-3">
+                                            <div className="text-dark fw-medium text-truncate" style={{ fontSize: '12px' }} title={app.doctor}>{app.doctor || 'Dr. Robert Chen, MD'}</div>
+                                            <div className="text-muted text-truncate" style={{ fontSize: '11px' }} title={app.branch}>{app.branch || 'Metro Branch'}</div>
                                         </td>
                                         <td className="py-3">
                                             <span
-                                                className="badge px-2.5 py-1 rounded-pill fw-normal text-truncate d-inline-block"
+                                                className="badge px-2 py-1 rounded-pill fw-normal text-truncate d-inline-block mw-100"
                                                 style={{
-                                                    maxWidth: '180px',
                                                     backgroundColor: '#f1f5f9',
                                                     color: '#475569',
+                                                    fontSize: '11px',
                                                     verticalAlign: 'middle'
                                                 }}
                                                 title={app.service || app.treatment || 'General Checkup'}
@@ -358,10 +358,11 @@ const StaffDashboard = () => {
                                                 {app.service || app.treatment || 'General Checkup'}
                                             </span>
                                         </td>
-                                        <td className="py-3" style={{ whiteSpace: 'nowrap' }}>
+                                        <td className="py-3">
                                             <span
-                                                className="badge rounded-pill px-3 py-1 fw-medium"
+                                                className="badge rounded-pill px-2 py-1 fw-medium text-nowrap"
                                                 style={{
+                                                    fontSize: '11px',
                                                     backgroundColor: app.status === 'Completed' ? '#ecfdf5' : app.status === 'Approved' ? '#f0f9ff' : app.status === 'Cancelled' ? '#fef2f2' : '#fffbeb',
                                                     color: app.status === 'Completed' ? '#047857' : app.status === 'Approved' ? '#0369a1' : app.status === 'Cancelled' ? '#b91c1c' : '#b45309'
                                                 }}
@@ -369,28 +370,28 @@ const StaffDashboard = () => {
                                                 {app.status || 'Pending'}
                                             </span>
                                         </td>
-                                        <td className="pe-4 py-3 text-end" style={{ whiteSpace: 'nowrap' }}>
-                                            <div className="btn-group btn-group-sm">
+                                        <td className="pe-3 py-3 text-end">
+                                            <div className="d-inline-flex align-items-center gap-1">
                                                 <button
                                                     onClick={() => handleTriageAction(app.id, 'Completed')}
-                                                    className="btn btn-light border btn-sm text-success"
+                                                    className="btn btn-sm btn-light border text-success p-1 px-2 rounded-2"
                                                     title="Mark Complete"
                                                 >
-                                                    <RiCheckDoubleLine /> Complete
+                                                    <RiCheckDoubleLine size={15} />
                                                 </button>
                                                 <button
                                                     onClick={() => navigate('/staff/consultations')}
-                                                    className="btn btn-light border btn-sm text-primary"
+                                                    className="btn btn-sm btn-light border text-primary p-1 px-2 rounded-2"
                                                     title="To Consultation"
                                                 >
-                                                    <RiStethoscopeLine />
+                                                    <RiStethoscopeLine size={15} />
                                                 </button>
                                                 <button
                                                     onClick={() => navigate('/staff/laboratory')}
-                                                    className="btn btn-light border btn-sm text-warning"
+                                                    className="btn btn-sm btn-light border text-warning p-1 px-2 rounded-2"
                                                     title="To Laboratory"
                                                 >
-                                                    <RiFlaskLine />
+                                                    <RiFlaskLine size={15} />
                                                 </button>
                                             </div>
                                         </td>

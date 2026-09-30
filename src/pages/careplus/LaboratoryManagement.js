@@ -338,7 +338,7 @@ const LaboratoryManagement = () => {
             {/* Laboratory Orders Table */}
             <div className="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
                 <div className="table-responsive">
-                    <table className="table table-hover align-middle mb-0" style={{ minWidth: '850px' }}>
+                    <table className="table table-hover align-middle mb-0">
                         <thead className="table-light">
                             <tr>
                                 <th className="ps-4" style={{ whiteSpace: 'nowrap' }}>Order ID &amp; Date</th>
