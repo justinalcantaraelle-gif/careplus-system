@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import Swal from 'sweetalert2';
 import {
     RiMoneyDollarCircleLine, RiAddLine, RiSearchLine, RiPrinterLine,
@@ -260,7 +261,7 @@ const BillingManagement = () => {
     }, [db.billing_records]);
 
     return (
-        <div className="container-fluid p-3 p-md-4 animate__animated animate__fadeIn">
+        <div className="container-fluid p-3 p-md-4">
             {/* Header Banner */}
             <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 p-4 rounded-4 shadow-sm bg-white border">
                 <div>
@@ -472,8 +473,8 @@ const BillingManagement = () => {
             </div>
 
             {/* Modal: Create Invoice */}
-            {activeModal === 'create' && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+            {activeModal === 'create' && createPortal(
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.65)', zIndex: 9999 }}>
                     <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
                         <div className="modal-content rounded-4 border-0 shadow">
                             <div className="modal-header bg-primary text-white py-3">
@@ -620,12 +621,13 @@ const BillingManagement = () => {
                             </form>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Modal: Process Payment */}
-            {activeModal === 'pay' && selectedInvoice && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+            {activeModal === 'pay' && selectedInvoice && createPortal(
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.65)', zIndex: 9999 }}>
                     <div className="modal-dialog modal-md modal-dialog-centered">
                         <div className="modal-content rounded-4 border-0 shadow">
                             <div className="modal-header bg-success text-white py-3">
@@ -698,115 +700,169 @@ const BillingManagement = () => {
                             </form>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Modal: Official Receipt (OR) View */}
-            {activeModal === 'receipt' && selectedInvoice && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1050 }}>
+            {activeModal === 'receipt' && selectedInvoice && createPortal(
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.65)', zIndex: 9999 }}>
                     <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
                         <div className="modal-content rounded-4 border-0 shadow-lg">
-                            <div className="modal-header border-bottom py-3 bg-light">
+                            <div className="modal-header border-bottom py-3 bg-light no-print">
                                 <h5 className="modal-title fw-bold text-dark">
-                                    CarePlus Official Billing Statement & Payment Receipt
+                                    CarePlus Official Billing Statement &amp; Payment Receipt
                                 </h5>
                                 <button type="button" className="btn-close" onClick={() => setActiveModal(null)}></button>
                             </div>
                             <div className="modal-body p-4 bg-white" id="printable-receipt">
-                                {/* Header */}
-                                <div className="text-center border-bottom pb-3 mb-3">
-                                    <h4 className="fw-bold mb-0 text-primary">CarePlus Clinic Management System</h4>
-                                    <div className="fw-semibold text-secondary small">{selectedInvoice.branch}</div>
-                                    <div className="text-muted small">Official Clinical Billing Statement & Cashier Receipt</div>
-                                    <span className="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 mt-1">
-                                        VAT-Exempt Healthcare Services
-                                    </span>
-                                </div>
+                                {/* Facility Header Table */}
+                                <table className="table table-bordered mb-3 billing-print-table" style={{ borderColor: '#cbd5e1' }}>
+                                    <tbody>
+                                        <tr>
+                                            <td style={{ width: '65%', verticalAlign: 'middle' }}>
+                                                <div className="fw-bold fs-5 text-primary" style={{ letterSpacing: '0.5px' }}>
+                                                    CAREPLUS CLINIC MANAGEMENT SYSTEM
+                                                </div>
+                                                <div className="fw-semibold text-secondary small">
+                                                    {selectedInvoice.branch || 'CarePlus Multi-Branch Clinical Network'}
+                                                </div>
+                                                <div className="text-muted small" style={{ fontSize: '11px' }}>
+                                                    Hospital &amp; Ambulatory Care Accounts • VAT-Exempt Healthcare Services
+                                                </div>
+                                            </td>
+                                            <td style={{ width: '35%', verticalAlign: 'middle', fontSize: '11px', background: '#f8fafc' }}>
+                                                <div><strong>Invoice No:</strong> {selectedInvoice.invoiceNumber}</div>
+                                                <div><strong>Official Receipt (OR):</strong> <span className="fw-bold text-success">{selectedInvoice.receiptNumber || 'OR-PENDING'}</span></div>
+                                                <div><strong>Billing Date:</strong> {selectedInvoice.date}</div>
+                                                <div><strong>Status:</strong> <span className="fw-bold text-uppercase">{selectedInvoice.paymentStatus}</span></div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
 
-                                <div className="row g-2 mb-3 p-3 bg-light rounded-3 border small">
-                                    <div className="col-6 col-md-3">
-                                        <span className="text-muted">Invoice No:</span>
-                                        <div className="fw-bold text-dark">{selectedInvoice.invoiceNumber}</div>
+                                {/* Section 1: Patient & Billing Demographics Table */}
+                                <div className="mb-3">
+                                    <div className="fw-bold text-dark small text-uppercase mb-1">
+                                        Section 1: Patient Account &amp; Transaction Particulars
                                     </div>
-                                    <div className="col-6 col-md-3">
-                                        <span className="text-muted">Official Receipt (OR):</span>
-                                        <div className="fw-bold text-success">{selectedInvoice.receiptNumber || 'PENDING'}</div>
-                                    </div>
-                                    <div className="col-6 col-md-3">
-                                        <span className="text-muted">Date:</span>
-                                        <div className="fw-bold text-dark">{selectedInvoice.date}</div>
-                                    </div>
-                                    <div className="col-6 col-md-3">
-                                        <span className="text-muted">Payment Status:</span>
-                                        <div className="fw-bold text-primary">{selectedInvoice.paymentStatus}</div>
-                                    </div>
-                                    <div className="col-6 col-md-6">
-                                        <span className="text-muted">Billed To (Patient):</span>
-                                        <div className="fw-bold text-dark">{selectedInvoice.patientName}</div>
-                                        <div className="text-muted">{selectedInvoice.patientEmail}</div>
-                                    </div>
-                                    <div className="col-6 col-md-6">
-                                        <span className="text-muted">Payment Method:</span>
-                                        <div className="fw-semibold text-dark">{selectedInvoice.paymentMethod || 'Pending Counter Checkout'}</div>
-                                    </div>
-                                </div>
-
-                                {/* Items Breakdown */}
-                                <div className="table-responsive mb-3">
-                                    <table className="table table-bordered">
-                                        <thead className="table-light small">
+                                    <table className="table table-bordered table-sm mb-0 billing-print-table" style={{ borderColor: '#cbd5e1', fontSize: '12px' }}>
+                                        <tbody>
                                             <tr>
-                                                <th>Item Description</th>
-                                                <th>Category</th>
-                                                <th className="text-end">Amount</th>
+                                                <th style={{ width: '20%', background: '#f1f5f9', color: '#334155' }}>Billed To (Patient)</th>
+                                                <td style={{ width: '30%', fontWeight: 'bold' }}>{selectedInvoice.patientName}</td>
+                                                <th style={{ width: '20%', background: '#f1f5f9', color: '#334155' }}>Patient Email</th>
+                                                <td style={{ width: '30%' }}>{selectedInvoice.patientEmail}</td>
+                                            </tr>
+                                            <tr>
+                                                <th style={{ background: '#f1f5f9', color: '#334155' }}>Facility Location</th>
+                                                <td>{selectedInvoice.branch}</td>
+                                                <th style={{ background: '#f1f5f9', color: '#334155' }}>Payment Method</th>
+                                                <td className="fw-semibold">{selectedInvoice.paymentMethod || 'Counter Cash/Card'}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Section 2: Itemized Statement of Services Table */}
+                                <div className="mb-3">
+                                    <div className="fw-bold text-dark small text-uppercase mb-1">
+                                        Section 2: Itemized Clinical Services, Laboratory &amp; Pharmacy
+                                    </div>
+                                    <table className="table table-bordered table-sm mb-0 billing-print-table" style={{ borderColor: '#cbd5e1', fontSize: '11.5px' }}>
+                                        <thead style={{ background: '#f1f5f9' }}>
+                                            <tr>
+                                                <th style={{ width: '6%', textAlign: 'center' }}>#</th>
+                                                <th style={{ width: '48%' }}>Item / Clinical Service Description</th>
+                                                <th style={{ width: '26%' }}>Department / Category</th>
+                                                <th style={{ width: '20%', textAlign: 'end' }}>Amount (₱)</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {selectedInvoice.items && selectedInvoice.items.map((item, idx) => (
                                                 <tr key={idx}>
+                                                    <td className="text-center fw-bold">{idx + 1}</td>
                                                     <td className="fw-semibold text-dark">{item.description}</td>
-                                                    <td className="small text-muted">{item.category}</td>
-                                                    <td className="text-end fw-bold">₱{Number(item.amount).toLocaleString()}</td>
+                                                    <td className="text-muted small">{item.category}</td>
+                                                    <td className="text-end fw-bold">₱{Number(item.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
-                                        <tfoot className="table-light">
-                                            <tr>
-                                                <td colSpan="2" className="text-end fw-semibold">Subtotal:</td>
-                                                <td className="text-end fw-bold">₱{(selectedInvoice.subtotal || selectedInvoice.totalAmount).toLocaleString()}</td>
-                                            </tr>
-                                            {selectedInvoice.discountAmount > 0 && (
-                                                <tr className="text-success">
-                                                    <td colSpan="2" className="text-end small">
-                                                        Less: {selectedInvoice.discountType}
-                                                    </td>
-                                                    <td className="text-end fw-bold">-₱{selectedInvoice.discountAmount.toLocaleString()}</td>
-                                                </tr>
-                                            )}
-                                            <tr className="fs-6">
-                                                <td colSpan="2" className="text-end fw-bold text-primary">Final Net Amount Due:</td>
-                                                <td className="text-end fw-bold text-primary">₱{(selectedInvoice.totalAmount || 0).toLocaleString()}</td>
-                                            </tr>
-                                            <tr className="bg-success bg-opacity-10">
-                                                <td colSpan="2" className="text-end fw-bold text-success">Total Amount Paid:</td>
-                                                <td className="text-end fw-bold text-success">₱{(selectedInvoice.amountPaid || 0).toLocaleString()}</td>
-                                            </tr>
-                                        </tfoot>
                                     </table>
                                 </div>
 
-                                <div className="d-flex justify-content-between align-items-end mt-4 pt-3 border-top small">
-                                    <div>
-                                        <div className="text-muted">Prepared By: <strong>{selectedInvoice.cashier || 'Cashier Desk'}</strong></div>
-                                        <div className="text-muted">System Stamp: CarePlus Central Financial System (Valid Receipt)</div>
+                                {/* Section 3: Financial Settlement & Totals Table */}
+                                <div className="mb-3">
+                                    <div className="fw-bold text-dark small text-uppercase mb-1">
+                                        Section 3: Summary of Charges &amp; Settlement
                                     </div>
-                                    <div className="text-center" style={{ width: '200px' }}>
-                                        <div className="border-bottom pb-1 fw-bold">{selectedInvoice.cashier || 'Authorized Cashier'}</div>
-                                        <div className="text-muted">Authorized Signature</div>
-                                    </div>
+                                    <table className="table table-bordered table-sm mb-0 billing-print-table" style={{ borderColor: '#cbd5e1', fontSize: '12px' }}>
+                                        <tbody>
+                                            <tr>
+                                                <td style={{ width: '70%', textAlign: 'end', background: '#f8fafc', fontWeight: '600' }}>Gross Subtotal:</td>
+                                                <td style={{ width: '30%', textAlign: 'end', fontWeight: 'bold' }}>
+                                                    ₱{(selectedInvoice.subtotal || selectedInvoice.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                                </td>
+                                            </tr>
+                                            {selectedInvoice.discountAmount > 0 && (
+                                                <tr className="text-success">
+                                                    <td style={{ textAlign: 'end', background: '#f8fafc', fontWeight: '600' }}>
+                                                        Applied Discount ({selectedInvoice.discountType || 'Mandatory PWD/Senior'}):
+                                                    </td>
+                                                    <td style={{ textAlign: 'end', fontWeight: 'bold' }}>
+                                                        -₱{selectedInvoice.discountAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                                    </td>
+                                                </tr>
+                                            )}
+                                            <tr style={{ background: '#eff6ff' }}>
+                                                <td style={{ textAlign: 'end', fontWeight: 'bold', color: '#1e40af' }}>Final Net Amount Due:</td>
+                                                <td style={{ textAlign: 'end', fontWeight: 'bold', color: '#1e40af', fontSize: '13px' }}>
+                                                    ₱{(selectedInvoice.totalAmount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                                </td>
+                                            </tr>
+                                            <tr style={{ background: '#f0fdf4' }}>
+                                                <td style={{ textAlign: 'end', fontWeight: 'bold', color: '#166534' }}>Total Amount Paid / Settled:</td>
+                                                <td style={{ textAlign: 'end', fontWeight: 'bold', color: '#166534', fontSize: '13px' }}>
+                                                    ₱{(selectedInvoice.amountPaid || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style={{ textAlign: 'end', background: '#f8fafc', fontWeight: '600' }}>Balance Outstanding:</td>
+                                                <td style={{ textAlign: 'end', fontWeight: 'bold' }}>
+                                                    ₱{Math.max(0, (selectedInvoice.totalAmount || 0) - (selectedInvoice.amountPaid || 0)).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Section 4: Dual Verification & Signatures Table */}
+                                <div className="mt-4 pt-1">
+                                    <table className="table table-bordered mb-0 billing-print-table" style={{ borderColor: '#cbd5e1' }}>
+                                        <tbody>
+                                            <tr style={{ background: '#f8fafc' }}>
+                                                <th style={{ width: '50%', textAlign: 'center' }}>Patient / Payor Acknowledgment</th>
+                                                <th style={{ width: '50%', textAlign: 'center' }}>Authorized Cashier / Finance Desk</th>
+                                            </tr>
+                                            <tr>
+                                                <td style={{ height: '75px', verticalAlign: 'bottom', textAlign: 'center', paddingBottom: '8px' }}>
+                                                    <div className="border-top border-dark mx-auto" style={{ width: '75%' }}></div>
+                                                    <div className="fw-bold text-dark small mt-1">{selectedInvoice.patientName}</div>
+                                                    <div className="text-muted small" style={{ fontSize: '10px' }}>Patient / Payor Signature</div>
+                                                </td>
+                                                <td style={{ height: '75px', verticalAlign: 'bottom', textAlign: 'center', paddingBottom: '8px' }}>
+                                                    <div className="border-top border-dark mx-auto" style={{ width: '75%' }}></div>
+                                                    <div className="fw-bold text-dark small mt-1">{selectedInvoice.cashier || 'Authorized Cashier'}</div>
+                                                    <div className="text-muted small" style={{ fontSize: '10px' }}>
+                                                        CarePlus Cashier Desk • Valid Clinical Official Receipt
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
-                            <div className="modal-footer bg-light py-2">
+                            <div className="modal-footer bg-light py-2 no-print">
                                 <button type="button" className="btn btn-outline-secondary rounded-pill px-4" onClick={() => setActiveModal(null)}>Close</button>
                                 <button type="button" className="btn btn-primary rounded-pill px-4 fw-bold shadow-sm d-flex align-items-center gap-2" onClick={() => window.print()}>
                                     <RiPrinterLine /> Print Official Statement
@@ -814,8 +870,70 @@ const BillingManagement = () => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
+
+            <style>{`
+                @media print {
+                    @page {
+                        size: A4 portrait;
+                        margin: 10mm 12mm;
+                    }
+                    body, html {
+                        background-color: #ffffff !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    .no-print, nav, .sidebar, .navbar, header, footer, .modal-backdrop, .modal-header, .modal-footer, .btn {
+                        display: none !important;
+                    }
+                    .modal {
+                        position: static !important;
+                        display: block !important;
+                        background: none !important;
+                        padding: 0 !important;
+                        overflow: visible !important;
+                    }
+                    .modal-dialog {
+                        max-width: 100% !important;
+                        width: 100% !important;
+                        margin: 0 !important;
+                        transform: none !important;
+                    }
+                    .modal-content {
+                        border: none !important;
+                        box-shadow: none !important;
+                        border-radius: 0 !important;
+                        padding: 0 !important;
+                    }
+                    #printable-receipt {
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                    }
+                    .billing-print-table {
+                        width: 100% !important;
+                        border-collapse: collapse !important;
+                        page-break-inside: avoid !important;
+                        margin-bottom: 8px !important;
+                    }
+                    .billing-print-table th,
+                    .billing-print-table td {
+                        border: 1px solid #94a3b8 !important;
+                        padding: 4px 8px !important;
+                        color: #0f172a !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    .billing-print-table th {
+                        background-color: #f1f5f9 !important;
+                    }
+                }
+            `}</style>
         </div>
     );
 };

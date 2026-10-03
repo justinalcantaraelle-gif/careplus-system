@@ -6,20 +6,48 @@
 let eventSource = null;
 const listeners = new Map();
 
+let currentEmail = null;
+let currentRole = null;
+
 /**
  * Connect to the backend real-time stream
  * @param {string} userEmail - Current user email
  * @param {string} role - Current user role
  */
 export const connectRealtime = (userEmail = '', role = '') => {
-    if (eventSource && eventSource.readyState !== EventSource.CLOSED) {
-        return eventSource;
+    let email = (userEmail || '').trim().toLowerCase();
+    let userRole = (role || '').trim().toLowerCase();
+
+    // Auto-detect from active session if not provided
+    if (!email && typeof window !== 'undefined') {
+        try {
+            const raw = sessionStorage.getItem('current_session');
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                email = (parsed.email || '').trim().toLowerCase();
+                userRole = (parsed.role || '').trim().toLowerCase();
+            }
+        } catch (e) {}
     }
+
+    if (eventSource && eventSource.readyState !== EventSource.CLOSED) {
+        if (currentEmail === email && currentRole === userRole) {
+            return eventSource;
+        }
+        // Credentials changed (e.g. login or switch account) - close existing stream and re-open
+        try {
+            eventSource.close();
+        } catch (e) {}
+        eventSource = null;
+    }
+
+    currentEmail = email;
+    currentRole = userRole;
 
     const backendUrl = (typeof window !== 'undefined' && window.location && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1')
         ? window.location.origin
         : (process.env.REACT_APP_API_URL || 'http://localhost:5000');
-    const streamUrl = `${backendUrl}/api/realtime/stream?email=${encodeURIComponent(userEmail)}&role=${encodeURIComponent(role)}`;
+    const streamUrl = `${backendUrl}/api/realtime/stream?email=${encodeURIComponent(email)}&role=${encodeURIComponent(userRole)}`;
 
     eventSource = new EventSource(streamUrl);
 
@@ -28,7 +56,7 @@ export const connectRealtime = (userEmail = '', role = '') => {
     });
 
     eventSource.onerror = (err) => {
-        console.warn('[Realtime SSE] Stream connection error. Auto-reconnecting...', err);
+        console.warn('[Realtime SSE] Stream connection warning (will retry automatically):', err);
     };
 
     // Forward received events to registered listeners

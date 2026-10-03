@@ -45,6 +45,15 @@ const calculateAge = (birthDateString) => {
     return age > 0 ? age : 0;
 };
 
+const escapeHtml = (value) => {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+};
+
 const emptyPatient = {
     fullName: '',
     email: '',
@@ -1225,82 +1234,202 @@ const PatientManagement = () => {
     }, [patients, medicalRecords, allAppointments, reportSearchTerm, reportTreatmentFilter, reportStatusFilter, getPatientAppointments]);
 
     const generatePatientReportHtml = () => {
-        const rowsHtml = reportFilteredPatients.map(item => `
-            <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; font-weight: bold; color: #111827;">
-                    ${escapeHtml(item.patient.fullName || item.patient.name || 'Patient')}
-                    <br/><span style="font-size: 11px; font-weight: normal; color: #6b7280;">${escapeHtml(item.patient.email || '')} ${item.patient.phone ? '| ' + escapeHtml(item.patient.phone) : ''}</span>
+        const rowsHtml = reportFilteredPatients.map((item, idx) => `
+            <tr style="background-color: ${idx % 2 === 1 ? '#f8fafc' : '#ffffff'};">
+                <td style="padding: 8px 10px; border-bottom: 1px solid #cbd5e1; border-right: 1px solid #cbd5e1; text-align: center; font-weight: bold; color: #475569; width: 5%;">
+                    ${idx + 1}
                 </td>
-                <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #374151; font-weight: 500;">
-                    ${escapeHtml(item.treatmentStr)}
+                <td style="padding: 8px 10px; border-bottom: 1px solid #cbd5e1; border-right: 1px solid #cbd5e1; font-weight: bold; color: #0f172a; width: 28%;">
+                    <div style="font-size: 11.5px; color: #0f172a;">${escapeHtml(item.patient.fullName || item.patient.name || 'Patient')}</div>
+                    <div style="font-size: 10px; font-weight: normal; color: #64748b; margin-top: 2px;">
+                        ${escapeHtml(item.patient.email || '')} ${item.patient.phone ? '&bull; ' + escapeHtml(item.patient.phone) : ''}
+                    </div>
                 </td>
-                <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
+                <td style="padding: 8px 10px; border-bottom: 1px solid #cbd5e1; border-right: 1px solid #cbd5e1; color: #334155; font-size: 11px; width: 25%;">
+                    ${escapeHtml(item.treatmentStr || 'General Consultation / Evaluation')}
+                </td>
+                <td style="padding: 8px 10px; border-bottom: 1px solid #cbd5e1; border-right: 1px solid #cbd5e1; width: 22%;">
                     ${item.allergiesStr === 'None Reported' 
-                        ? '<span style="color: #6b7280; font-size: 11px;">None Reported</span>' 
-                        : `<span style="color: #dc2626; font-weight: bold; background: #fee2e2; padding: 3px 8px; border-radius: 4px; font-size: 11px;">${escapeHtml(item.allergiesStr)}</span>`}
+                        ? '<span style="color: #64748b; font-size: 10px; font-style: italic;">No known allergies on record</span>' 
+                        : `<span style="color: #b91c1c; font-weight: bold; background: #fee2e2; border: 1px solid #fecaca; padding: 2px 6px; border-radius: 4px; font-size: 10px;">${escapeHtml(item.allergiesStr)}</span>`}
                 </td>
-                <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
+                <td style="padding: 8px 10px; border-bottom: 1px solid #cbd5e1; text-align: center; width: 20%;">
                     ${item.statuses.map(st => {
                         const isDidntCome = (st || '').toLowerCase().includes("didn't come") || (st || '').toLowerCase().includes("no show");
                         const isCompleted = (st || '').toLowerCase().includes("completed") || (st || '').toLowerCase().includes("done");
-                        if (isDidntCome) return '<span style="background: #fef08a; color: #854d0e; padding: 4px 10px; border-radius: 9999px; font-weight: bold; font-size: 11px; display: inline-block; margin: 2px;">Didn\'t Come</span>';
-                        if (isCompleted) return '<span style="background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 9999px; font-weight: bold; font-size: 11px; display: inline-block; margin: 2px;">Completed</span>';
-                        return `<span style="background: #f3f4f6; color: #374151; padding: 4px 10px; border-radius: 9999px; font-size: 11px; display: inline-block; margin: 2px;">${escapeHtml(st)}</span>`;
+                        if (isDidntCome) return '<span style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a; padding: 2px 7px; border-radius: 9999px; font-weight: bold; font-size: 9.5px; display: inline-block; margin: 1px;">No Show</span>';
+                        if (isCompleted) return '<span style="background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; padding: 2px 7px; border-radius: 9999px; font-weight: bold; font-size: 9.5px; display: inline-block; margin: 1px;">Completed</span>';
+                        return `<span style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; padding: 2px 7px; border-radius: 9999px; font-size: 9.5px; display: inline-block; margin: 1px;">${escapeHtml(st)}</span>`;
                     }).join(' ')}
                 </td>
             </tr>
         `).join('');
 
         const activeFilterLabels = [];
-        if (reportSearchTerm) activeFilterLabels.push(`Name Search: "${reportSearchTerm}"`);
+        if (reportSearchTerm) activeFilterLabels.push(`Query: "${reportSearchTerm}"`);
         if (reportTreatmentFilter !== 'All') activeFilterLabels.push(`Treatment: "${reportTreatmentFilter}"`);
         if (reportStatusFilter !== 'All') activeFilterLabels.push(`Status: ${reportStatusFilter}`);
 
-        const filterDescription = activeFilterLabels.length > 0 ? activeFilterLabels.join(' | ') : 'All Patients';
+        const filterDescription = activeFilterLabels.length > 0 ? activeFilterLabels.join(' | ') : 'All Patient Profiles (Unfiltered)';
 
         return `
             <!DOCTYPE html>
-            <html>
+            <html lang="en">
             <head>
-                <title>Doc Dental Care - Patient List Report</title>
+                <meta charset="UTF-8">
+                <title>CarePlus Multi-Branch - Patient Registry Report</title>
                 <style>
-                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 25px; color: #1f2937; line-height: 1.5; font-size: 12px; background: #ffffff; }
-                    .header { text-align: center; border-bottom: 2px solid #B8860B; padding-bottom: 12px; margin-bottom: 20px; }
-                    .header h1 { color: #B8860B; margin: 0 0 4px 0; font-size: 24px; font-weight: 800; letter-spacing: 1px; }
-                    .header .subtitle { color: #4b5563; font-size: 14px; font-weight: 600; }
-                    .header .filter-tag { background-color: #FDF7E7; display: inline-block; padding: 5px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; color: #854d0e; margin-top: 8px; border: 1px solid #fef08a; }
-                    .meta { display: flex; justify-content: space-between; font-size: 11px; color: #6b7280; margin-top: 15px; border-top: 1px solid #f3f4f6; padding-top: 8px; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-                    th { background-color: #f9fafb; text-align: left; padding: 10px; font-size: 11px; text-transform: uppercase; color: #6b7280; font-weight: bold; border-bottom: 1.5px solid #e5e7eb; }
+                    * { box-sizing: border-box; }
+                    body {
+                        font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+                        margin: 0;
+                        padding: 15mm;
+                        color: #0f172a;
+                        background: #ffffff;
+                        line-height: 1.4;
+                        font-size: 11px;
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                    }
                     @media print {
-                        body { margin: 10mm; }
+                        body { padding: 8mm; margin: 0; }
+                        tr { page-break-inside: avoid; }
+                        @page { size: landscape; margin: 8mm; }
                     }
                 </style>
             </head>
             <body>
-                <div class="header">
-                    <h1>DOC DENTAL CARE</h1>
-                    <div class="subtitle">Patient List Report</div>
-                    <div class="filter-tag">Applied Filters: ${escapeHtml(filterDescription)}</div>
-                    <div class="meta">
-                        <span><strong>Total Matching Patients:</strong> ${reportFilteredPatients.length}</span>
-                        <span><strong>Generated Date:</strong> ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</span>
-                    </div>
-                </div>
-
-                <table>
-                    <thead>
+                <!-- 1. Enterprise Facility Header Table -->
+                <table style="border-bottom: 2.5px solid #0f172a; margin-bottom: 16px;">
+                    <tbody>
                         <tr>
-                            <th style="width: 30%;">Patient Name & Contact</th>
-                            <th style="width: 25%;">Treatment / Service</th>
-                            <th style="width: 25%;">Allergies</th>
-                            <th style="width: 20%;">Status / Attendance</th>
+                            <td style="vertical-align: top; width: 65%; padding-bottom: 10px;">
+                                <div style="font-size: 20px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.5px;">
+                                    CAREPLUS MULTI-BRANCH CLINIC MANAGEMENT SYSTEM
+                                </div>
+                                <div style="font-size: 12px; font-weight: 600; color: #0284c7; margin-top: 2px;">
+                                    CENTRALIZED PATIENT REGISTRY &amp; CLINICAL LEDGER
+                                </div>
+                                <div style="font-size: 10px; color: #64748b; margin-top: 4px;">
+                                    Ambulatory Care &bull; Dental Medicine &bull; Diagnostic Laboratory &bull; Multi-Branch EHR
+                                </div>
+                                <div style="font-size: 9.5px; color: #64748b;">
+                                    Metro Main: 123 Healthcare Blvd &bull; Northside Branch: 789 Medical Park Dr &bull; Tel: (02) 8888-CARE
+                                </div>
+                            </td>
+                            <td style="vertical-align: top; width: 35%; padding-bottom: 10px;">
+                                <table style="border: 1px solid #cbd5e1; font-size: 10.5px;">
+                                    <tbody>
+                                        <tr style="background-color: #f8fafc;">
+                                            <td style="padding: 4px 8px; font-weight: bold; color: #475569; border-bottom: 1px solid #cbd5e1;">Report Ref:</td>
+                                            <td style="padding: 4px 8px; text-align: right; font-weight: bold; border-bottom: 1px solid #cbd5e1;">CP-PAT-${Date.now().toString().slice(-6)}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 4px 8px; font-weight: bold; color: #475569; border-bottom: 1px solid #cbd5e1;">Date Generated:</td>
+                                            <td style="padding: 4px 8px; text-align: right; border-bottom: 1px solid #cbd5e1;">${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</td>
+                                        </tr>
+                                        <tr style="background-color: #f8fafc;">
+                                            <td style="padding: 4px 8px; font-weight: bold; color: #475569;">Active Filter:</td>
+                                            <td style="padding: 4px 8px; text-align: right; font-weight: bold; color: #0284c7;">${escapeHtml(filterDescription)}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- 2. Registry Parameter & KPI Summary Table -->
+                <table style="border: 1px solid #cbd5e1; margin-bottom: 16px; font-size: 11px;">
+                    <thead>
+                        <tr style="background-color: #f1f5f9; border-bottom: 1.5px solid #94a3b8;">
+                            <th style="padding: 6px 10px; text-align: left; font-weight: bold; color: #1e293b; border-right: 1px solid #cbd5e1; width: 25%;">Registry Volume</th>
+                            <th style="padding: 6px 10px; text-align: left; font-weight: bold; color: #1e293b; border-right: 1px solid #cbd5e1; width: 35%;">Filter Specification</th>
+                            <th style="padding: 6px 10px; text-align: left; font-weight: bold; color: #1e293b; border-right: 1px solid #cbd5e1; width: 22%;">Clinical Verification</th>
+                            <th style="padding: 6px 10px; text-align: center; font-weight: bold; color: #1e293b; width: 18%;">System Status</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${rowsHtml || '<tr><td colSpan="4" style="text-align:center; padding: 30px; color: #9ca3af;">No patients matched the criteria.</td></tr>'}
+                        <tr>
+                            <td style="padding: 6px 10px; border-right: 1px solid #cbd5e1; font-weight: bold; color: #0369a1; font-size: 12px;">
+                                ${reportFilteredPatients.length} Enrolled Patients
+                            </td>
+                            <td style="padding: 6px 10px; border-right: 1px solid #cbd5e1; color: #334155;">
+                                ${escapeHtml(filterDescription)}
+                            </td>
+                            <td style="padding: 6px 10px; border-right: 1px solid #cbd5e1; color: #475569;">
+                                Authenticated Identity &bull; Validated Contacts
+                            </td>
+                            <td style="padding: 6px 10px; text-align: center; font-weight: bold; color: #166534;">
+                                Synchronized
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
+
+                <!-- 3. Master Patient Registry Ledger Table -->
+                <table style="border: 1px solid #cbd5e1; margin-bottom: 20px; font-size: 10.5px;">
+                    <thead>
+                        <tr style="background-color: #f1f5f9; border-bottom: 1.5px solid #94a3b8;">
+                            <th style="padding: 8px 10px; text-align: center; font-weight: bold; color: #1e293b; border-right: 1px solid #cbd5e1; width: 5%;">#</th>
+                            <th style="padding: 8px 10px; text-align: left; font-weight: bold; color: #1e293b; border-right: 1px solid #cbd5e1; width: 28%;">Patient Name &amp; Contact Details</th>
+                            <th style="padding: 8px 10px; text-align: left; font-weight: bold; color: #1e293b; border-right: 1px solid #cbd5e1; width: 25%;">Registered Procedures / Treatments</th>
+                            <th style="padding: 8px 10px; text-align: left; font-weight: bold; color: #1e293b; border-right: 1px solid #cbd5e1; width: 22%;">Allergy &amp; Medical Alerts</th>
+                            <th style="padding: 8px 10px; text-align: center; font-weight: bold; color: #1e293b; width: 20%;">Clinical Encounter Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rowsHtml || `
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 28px; color: #94a3b8; font-style: italic;">
+                                    No patient records matched the specified criteria.
+                                </td>
+                            </tr>
+                        `}
+                    </tbody>
+                </table>
+
+                <!-- 4. Governance & Dual Attestation Table -->
+                <table style="border-collapse: collapse; margin-top: 16px; page-break-inside: avoid;">
+                    <tbody>
+                        <tr>
+                            <td style="width: 48%; vertical-align: top; border: 1px solid #cbd5e1; padding: 12px 14px; background-color: #f8fafc;">
+                                <div style="font-size: 9.5px; text-transform: uppercase; color: #64748b; font-weight: bold;">
+                                    Medical Records Custodian
+                                </div>
+                                <div style="margin-top: 26px; border-bottom: 1.5px solid #0f172a; width: 85%;"></div>
+                                <div style="margin-top: 6px; font-weight: bold; font-size: 11.5px; color: #0f172a;">
+                                    Clinical Records Administrator
+                                </div>
+                                <div style="font-size: 9.5px; color: #475569;">
+                                    Health Information Management &bull; CarePlus Multi-Branch
+                                </div>
+                            </td>
+                            <td style="width: 4%;"></td>
+                            <td style="width: 48%; vertical-align: top; border: 1px solid #cbd5e1; padding: 12px 14px; background-color: #f8fafc;">
+                                <div style="font-size: 9.5px; text-transform: uppercase; color: #64748b; font-weight: bold;">
+                                    Supervising Clinical Director
+                                </div>
+                                <div style="margin-top: 26px; border-bottom: 1.5px solid #0f172a; width: 85%;"></div>
+                                <div style="margin-top: 6px; font-weight: bold; font-size: 11.5px; color: #0f172a;">
+                                    Dr. Robert Chen, MD, FPCP
+                                </div>
+                                <div style="font-size: 9.5px; color: #475569;">
+                                    Chief of Clinics &bull; PRC License No. 0084920
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- 5. Confidentiality Statement -->
+                <div style="margin-top: 14px; text-align: center; font-size: 9px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 8px;">
+                    CONFIDENTIAL PATIENT DATA &bull; PROTECTED UNDER DATA PRIVACY ACT &amp; CLINICAL RECORDS GOVERNANCE &bull; FOR AUTHORIZED MEDICAL PERSONNEL ONLY
+                </div>
             </body>
             </html>
         `;

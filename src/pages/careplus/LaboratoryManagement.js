@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import Swal from 'sweetalert2';
 import {
     RiFlaskLine, RiAddLine, RiSearchLine, RiPrinterLine,
@@ -256,7 +257,7 @@ const LaboratoryManagement = () => {
     };
 
     return (
-        <div className="container-fluid p-3 p-md-4 animate__animated animate__fadeIn">
+        <div className="container-fluid p-3 p-md-4">
             {/* Header Banner */}
             <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 p-4 rounded-4 shadow-sm bg-white border">
                 <div>
@@ -413,8 +414,8 @@ const LaboratoryManagement = () => {
             </div>
 
             {/* Modal: New Lab Order */}
-            {activeModal === 'order' && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+            {activeModal === 'order' && createPortal(
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.65)', zIndex: 9999 }}>
                     <div className="modal-dialog modal-lg modal-dialog-centered">
                         <div className="modal-content rounded-4 border-0 shadow">
                             <div className="modal-header bg-primary text-white py-3">
@@ -511,12 +512,13 @@ const LaboratoryManagement = () => {
                             </form>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Modal: Enter Results */}
-            {activeModal === 'enterResults' && selectedLabOrder && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+            {activeModal === 'enterResults' && selectedLabOrder && createPortal(
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.65)', zIndex: 9999 }}>
                     <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
                         <div className="modal-content rounded-4 border-0 shadow">
                             <div className="modal-header bg-success text-white py-3">
@@ -671,74 +673,83 @@ const LaboratoryManagement = () => {
                             </form>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Modal: View Official Lab Report Slip */}
-            {activeModal === 'viewReport' && selectedLabOrder && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1050 }}>
+            {activeModal === 'viewReport' && selectedLabOrder && createPortal(
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.65)', zIndex: 9999 }}>
                     <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
                         <div className="modal-content rounded-4 border-0 shadow-lg">
-                            <div className="modal-header border-bottom py-3 bg-light">
+                            <div className="modal-header border-bottom py-3 bg-light no-print">
                                 <h5 className="modal-title fw-bold text-dark">
                                     Official Diagnostic Laboratory Examination Report
                                 </h5>
                                 <button type="button" className="btn-close" onClick={() => setActiveModal(null)}></button>
                             </div>
                             <div className="modal-body p-4 bg-white" id="printable-lab-report">
-                                {/* Header */}
-                                <div className="text-center border-bottom pb-3 mb-3">
-                                    <h4 className="fw-bold mb-0 text-primary">CarePlus Diagnostic Laboratory</h4>
-                                    <div className="fw-semibold text-secondary small">{selectedLabOrder.branch}</div>
-                                    <div className="text-muted small">Department of Pathology & Clinical Laboratory Services</div>
-                                    <span className="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 mt-1">
-                                        Accredited Clinical Testing Facility
-                                    </span>
+                                {/* Laboratory Facility Header Table */}
+                                <table className="table table-bordered mb-3 lab-print-table" style={{ borderColor: '#cbd5e1' }}>
+                                    <tbody>
+                                        <tr>
+                                            <td style={{ width: '65%', verticalAlign: 'middle' }}>
+                                                <div className="fw-bold fs-5 text-primary" style={{ letterSpacing: '0.5px' }}>
+                                                    CAREPLUS DIAGNOSTIC LABORATORY
+                                                </div>
+                                                <div className="fw-semibold text-secondary small">
+                                                    {selectedLabOrder.branch || 'CarePlus Multi-Branch Clinical Network'}
+                                                </div>
+                                                <div className="text-muted small" style={{ fontSize: '11px' }}>
+                                                    Department of Clinical Pathology • DOH-Accredited Diagnostic Center
+                                                </div>
+                                            </td>
+                                            <td style={{ width: '35%', verticalAlign: 'middle', fontSize: '11px', background: '#f8fafc' }}>
+                                                <div><strong>Laboratory ID:</strong> {selectedLabOrder.id}</div>
+                                                <div><strong>Specimen Requisition:</strong> {selectedLabOrder.requestDate}</div>
+                                                <div><strong>Date Released:</strong> <span className="fw-bold text-success">{selectedLabOrder.completionDate || 'Same Day'}</span></div>
+                                                <div><strong>Result Status:</strong> <span className="fw-bold text-uppercase">{selectedLabOrder.status}</span></div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                {/* Section 1: Patient & Specimen Demographics Table */}
+                                <div className="mb-3">
+                                    <div className="fw-bold text-dark small text-uppercase mb-1">
+                                        Section 1: Patient Identification &amp; Specimen Metadata
+                                    </div>
+                                    <table className="table table-bordered table-sm mb-0 lab-print-table" style={{ borderColor: '#cbd5e1', fontSize: '12px' }}>
+                                        <tbody>
+                                            <tr>
+                                                <th style={{ width: '20%', background: '#f1f5f9', color: '#334155' }}>Patient Name</th>
+                                                <td style={{ width: '30%', fontWeight: 'bold' }}>{selectedLabOrder.patientName}</td>
+                                                <th style={{ width: '20%', background: '#f1f5f9', color: '#334155' }}>Requesting Physician</th>
+                                                <td style={{ width: '30%', fontWeight: '600' }}>{selectedLabOrder.requestingDoctor}</td>
+                                            </tr>
+                                            <tr>
+                                                <th style={{ background: '#f1f5f9', color: '#334155' }}>Specimen Type</th>
+                                                <td style={{ fontWeight: '500' }}>{selectedLabOrder.specimen}</td>
+                                                <th style={{ background: '#f1f5f9', color: '#334155' }}>Test Procedure</th>
+                                                <td className="fw-bold text-primary">{selectedLabOrder.testName} ({selectedLabOrder.testCategory})</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
 
-                                {/* Patient Information */}
-                                <div className="row g-2 mb-3 p-3 bg-light rounded-3 border small">
-                                    <div className="col-6 col-md-3">
-                                        <span className="text-muted">Patient Name:</span>
-                                        <div className="fw-bold text-dark">{selectedLabOrder.patientName}</div>
+                                {/* Section 2: Clinical Results Breakdown Table */}
+                                <div className="mb-3">
+                                    <div className="fw-bold text-dark small text-uppercase mb-1">
+                                        Section 2: Diagnostic Parameter Measurements &amp; Clinical Evaluation
                                     </div>
-                                    <div className="col-6 col-md-3">
-                                        <span className="text-muted">Laboratory ID:</span>
-                                        <div className="fw-bold text-dark">{selectedLabOrder.id}</div>
-                                    </div>
-                                    <div className="col-6 col-md-3">
-                                        <span className="text-muted">Date Requisitioned:</span>
-                                        <div className="fw-bold text-dark">{selectedLabOrder.requestDate}</div>
-                                    </div>
-                                    <div className="col-6 col-md-3">
-                                        <span className="text-muted">Date Released:</span>
-                                        <div className="fw-bold text-success">{selectedLabOrder.completionDate || 'Same Day'}</div>
-                                    </div>
-                                    <div className="col-6 col-md-6">
-                                        <span className="text-muted">Requesting Physician:</span>
-                                        <div className="fw-semibold text-dark">{selectedLabOrder.requestingDoctor}</div>
-                                    </div>
-                                    <div className="col-6 col-md-6">
-                                        <span className="text-muted">Specimen Type:</span>
-                                        <div className="fw-semibold text-dark">{selectedLabOrder.specimen}</div>
-                                    </div>
-                                </div>
-
-                                <div className="mb-2">
-                                    <h5 className="fw-bold text-dark mb-1">{selectedLabOrder.testName}</h5>
-                                    <span className="badge bg-secondary bg-opacity-10 text-secondary mb-3">{selectedLabOrder.testCategory}</span>
-                                </div>
-
-                                {/* Results Table */}
-                                <div className="table-responsive mb-4">
-                                    <table className="table table-sm table-bordered">
-                                        <thead className="table-light">
-                                            <tr className="small">
-                                                <th>Parameter / Test</th>
-                                                <th>Result</th>
-                                                <th>Unit</th>
-                                                <th>Reference Range</th>
-                                                <th>Flag</th>
+                                    <table className="table table-bordered table-sm mb-0 lab-print-table" style={{ borderColor: '#cbd5e1', fontSize: '11.5px' }}>
+                                        <thead style={{ background: '#f1f5f9' }}>
+                                            <tr>
+                                                <th style={{ width: '32%' }}>Test Parameter / Analyte</th>
+                                                <th style={{ width: '18%', textAlign: 'center' }}>Measured Value</th>
+                                                <th style={{ width: '15%', textAlign: 'center' }}>SI Unit</th>
+                                                <th style={{ width: '20%', textAlign: 'center' }}>Biological Reference Interval</th>
+                                                <th style={{ width: '15%', textAlign: 'center' }}>Clinical Flag</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -746,47 +757,80 @@ const LaboratoryManagement = () => {
                                                 selectedLabOrder.results.map((r, i) => (
                                                     <tr key={i}>
                                                         <td className="fw-semibold text-dark">{r.parameter}</td>
-                                                        <td className="fw-bold">{r.value}</td>
-                                                        <td className="small text-muted">{r.unit}</td>
-                                                        <td className="small">{r.normalRange}</td>
-                                                        <td>
+                                                        <td className="text-center fw-bold" style={{ fontSize: '12.5px' }}>{r.value}</td>
+                                                        <td className="text-center text-muted small">{r.unit}</td>
+                                                        <td className="text-center small">{r.normalRange}</td>
+                                                        <td className="text-center">
                                                             <span className={`badge ${r.flag === 'High' ? 'bg-danger' : r.flag === 'Low' ? 'bg-warning text-dark' : 'bg-success'}`}>
-                                                                {r.flag || 'Normal'}
+                                                                {r.flag || 'NORMAL'}
                                                             </span>
                                                         </td>
                                                     </tr>
                                                 ))
                                             ) : (
                                                 <tr>
-                                                    <td colSpan="5" className="text-center text-muted">No individual parameter entries.</td>
+                                                    <td colSpan="5" className="text-center text-muted py-3">
+                                                        No individual parameter measurements recorded.
+                                                    </td>
                                                 </tr>
                                             )}
                                         </tbody>
                                     </table>
                                 </div>
 
-                                {/* Remarks */}
+                                {/* Section 3: Diagnostic Remarks Table */}
                                 {selectedLabOrder.remarks && (
-                                    <div className="p-3 bg-light rounded-3 border mb-4 small">
-                                        <strong>Technician Remarks:</strong> {selectedLabOrder.remarks}
+                                    <div className="mb-3">
+                                        <div className="fw-bold text-dark small text-uppercase mb-1">
+                                            Section 3: Clinical Pathologist &amp; Technician Remarks
+                                        </div>
+                                        <table className="table table-bordered table-sm mb-0 lab-print-table" style={{ borderColor: '#cbd5e1', fontSize: '11px' }}>
+                                            <tbody>
+                                                <tr>
+                                                    <td style={{ background: '#fffdf6', padding: '8px 12px' }}>
+                                                        <strong>Interpretation:</strong> {selectedLabOrder.remarks}
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 )}
 
-                                {/* Signatures */}
-                                <div className="row text-center mt-5 pt-3">
-                                    <div className="col-6">
-                                        <div className="border-bottom pb-1 fw-bold text-dark">{selectedLabOrder.technician || 'Ronald David, RMT'}</div>
-                                        <div className="small text-muted">Medical Technologist</div>
-                                        <div className="small text-muted">PRC Lic. No. 0048191</div>
-                                    </div>
-                                    <div className="col-6">
-                                        <div className="border-bottom pb-1 fw-bold text-dark">Dr. Elena Cruz, MD, FPSP</div>
-                                        <div className="small text-muted">Clinical Pathologist</div>
-                                        <div className="small text-muted">PRC Lic. No. 0039281</div>
-                                    </div>
+                                {/* Section 4: Dual Verification & Licensure Signatures Table */}
+                                <div className="mt-4 pt-1">
+                                    <table className="table table-bordered mb-0 lab-print-table" style={{ borderColor: '#cbd5e1' }}>
+                                        <tbody>
+                                            <tr style={{ background: '#f8fafc' }}>
+                                                <th style={{ width: '50%', textAlign: 'center' }}>Medical Technologist / Analyst</th>
+                                                <th style={{ width: '50%', textAlign: 'center' }}>Attending Clinical Pathologist</th>
+                                            </tr>
+                                            <tr>
+                                                <td style={{ height: '80px', verticalAlign: 'bottom', textAlign: 'center', paddingBottom: '8px' }}>
+                                                    <div className="fw-bold text-dark mb-1" style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: '15px' }}>
+                                                        {selectedLabOrder.technician || 'Ronald David, RMT'}
+                                                    </div>
+                                                    <div className="border-top border-dark mx-auto" style={{ width: '75%' }}></div>
+                                                    <div className="fw-bold text-dark small mt-1">{selectedLabOrder.technician || 'Ronald David, RMT'}</div>
+                                                    <div className="text-muted small" style={{ fontSize: '10px' }}>
+                                                        Registered Medical Technologist • PRC Lic. No. 0048191
+                                                    </div>
+                                                </td>
+                                                <td style={{ height: '80px', verticalAlign: 'bottom', textAlign: 'center', paddingBottom: '8px' }}>
+                                                    <div className="fw-bold text-primary mb-1" style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: '15px' }}>
+                                                        Dr. Elena Cruz, MD, FPSP
+                                                    </div>
+                                                    <div className="border-top border-dark mx-auto" style={{ width: '75%' }}></div>
+                                                    <div className="fw-bold text-dark small mt-1">Dr. Elena Cruz, MD, FPSP</div>
+                                                    <div className="text-muted small" style={{ fontSize: '10px' }}>
+                                                        Clinical Pathologist • PRC Lic. No. 0039281
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
-                            <div className="modal-footer bg-light py-2">
+                            <div className="modal-footer bg-light py-2 no-print">
                                 <button type="button" className="btn btn-outline-secondary rounded-pill px-4" onClick={() => setActiveModal(null)}>Close</button>
                                 <button type="button" className="btn btn-primary rounded-pill px-4 fw-bold shadow-sm d-flex align-items-center gap-2" onClick={() => window.print()}>
                                     <RiPrinterLine /> Print Official Report
@@ -794,8 +838,70 @@ const LaboratoryManagement = () => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
+
+            <style>{`
+                @media print {
+                    @page {
+                        size: A4 portrait;
+                        margin: 10mm 12mm;
+                    }
+                    body, html {
+                        background-color: #ffffff !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    .no-print, nav, .sidebar, .navbar, header, footer, .modal-backdrop, .modal-header, .modal-footer, .btn {
+                        display: none !important;
+                    }
+                    .modal {
+                        position: static !important;
+                        display: block !important;
+                        background: none !important;
+                        padding: 0 !important;
+                        overflow: visible !important;
+                    }
+                    .modal-dialog {
+                        max-width: 100% !important;
+                        width: 100% !important;
+                        margin: 0 !important;
+                        transform: none !important;
+                    }
+                    .modal-content {
+                        border: none !important;
+                        box-shadow: none !important;
+                        border-radius: 0 !important;
+                        padding: 0 !important;
+                    }
+                    #printable-lab-report {
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                    }
+                    .lab-print-table {
+                        width: 100% !important;
+                        border-collapse: collapse !important;
+                        page-break-inside: avoid !important;
+                        margin-bottom: 8px !important;
+                    }
+                    .lab-print-table th,
+                    .lab-print-table td {
+                        border: 1px solid #94a3b8 !important;
+                        padding: 4px 8px !important;
+                        color: #0f172a !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    .lab-print-table th {
+                        background-color: #f1f5f9 !important;
+                    }
+                }
+            `}</style>
         </div>
     );
 };

@@ -347,12 +347,12 @@ const AdminDashboard = () => {
                             <table className="table table-hover align-middle mb-0 w-100" style={{ tableLayout: 'fixed' }}>
                                 <thead style={{ backgroundColor: '#f8fafc' }} className="small text-muted">
                                     <tr>
-                                        <th className="ps-3 py-3 fw-medium" style={{ width: '16%' }}>Schedule</th>
-                                        <th className="py-3 fw-medium" style={{ width: '22%' }}>Patient</th>
-                                        <th className="py-3 fw-medium" style={{ width: '20%' }}>Doctor &amp; Clinic</th>
-                                        <th className="py-3 fw-medium" style={{ width: '18%' }}>Service</th>
-                                        <th className="py-3 fw-medium" style={{ width: '13%' }}>Status</th>
-                                        <th className="pe-3 py-3 text-end fw-medium" style={{ width: '11%' }}>Actions</th>
+                                        <th className="ps-3 py-3 fw-medium" style={{ width: '15%' }}>Schedule</th>
+                                        <th className="py-3 fw-medium" style={{ width: '23%' }}>Patient</th>
+                                        <th className="py-3 fw-medium" style={{ width: '19%' }}>Doctor &amp; Clinic</th>
+                                        <th className="py-3 fw-medium" style={{ width: '16%' }}>Service</th>
+                                        <th className="py-3 fw-medium" style={{ width: '12%' }}>Status</th>
+                                        <th className="pe-4 py-3 text-end fw-medium" style={{ width: '15%' }}>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -399,19 +399,21 @@ const AdminDashboard = () => {
                                                         {app.status || 'Pending'}
                                                     </span>
                                                 </td>
-                                                <td className="pe-3 py-3 text-end">
-                                                    <div className="d-inline-flex align-items-center gap-1">
+                                                <td className="pe-4 py-3 text-end">
+                                                    <div className="d-inline-flex align-items-center gap-1.5 justify-content-end">
                                                         <button
                                                             onClick={() => handleStatusUpdate(app.id, 'Completed')}
-                                                            className="btn btn-light border btn-sm text-success p-1 px-2 rounded-2"
+                                                            className="btn btn-sm btn-light border text-success rounded-2 d-inline-flex align-items-center justify-content-center shadow-none"
                                                             title="Mark Complete"
+                                                            style={{ width: '28px', height: '28px', padding: 0 }}
                                                         >
                                                             <RiCheckDoubleLine size={15} />
                                                         </button>
                                                         <button
                                                             onClick={() => navigate('/admin/consultations')}
-                                                            className="btn btn-light border btn-sm text-primary p-1 px-2 rounded-2"
+                                                            className="btn btn-sm btn-light border text-primary rounded-2 d-inline-flex align-items-center justify-content-center shadow-none"
                                                             title="Launch Consultation"
+                                                            style={{ width: '28px', height: '28px', padding: 0 }}
                                                         >
                                                             <RiStethoscopeLine size={15} />
                                                         </button>
@@ -497,6 +499,301 @@ const AdminDashboard = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Hidden on screen, visible on print: Executive Briefing Report in Clean Table Format */}
+            <div id="printable-admin-brief" className="d-none d-print-block" style={{ backgroundColor: '#ffffff', color: '#111827' }}>
+                {/* 1. Executive Header Table */}
+                <table style={{ width: '100%', borderCollapse: 'collapse', borderBottom: '2.5px solid #1e293b', marginBottom: '20px' }}>
+                    <tbody>
+                        <tr>
+                            <td style={{ verticalAlign: 'top', paddingBottom: '12px', width: '65%' }}>
+                                <div style={{ fontSize: '20px', fontWeight: '800', color: '#0f172a', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                                    CAREPLUS MULTI-BRANCH CLINIC MANAGEMENT SYSTEM
+                                </div>
+                                <div style={{ fontSize: '12px', fontWeight: '600', color: '#0284c7', marginTop: '2px', letterSpacing: '0.5px' }}>
+                                    EXECUTIVE CLINICAL OPERATIONS &amp; ADMINISTRATIVE BRIEF
+                                </div>
+                                <div style={{ fontSize: '10px', color: '#64748b', marginTop: '4px' }}>
+                                    Metro Main: 123 Healthcare Blvd, Suite 400 &bull; Northside Branch: 789 Medical Park Dr
+                                </div>
+                                <div style={{ fontSize: '10px', color: '#64748b' }}>
+                                    Network EHR Helpline: (02) 8888-CARE &bull; regulatory-compliance@careplus.ph
+                                </div>
+                            </td>
+                            <td style={{ verticalAlign: 'top', textAlign: 'right', paddingBottom: '12px', width: '35%' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', border: '1px solid #cbd5e1' }}>
+                                    <tbody>
+                                        <tr style={{ backgroundColor: '#f8fafc' }}>
+                                            <td style={{ padding: '4px 8px', fontWeight: 'bold', color: '#475569', borderBottom: '1px solid #cbd5e1' }}>Document Ref:</td>
+                                            <td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 'bold', borderBottom: '1px solid #cbd5e1' }}>CP-EXEC-{Date.now().toString().slice(-6)}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style={{ padding: '4px 8px', fontWeight: 'bold', color: '#475569', borderBottom: '1px solid #cbd5e1' }}>Facility Scope:</td>
+                                            <td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 'bold', borderBottom: '1px solid #cbd5e1', color: '#0284c7' }}>{selectedBranch}</td>
+                                        </tr>
+                                        <tr style={{ backgroundColor: '#f8fafc' }}>
+                                            <td style={{ padding: '4px 8px', fontWeight: 'bold', color: '#475569', borderBottom: '1px solid #cbd5e1' }}>Generated On:</td>
+                                            <td style={{ padding: '4px 8px', textAlign: 'right', borderBottom: '1px solid #cbd5e1' }}>{new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style={{ padding: '4px 8px', fontWeight: 'bold', color: '#475569' }}>Generated By:</td>
+                                            <td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 'bold' }}>{adminName}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                {/* 2. Executive Operational KPI Summary Table */}
+                <div style={{ marginBottom: '16px' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', color: '#1e293b', borderLeft: '4px solid #0284c7', paddingLeft: '8px', marginBottom: '6px' }}>
+                        I. Enterprise Operational Volume &amp; Financial Performance
+                    </div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #cbd5e1', fontSize: '11px' }}>
+                        <thead>
+                            <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1.5px solid #94a3b8' }}>
+                                <th style={{ padding: '8px 10px', textAlign: 'left', fontWeight: 'bold', color: '#1e293b', borderRight: '1px solid #cbd5e1' }}>Operational Domain</th>
+                                <th style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 'bold', color: '#1e293b', borderRight: '1px solid #cbd5e1', width: '22%' }}>Network Total</th>
+                                <th style={{ padding: '8px 10px', textAlign: 'left', fontWeight: 'bold', color: '#1e293b', borderRight: '1px solid #cbd5e1', width: '30%' }}>Operational Status Breakdown</th>
+                                <th style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 'bold', color: '#1e293b', width: '18%' }}>System State</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style={{ padding: '8px 10px', fontWeight: 'bold', color: '#0f172a', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #e2e8f0' }}>
+                                    Unified Patient Registry
+                                </td>
+                                <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 'bold', fontSize: '13px', color: '#0369a1', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #e2e8f0' }}>
+                                    {dbData.users.filter(u => (u.role || '').toLowerCase() === 'patient').length} Active Patients
+                                </td>
+                                <td style={{ padding: '8px 10px', color: '#475569', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #e2e8f0' }}>
+                                    Centralized EHR across Metro &amp; Northside
+                                </td>
+                                <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 'bold', color: '#15803d', borderBottom: '1px solid #e2e8f0' }}>
+                                    Synchronized
+                                </td>
+                            </tr>
+                            <tr style={{ backgroundColor: '#fafafa' }}>
+                                <td style={{ padding: '8px 10px', fontWeight: 'bold', color: '#0f172a', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #e2e8f0' }}>
+                                    Clinical Consultations &amp; Visits
+                                </td>
+                                <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 'bold', fontSize: '13px', color: '#15803d', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #e2e8f0' }}>
+                                    {filteredAppointments.length} Encounters
+                                </td>
+                                <td style={{ padding: '8px 10px', color: '#475569', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #e2e8f0' }}>
+                                    {filteredAppointments.filter(a => a.status === 'Completed').length} Completed &bull; {filteredAppointments.filter(a => a.status === 'Approved' || a.status === 'Pending').length} Pending/Active
+                                </td>
+                                <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 'bold', color: '#15803d', borderBottom: '1px solid #e2e8f0' }}>
+                                    On Schedule
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style={{ padding: '8px 10px', fontWeight: 'bold', color: '#0f172a', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #e2e8f0' }}>
+                                    Diagnostic Laboratory Workload
+                                </td>
+                                <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 'bold', fontSize: '13px', color: '#b45309', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #e2e8f0' }}>
+                                    {filteredLabs.length} Lab Orders
+                                </td>
+                                <td style={{ padding: '8px 10px', color: '#475569', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #e2e8f0' }}>
+                                    {filteredLabs.filter(l => l.status === 'Completed').length} Verified &bull; {filteredLabs.filter(l => l.status !== 'Completed').length} In-Process
+                                </td>
+                                <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 'bold', color: '#0369a1', borderBottom: '1px solid #e2e8f0' }}>
+                                    Calibrated
+                                </td>
+                            </tr>
+                            <tr style={{ backgroundColor: '#fafafa' }}>
+                                <td style={{ padding: '8px 10px', fontWeight: 'bold', color: '#0f172a', borderRight: '1px solid #cbd5e1' }}>
+                                    Reconciled Cashier Collections
+                                </td>
+                                <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 'bold', fontSize: '13px', color: '#7c3aed', borderRight: '1px solid #cbd5e1' }}>
+                                    ₱{financialStats.totalPaid.toLocaleString()}
+                                </td>
+                                <td style={{ padding: '8px 10px', color: '#475569', borderRight: '1px solid #cbd5e1' }}>
+                                    Gross Receivables: ₱{financialStats.totalBilled.toLocaleString()}
+                                </td>
+                                <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 'bold', color: '#15803d' }}>
+                                    Reconciled
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* 3. Facility Branch Breakdown Table */}
+                <div style={{ marginBottom: '16px' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', color: '#1e293b', borderLeft: '4px solid #0284c7', paddingLeft: '8px', marginBottom: '6px' }}>
+                        II. Facility Branch Operational Status
+                    </div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #cbd5e1', fontSize: '11px' }}>
+                        <thead>
+                            <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1.5px solid #94a3b8' }}>
+                                <th style={{ padding: '8px 10px', textAlign: 'left', fontWeight: 'bold', color: '#1e293b', borderRight: '1px solid #cbd5e1' }}>Facility Name</th>
+                                <th style={{ padding: '8px 10px', textAlign: 'left', fontWeight: 'bold', color: '#1e293b', borderRight: '1px solid #cbd5e1' }}>Location &amp; Type</th>
+                                <th style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 'bold', color: '#1e293b', borderRight: '1px solid #cbd5e1' }}>Medical Staff</th>
+                                <th style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 'bold', color: '#1e293b', borderRight: '1px solid #cbd5e1' }}>Patient Visits</th>
+                                <th style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 'bold', color: '#1e293b', borderRight: '1px solid #cbd5e1' }}>Diagnostic Orders</th>
+                                <th style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 'bold', color: '#1e293b' }}>Operational Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {CLINIC_BRANCHES.map((branch, idx) => {
+                                const bAppts = (dbData.appointments || []).filter(a => a.branch === branch.name || (branch.name.includes('Metro') && !a.branch));
+                                const bLabs = (dbData.laboratory_requests || []).filter(l => l.branch === branch.name || (branch.name.includes('Metro') && !l.branch));
+                                const bDocs = CLINIC_DOCTORS.filter(d => d.branch === branch.name || branch.name.includes(d.branch || ''));
+                                return (
+                                    <tr key={branch.id} style={{ backgroundColor: idx % 2 === 1 ? '#fafafa' : '#ffffff' }}>
+                                        <td style={{ padding: '8px 10px', fontWeight: 'bold', color: '#0f172a', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #e2e8f0' }}>
+                                            {branch.name}
+                                        </td>
+                                        <td style={{ padding: '8px 10px', color: '#475569', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #e2e8f0' }}>
+                                            {branch.address} &bull; {branch.type}
+                                        </td>
+                                        <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 'bold', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #e2e8f0' }}>
+                                            {bDocs.length} Clinicians
+                                        </td>
+                                        <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 'bold', color: '#0369a1', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #e2e8f0' }}>
+                                            {bAppts.length}
+                                        </td>
+                                        <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 'bold', color: '#b45309', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #e2e8f0' }}>
+                                            {bLabs.length}
+                                        </td>
+                                        <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 'bold', color: '#15803d', borderBottom: '1px solid #e2e8f0' }}>
+                                            Normal Operations
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* 4. Active Patient Flow Queue Ledger Table */}
+                <div style={{ marginBottom: '20px' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', color: '#1e293b', borderLeft: '4px solid #0284c7', paddingLeft: '8px', marginBottom: '6px' }}>
+                        III. Current Patient Consultation &amp; Service Ledger ({selectedBranch})
+                    </div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #cbd5e1', fontSize: '10.5px' }}>
+                        <thead>
+                            <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1.5px solid #94a3b8' }}>
+                                <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 'bold', color: '#1e293b', borderRight: '1px solid #cbd5e1', width: '14%' }}>Schedule</th>
+                                <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 'bold', color: '#1e293b', borderRight: '1px solid #cbd5e1', width: '24%' }}>Patient Name &amp; Contact</th>
+                                <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 'bold', color: '#1e293b', borderRight: '1px solid #cbd5e1', width: '22%' }}>Attending Clinician</th>
+                                <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 'bold', color: '#1e293b', borderRight: '1px solid #cbd5e1', width: '18%' }}>Service / Procedure</th>
+                                <th style={{ padding: '6px 8px', textAlign: 'center', fontWeight: 'bold', color: '#1e293b', width: '12%' }}>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredAppointments.length > 0 ? (
+                                filteredAppointments.slice(0, 12).map((app, idx) => (
+                                    <tr key={app.id || idx} style={{ backgroundColor: idx % 2 === 1 ? '#fafafa' : '#ffffff' }}>
+                                        <td style={{ padding: '6px 8px', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #e2e8f0' }}>
+                                            <div style={{ fontWeight: 'bold', color: '#0f172a' }}>{app.time || '09:00 AM'}</div>
+                                            <div style={{ fontSize: '9.5px', color: '#64748b' }}>{app.date || 'Today'}</div>
+                                        </td>
+                                        <td style={{ padding: '6px 8px', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #e2e8f0' }}>
+                                            <div style={{ fontWeight: 'bold', color: '#0f172a' }}>{app.patientName || 'Patient'}</div>
+                                            <div style={{ fontSize: '9.5px', color: '#64748b' }}>{app.patientEmail || app.contactNumber || 'Patient Record'}</div>
+                                        </td>
+                                        <td style={{ padding: '6px 8px', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #e2e8f0' }}>
+                                            <div style={{ fontWeight: 'bold', color: '#0f172a' }}>{app.doctor || 'Dr. Robert Chen, MD'}</div>
+                                            <div style={{ fontSize: '9.5px', color: '#64748b' }}>{app.branch || 'Metro Branch'}</div>
+                                        </td>
+                                        <td style={{ padding: '6px 8px', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #e2e8f0', color: '#334155' }}>
+                                            {app.service || app.treatment || 'Consultation'}
+                                        </td>
+                                        <td style={{ padding: '6px 8px', textAlign: 'center', fontWeight: 'bold', borderBottom: '1px solid #e2e8f0', color: app.status === 'Completed' ? '#15803d' : '#b45309' }}>
+                                            {app.status || 'Pending'}
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="5" style={{ padding: '16px', textAlign: 'center', color: '#94a3b8' }}>
+                                        No patient queue encounters recorded for this facility scope.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* 5. Executive Governance & Dual Sign-off Table */}
+                <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '24px', pageBreakInside: 'avoid' }}>
+                    <tbody>
+                        <tr>
+                            <td style={{ width: '48%', verticalAlign: 'top', border: '1px solid #cbd5e1', padding: '12px 16px', backgroundColor: '#f8fafc' }}>
+                                <div style={{ fontSize: '10px', textTransform: 'uppercase', color: '#64748b', fontWeight: 'bold', letterSpacing: '0.5px' }}>
+                                    Executive Operations Administration
+                                </div>
+                                <div style={{ marginTop: '28px', borderBottom: '1.5px solid #0f172a', width: '85%' }}></div>
+                                <div style={{ marginTop: '6px', fontWeight: 'bold', fontSize: '12px', color: '#0f172a' }}>
+                                    {adminName}
+                                </div>
+                                <div style={{ fontSize: '10px', color: '#475569' }}>
+                                    Clinic Operations Administrator &bull; CarePlus Central
+                                </div>
+                                <div style={{ fontSize: '9px', color: '#64748b', marginTop: '2px' }}>
+                                    Official Executive Operational Briefing Sign-off
+                                </div>
+                            </td>
+                            <td style={{ width: '4%' }}></td>
+                            <td style={{ width: '48%', verticalAlign: 'top', border: '1px solid #cbd5e1', padding: '12px 16px', backgroundColor: '#f8fafc' }}>
+                                <div style={{ fontSize: '10px', textTransform: 'uppercase', color: '#64748b', fontWeight: 'bold', letterSpacing: '0.5px' }}>
+                                    Chief Medical Director Attestation
+                                </div>
+                                <div style={{ marginTop: '28px', borderBottom: '1.5px solid #0f172a', width: '85%' }}></div>
+                                <div style={{ marginTop: '6px', fontWeight: 'bold', fontSize: '12px', color: '#0f172a' }}>
+                                    Dr. Robert Chen, MD, FPCP
+                                </div>
+                                <div style={{ fontSize: '10px', color: '#475569' }}>
+                                    Chief of Clinics &bull; Medical Director, PRC Lic. 0084920
+                                </div>
+                                <div style={{ fontSize: '9px', color: '#64748b', marginTop: '2px' }}>
+                                    Clinical Governance &amp; Regulatory Concurrence
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                {/* Footer Notice */}
+                <div style={{ marginTop: '16px', textAlign: 'center', fontSize: '9px', color: '#94a3b8', borderTop: '1px solid #e2e8f0', paddingTop: '8px' }}>
+                    CONFIDENTIAL CLINICAL BRIEFING &bull; ENTARC CAREPLUS MULTI-BRANCH ENTERPRISE HEALTH SYSTEM &bull; STRICTLY FOR ADMINISTRATIVE OVERSIGHT
+                </div>
+            </div>
+
+            {/* Print Stylesheet for Admin Executive Brief */}
+            <style>{`
+                @media print {
+                    body * {
+                        visibility: hidden !important;
+                    }
+                    #printable-admin-brief, #printable-admin-brief * {
+                        visibility: visible !important;
+                    }
+                    #printable-admin-brief {
+                        position: absolute !important;
+                        left: 0 !important;
+                        top: 0 !important;
+                        width: 100% !important;
+                        display: block !important;
+                        margin: 0 !important;
+                        padding: 10mm 15mm !important;
+                        background: #ffffff !important;
+                        color: #111827 !important;
+                        box-sizing: border-box !important;
+                    }
+                    .navbar, .sidebar, .btn, .input-group, .btn-group, select, input {
+                        display: none !important;
+                    }
+                    @page {
+                        size: A4 portrait;
+                        margin: 10mm;
+                    }
+                }
+            `}</style>
         </div>
     );
 };

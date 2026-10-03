@@ -194,7 +194,7 @@ const Layout = ({ children, role }) => {
                     maxWidth: isMobile ? '265px' : (collapsed ? '80px' : '265px'),
                     left: isMobile ? (collapsed ? '-280px' : '0') : undefined,
                     transition: 'all 0.25s ease-in-out',
-                    zIndex: 1050,
+                    zIndex: isMobile ? 1045 : 10,
                     height: '100vh',
                     flexShrink: 0
                 }}

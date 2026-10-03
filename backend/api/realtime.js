@@ -24,7 +24,13 @@ function broadcast(event, data, targetEmail = null, targetRoles = null) {
             .map(r => String(r).toLowerCase().replace(/[\s_]+/g, ''));
     }
 
+    const deadClients = [];
     clients.forEach(client => {
+        if (!client.res || client.res.writableEnded || client.res.destroyed) {
+            deadClients.push(client);
+            return;
+        }
+
         const clientEmail = (client.userEmail || '').toLowerCase().trim();
         const clientRole = (client.role || '').toLowerCase().replace(/[\s_]+/g, '');
 
@@ -44,8 +50,12 @@ function broadcast(event, data, targetEmail = null, targetRoles = null) {
             client.res.write(message);
         } catch (err) {
             console.error('[Realtime Broadcast Error]', err.message);
+            deadClients.push(client);
         }
     });
+
+    // Clean up any stale sockets
+    deadClients.forEach(c => clients.delete(c));
 }
 
 // 1. GET /api/realtime/stream -> Connect to real-time event stream
@@ -58,7 +68,8 @@ router.get('/realtime/stream', (req, res) => {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache, no-transform',
         'Connection': 'keep-alive',
-        'Access-Control-Allow-Origin': '*'
+        'Access-Control-Allow-Origin': '*',
+        'X-Accel-Buffering': 'no'
     });
 
     res.flushHeaders?.();
@@ -69,14 +80,20 @@ router.get('/realtime/stream', (req, res) => {
     console.log(`[Realtime Stream] Client connected: ${userEmail || 'Anonymous'} (Role: ${role || 'guest'}). Total active: ${clients.size}`);
 
     // Send initial connection greeting
-    res.write(`event: connected\ndata: ${JSON.stringify({ message: 'Connected to Doc Dental Real-time Stream', timestamp: new Date().toISOString() })}\n\n`);
+    res.write(`event: connected\ndata: ${JSON.stringify({ message: 'Connected to CarePlus Multi-Branch Central Real-time Stream', timestamp: new Date().toISOString() })}\n\n`);
 
     // Keep connection alive with heartbeat ping every 25 seconds
     const pingInterval = setInterval(() => {
         try {
+            if (res.writableEnded || res.destroyed) {
+                clearInterval(pingInterval);
+                clients.delete(clientRecord);
+                return;
+            }
             res.write(': keepalive\n\n');
         } catch (e) {
             clearInterval(pingInterval);
+            clients.delete(clientRecord);
         }
     }, 25000);
 

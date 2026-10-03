@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
-import { getDatabase, getPricelist, loadAllProfilePics, readDatabase, readSession } from './utils/storage';
+import { getDatabase, getPricelist, loadAllProfilePics, readDatabase, readSession, subscribeToRealtimeDb } from './utils/storage';
 
 // AUTH PAGES
 import Login from './pages/auth/Login';
@@ -49,6 +49,10 @@ function App() {
     if (cachedDb && cachedDb.users && cachedDb.users.length > 0) {
       setLoading(false);
     }
+
+    // Connect active real-time SSE listener and BroadcastChannel
+    const session = readSession();
+    subscribeToRealtimeDb(session?.email || '', session?.role || '');
 
     const safetyTimer = setTimeout(() => {
       setLoading(false);

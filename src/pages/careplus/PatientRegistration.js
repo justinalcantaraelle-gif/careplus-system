@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import {
@@ -145,7 +146,7 @@ const PatientRegistration = () => {
     };
 
     return (
-        <div className="container-fluid p-3 p-md-4 animate__animated animate__fadeIn">
+        <div className="container-fluid p-3 p-md-4">
             {/* Header Banner */}
             <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 p-4 rounded-4 shadow-sm bg-white border">
                 <div>
@@ -285,8 +286,8 @@ const PatientRegistration = () => {
             </div>
 
             {/* Modal: Register Patient */}
-            {showRegisterModal && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+            {showRegisterModal && createPortal(
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.65)', zIndex: 9999 }}>
                     <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
                         <div className="modal-content rounded-4 border-0 shadow">
                             <div className="modal-header bg-primary text-white py-3">
@@ -467,12 +468,13 @@ const PatientRegistration = () => {
                             </form>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Modal: Patient Chart Details */}
-            {selectedPatientDetails && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1050 }}>
+            {selectedPatientDetails && createPortal(
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.65)', zIndex: 9999 }}>
                     <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
                         <div className="modal-content rounded-4 border-0 shadow">
                             <div className="modal-header bg-light border-bottom py-3">
@@ -570,7 +572,8 @@ const PatientRegistration = () => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );

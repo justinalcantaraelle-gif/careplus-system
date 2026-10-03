@@ -6,7 +6,7 @@ import {
     RiBuilding4Line, RiStethoscopeLine, RiFlaskLine, RiMoneyDollarCircleLine,
     RiUserHeartLine, RiUserLine, RiKey2Line
 } from 'react-icons/ri';
-import { readDatabase, writeDatabase, writeSession, getDatabase, getApiBaseUrl, setAuthToken } from '../../utils/storage';
+import { readDatabase, writeDatabase, writeSession, getDatabase, getApiBaseUrl, setAuthToken, subscribeToRealtimeDb } from '../../utils/storage';
 import { INITIAL_CAREPLUS_USERS, CLINIC_BRANCHES } from '../../utils/careplusData';
 import { addAuditLog } from '../../services/auditLogger';
 
@@ -115,6 +115,9 @@ const Login = ({ mode = 'patient' }) => {
             ...loggedInUser,
             name: loggedInUser.fullName || loggedInUser.email
         });
+
+        // Initialize user-specific real-time event stream
+        subscribeToRealtimeDb(loggedInUser.email, loggedInUser.role);
 
         addAuditLog('User Login', `${loggedInUser.fullName} (${loggedInUser.role}) logged in at ${loggedInUser.branch || 'CarePlus'}`);
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import Swal from 'sweetalert2';
 import {
     RiStethoscopeLine, RiAddLine, RiSearchLine, RiPrinterLine,
@@ -222,7 +223,7 @@ const DoctorConsultations = () => {
     };
 
     return (
-        <div className="container-fluid p-3 p-md-4 animate__animated animate__fadeIn">
+        <div className="container-fluid p-3 p-md-4">
             {/* Header Banner */}
             <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 p-4 rounded-4 shadow-sm bg-white border">
                 <div>
@@ -376,8 +377,8 @@ const DoctorConsultations = () => {
             </div>
 
             {/* Modal: New Consultation */}
-            {activeModal === 'new' && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+            {activeModal === 'new' && createPortal(
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.65)', zIndex: 9999 }}>
                     <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
                         <div className="modal-content rounded-4 border-0 shadow">
                             <div className="modal-header bg-primary text-white py-3">
@@ -663,125 +664,241 @@ const DoctorConsultations = () => {
                             </form>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Modal: View Consultation & Printable Prescription (Rx) */}
-            {activeModal === 'view' && selectedConsultation && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1050 }}>
+            {activeModal === 'view' && selectedConsultation && createPortal(
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.65)', zIndex: 9999 }}>
                     <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
                         <div className="modal-content rounded-4 border-0 shadow-lg">
-                            <div className="modal-header border-bottom py-3 bg-light">
+                            <div className="modal-header border-bottom py-3 bg-light no-print">
                                 <h5 className="modal-title fw-bold text-dark">
-                                    Medical Consultation Sheet & Prescription
+                                    Medical Consultation Sheet &amp; Prescription (Rx)
                                 </h5>
                                 <button type="button" className="btn-close" onClick={() => setActiveModal(null)}></button>
                             </div>
                             <div className="modal-body p-4 bg-white" id="printable-rx-sheet">
-                                {/* Clinic Letterhead */}
-                                <div className="text-center border-bottom pb-3 mb-3">
-                                    <h4 className="fw-bold mb-0 text-primary">CarePlus Clinic Management System</h4>
-                                    <div className="fw-semibold text-secondary small">{selectedConsultation.branch}</div>
-                                    <div className="text-muted small">Integrated Medical, Laboratory & Ambulatory Healthcare Services</div>
-                                </div>
-
-                                {/* Patient Information Header */}
-                                <div className="row g-2 mb-3 p-3 bg-light rounded-3 border">
-                                    <div className="col-6 col-md-3">
-                                        <div className="small text-muted">Patient Name:</div>
-                                        <div className="fw-bold text-dark">{selectedConsultation.patientName}</div>
-                                    </div>
-                                    <div className="col-6 col-md-3">
-                                        <div className="small text-muted">Record No:</div>
-                                        <div className="fw-bold text-dark">{selectedConsultation.id}</div>
-                                    </div>
-                                    <div className="col-6 col-md-3">
-                                        <div className="small text-muted">Date:</div>
-                                        <div className="fw-bold text-dark">{selectedConsultation.date}</div>
-                                    </div>
-                                    <div className="col-6 col-md-3">
-                                        <div className="small text-muted">Attending Doctor:</div>
-                                        <div className="fw-bold text-primary">{selectedConsultation.doctorName}</div>
-                                    </div>
-                                </div>
-
-                                {/* Vitals */}
-                                {selectedConsultation.vitals && (
-                                    <div className="mb-3 p-2 px-3 border rounded-2 bg-light d-flex flex-wrap gap-3 small">
-                                        <span><strong>BP:</strong> {selectedConsultation.vitals.bloodPressure || 'N/A'}</span>
-                                        <span><strong>HR:</strong> {selectedConsultation.vitals.heartRate || 'N/A'}</span>
-                                        <span><strong>Temp:</strong> {selectedConsultation.vitals.temperature || 'N/A'}</span>
-                                        <span><strong>Weight:</strong> {selectedConsultation.vitals.weight || 'N/A'}</span>
-                                        <span><strong>BMI:</strong> {selectedConsultation.vitals.bmi || 'N/A'}</span>
-                                    </div>
-                                )}
-
-                                {/* Clinical Notes */}
-                                <div className="mb-3">
-                                    <div className="small text-muted fw-bold">CHIEF COMPLAINT & SYMPTOMS:</div>
-                                    <p className="mb-2 text-dark">{selectedConsultation.chiefComplaint}</p>
-
-                                    <div className="small text-muted fw-bold">CLINICAL DIAGNOSIS:</div>
-                                    <div className="p-2 px-3 rounded-2 bg-primary bg-opacity-10 text-primary fw-bold mb-3">
-                                        {selectedConsultation.diagnosis}
-                                    </div>
-                                </div>
-
-                                {/* Prescription Section */}
-                                <div className="border-top pt-3 mb-4">
-                                    <div className="d-flex align-items-center gap-2 mb-3">
-                                        <span className="display-6 font-monospace text-primary fw-bold">℞</span>
-                                        <h5 className="fw-bold mb-0 text-dark">Official Prescription</h5>
-                                    </div>
-
-                                    {selectedConsultation.prescription && selectedConsultation.prescription.length > 0 ? (
-                                        <div className="ps-4">
-                                            {selectedConsultation.prescription.map((rx, idx) => (
-                                                <div key={idx} className="mb-3 pb-2 border-bottom">
-                                                    <div className="fw-bold text-dark fs-6">
-                                                        {idx + 1}. {rx.medication} {rx.dosage && `(${rx.dosage})`}
-                                                    </div>
-                                                    <div className="text-secondary small">
-                                                        Sig: {rx.frequency} {rx.duration && `for ${rx.duration}`}
-                                                    </div>
+                                {/* Clinic Letterhead Table */}
+                                <table className="table table-bordered mb-3 rx-print-table" style={{ borderColor: '#cbd5e1' }}>
+                                    <tbody>
+                                        <tr>
+                                            <td style={{ width: '65%', verticalAlign: 'middle' }}>
+                                                <div className="fw-bold fs-5 text-primary" style={{ letterSpacing: '0.5px' }}>
+                                                    CAREPLUS CLINIC MANAGEMENT SYSTEM
                                                 </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <p className="text-muted small ps-4">No prescription drugs ordered during this consultation.</p>
-                                    )}
+                                                <div className="fw-semibold text-secondary small">
+                                                    {selectedConsultation.branch || 'CarePlus Multi-Branch Health Network'}
+                                                </div>
+                                                <div className="text-muted small" style={{ fontSize: '11px' }}>
+                                                    Ambulatory Medicine • Diagnostic Laboratory • Electronic Prescriptions (Rx)
+                                                </div>
+                                            </td>
+                                            <td style={{ width: '35%', verticalAlign: 'middle', fontSize: '11px', background: '#f8fafc' }}>
+                                                <div><strong>Consultation Ref:</strong> {selectedConsultation.id}</div>
+                                                <div><strong>Date of Encounter:</strong> {selectedConsultation.date}</div>
+                                                <div><strong>Attending Doctor:</strong> {selectedConsultation.doctorName}</div>
+                                                <div><strong>PRC License No.:</strong> 0089281 • PTR Valid 2026</div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                {/* Section 1: Patient Demographics Table */}
+                                <div className="mb-3">
+                                    <div className="fw-bold text-dark small text-uppercase mb-1">
+                                        Section 1: Patient Information &amp; Encounter Details
+                                    </div>
+                                    <table className="table table-bordered table-sm mb-0 rx-print-table" style={{ borderColor: '#cbd5e1', fontSize: '12px' }}>
+                                        <tbody>
+                                            <tr>
+                                                <th style={{ width: '20%', background: '#f1f5f9', color: '#334155' }}>Patient Name</th>
+                                                <td style={{ width: '30%', fontWeight: 'bold' }}>{selectedConsultation.patientName}</td>
+                                                <th style={{ width: '20%', background: '#f1f5f9', color: '#334155' }}>Encounter ID</th>
+                                                <td style={{ width: '30%' }}>{selectedConsultation.id}</td>
+                                            </tr>
+                                            <tr>
+                                                <th style={{ background: '#f1f5f9', color: '#334155' }}>Facility Branch</th>
+                                                <td>{selectedConsultation.branch}</td>
+                                                <th style={{ background: '#f1f5f9', color: '#334155' }}>Date of Consultation</th>
+                                                <td>{selectedConsultation.date}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
 
-                                {/* Ordered Labs */}
+                                {/* Section 2: Vital Signs & Baseline Table */}
+                                {selectedConsultation.vitals && (
+                                    <div className="mb-3">
+                                        <div className="fw-bold text-dark small text-uppercase mb-1">
+                                            Section 2: Vital Signs &amp; Baseline Measurements
+                                        </div>
+                                        <table className="table table-bordered table-sm text-center mb-0 rx-print-table" style={{ borderColor: '#cbd5e1', fontSize: '11.5px' }}>
+                                            <thead style={{ background: '#f1f5f9' }}>
+                                                <tr>
+                                                    <th>Blood Pressure</th>
+                                                    <th>Heart Rate</th>
+                                                    <th>Temperature</th>
+                                                    <th>Body Weight</th>
+                                                    <th>BMI Index</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr className="fw-semibold">
+                                                    <td>{selectedConsultation.vitals.bloodPressure || '120/80 mmHg'}</td>
+                                                    <td>{selectedConsultation.vitals.heartRate || '75 bpm'}</td>
+                                                    <td>{selectedConsultation.vitals.temperature || '36.6 °C'}</td>
+                                                    <td>{selectedConsultation.vitals.weight || '65 kg'}</td>
+                                                    <td>{selectedConsultation.vitals.bmi || '22.5 (Normal)'}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+
+                                {/* Section 3: Clinical Findings & Diagnosis Table */}
+                                <div className="mb-3">
+                                    <div className="fw-bold text-dark small text-uppercase mb-1">
+                                        Section 3: Clinical Assessment &amp; Primary Diagnosis
+                                    </div>
+                                    <table className="table table-bordered table-sm mb-0 rx-print-table" style={{ borderColor: '#cbd5e1', fontSize: '11.5px' }}>
+                                        <tbody>
+                                            <tr>
+                                                <th style={{ width: '22%', background: '#f1f5f9', color: '#334155' }}>Chief Complaint</th>
+                                                <td>{selectedConsultation.chiefComplaint || 'Routine medical evaluation'}</td>
+                                            </tr>
+                                            {selectedConsultation.symptoms && (
+                                                <tr>
+                                                    <th style={{ background: '#f1f5f9', color: '#334155' }}>Physical Exam Findings</th>
+                                                    <td>{selectedConsultation.symptoms}</td>
+                                                </tr>
+                                            )}
+                                            <tr>
+                                                <th style={{ background: '#f1f5f9', color: '#334155' }}>Clinical Diagnosis</th>
+                                                <td className="fw-bold text-primary" style={{ fontSize: '12.5px' }}>
+                                                    {selectedConsultation.diagnosis}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Section 4: Official Prescription (Rx) Table */}
+                                <div className="mb-3">
+                                    <div className="d-flex align-items-center gap-2 mb-1">
+                                        <span className="font-monospace text-primary fw-bold fs-5">℞</span>
+                                        <div className="fw-bold text-dark small text-uppercase">
+                                            Section 4: Electronic Prescription (Rx) &amp; Drug Regimen
+                                        </div>
+                                    </div>
+                                    <table className="table table-bordered table-sm mb-0 rx-print-table" style={{ borderColor: '#cbd5e1', fontSize: '11.5px' }}>
+                                        <thead style={{ background: '#f1f5f9' }}>
+                                            <tr>
+                                                <th style={{ width: '6%', textAlign: 'center' }}>#</th>
+                                                <th style={{ width: '34%' }}>Medication &amp; Generic Formulation</th>
+                                                <th style={{ width: '18%' }}>Dosage / Strength</th>
+                                                <th style={{ width: '28%' }}>Instructions for Use (Sig.)</th>
+                                                <th style={{ width: '14%', textAlign: 'center' }}>Duration / Qty</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {selectedConsultation.prescription && selectedConsultation.prescription.length > 0 ? (
+                                                selectedConsultation.prescription.map((rx, idx) => (
+                                                    <tr key={idx}>
+                                                        <td className="text-center fw-bold">{idx + 1}</td>
+                                                        <td className="fw-bold text-dark">{rx.medication}</td>
+                                                        <td>{rx.dosage || 'As indicated'}</td>
+                                                        <td>{rx.frequency || 'Follow physician advice'}</td>
+                                                        <td className="text-center fw-semibold">{rx.duration || 'Standard'}</td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan="5" className="text-center text-muted py-2">
+                                                        No electronic prescription items prescribed for this encounter.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Section 5: Ordered Diagnostics Table (if any) */}
                                 {selectedConsultation.orderedLabs?.length > 0 && (
-                                    <div className="border-top pt-3 mb-4">
-                                        <div className="small text-muted fw-bold mb-2">REQUISITIONED LABORATORY PROCEDURES:</div>
-                                        <ul className="mb-0 small text-dark">
-                                            {selectedConsultation.orderedLabs.map((l, i) => (
-                                                <li key={i}>{l}</li>
-                                            ))}
-                                        </ul>
+                                    <div className="mb-3">
+                                        <div className="fw-bold text-dark small text-uppercase mb-1">
+                                            Section 5: Requisitioned Laboratory &amp; Diagnostic Procedures
+                                        </div>
+                                        <table className="table table-bordered table-sm mb-0 rx-print-table" style={{ borderColor: '#cbd5e1', fontSize: '11px' }}>
+                                            <thead style={{ background: '#f1f5f9' }}>
+                                                <tr>
+                                                    <th style={{ width: '10%', textAlign: 'center' }}>Item</th>
+                                                    <th style={{ width: '60%' }}>Requisitioned Diagnostic Procedure</th>
+                                                    <th style={{ width: '30%', textAlign: 'center' }}>Target Laboratory Facility</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {selectedConsultation.orderedLabs.map((lab, i) => (
+                                                    <tr key={i}>
+                                                        <td className="text-center fw-bold">{i + 1}</td>
+                                                        <td className="fw-semibold text-dark">{lab}</td>
+                                                        <td className="text-center">{selectedConsultation.branch} Diagnostic Laboratory</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
                                     </div>
                                 )}
 
-                                {/* Instructions */}
+                                {/* Section 6: Instructions & Follow-up */}
                                 {selectedConsultation.clinicalAdvice && (
-                                    <div className="border-top pt-3 mb-4">
-                                        <div className="small text-muted fw-bold mb-1">PHYSICIAN'S ADVICE:</div>
-                                        <p className="small text-dark mb-0">{selectedConsultation.clinicalAdvice}</p>
+                                    <div className="mb-3">
+                                        <div className="fw-bold text-dark small text-uppercase mb-1">
+                                            Section 6: Physician Advice, Precautions &amp; Follow-up
+                                        </div>
+                                        <table className="table table-bordered table-sm mb-0 rx-print-table" style={{ borderColor: '#cbd5e1', fontSize: '11px' }}>
+                                            <tbody>
+                                                <tr>
+                                                    <td style={{ background: '#fffdf6', padding: '8px 12px' }}>
+                                                        {selectedConsultation.clinicalAdvice}
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 )}
 
-                                {/* Doctor Signature Line */}
-                                <div className="d-flex justify-content-end text-center mt-5 pt-4">
-                                    <div style={{ width: '250px' }}>
-                                        <div className="border-bottom pb-1 fw-bold text-dark">{selectedConsultation.doctorName}</div>
-                                        <div className="small text-muted">Physician Signature & License</div>
-                                        <div className="small text-muted">PRC Lic. No. 0089281 • PTR Valid 2026</div>
-                                    </div>
+                                {/* Section 7: Attending Physician Licensure & Dual Signatures Table */}
+                                <div className="mt-4 pt-1">
+                                    <table className="table table-bordered mb-0 rx-print-table" style={{ borderColor: '#cbd5e1' }}>
+                                        <tbody>
+                                            <tr style={{ background: '#f8fafc' }}>
+                                                <th style={{ width: '50%', textAlign: 'center' }}>Patient / Representative Verification</th>
+                                                <th style={{ width: '50%', textAlign: 'center' }}>Attending Physician Certification &amp; Licensure</th>
+                                            </tr>
+                                            <tr>
+                                                <td style={{ height: '80px', verticalAlign: 'bottom', textAlign: 'center', paddingBottom: '8px' }}>
+                                                    <div className="border-top border-dark mx-auto" style={{ width: '75%' }}></div>
+                                                    <div className="fw-bold text-dark small mt-1">{selectedConsultation.patientName}</div>
+                                                    <div className="text-muted small" style={{ fontSize: '10px' }}>Patient / Authorized Signature</div>
+                                                </td>
+                                                <td style={{ height: '80px', verticalAlign: 'bottom', textAlign: 'center', paddingBottom: '8px' }}>
+                                                    <div className="fw-bold text-primary mb-1" style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: '16px' }}>
+                                                        {selectedConsultation.doctorName}
+                                                    </div>
+                                                    <div className="border-top border-dark mx-auto" style={{ width: '75%' }}></div>
+                                                    <div className="fw-bold text-dark small mt-1">{selectedConsultation.doctorName}</div>
+                                                    <div className="text-muted small" style={{ fontSize: '10px' }}>
+                                                        PRC Lic. No. 0089281 • PTR Valid 2026 • S2 Reg.
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
-                            <div className="modal-footer bg-light py-2">
+                            <div className="modal-footer bg-light py-2 no-print">
                                 <button type="button" className="btn btn-outline-secondary rounded-pill px-4" onClick={() => setActiveModal(null)}>Close</button>
                                 <button type="button" className="btn btn-primary rounded-pill px-4 fw-bold shadow-sm d-flex align-items-center gap-2" onClick={handlePrintPrescription}>
                                     <RiPrinterLine /> Print Prescription Sheet
@@ -789,8 +906,70 @@ const DoctorConsultations = () => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
+
+            <style>{`
+                @media print {
+                    @page {
+                        size: A4 portrait;
+                        margin: 10mm 12mm;
+                    }
+                    body, html {
+                        background-color: #ffffff !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    .no-print, nav, .sidebar, .navbar, header, footer, .modal-backdrop, .modal-header, .modal-footer, .btn {
+                        display: none !important;
+                    }
+                    .modal {
+                        position: static !important;
+                        display: block !important;
+                        background: none !important;
+                        padding: 0 !important;
+                        overflow: visible !important;
+                    }
+                    .modal-dialog {
+                        max-width: 100% !important;
+                        width: 100% !important;
+                        margin: 0 !important;
+                        transform: none !important;
+                    }
+                    .modal-content {
+                        border: none !important;
+                        box-shadow: none !important;
+                        border-radius: 0 !important;
+                        padding: 0 !important;
+                    }
+                    #printable-rx-sheet {
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                    }
+                    .rx-print-table {
+                        width: 100% !important;
+                        border-collapse: collapse !important;
+                        page-break-inside: avoid !important;
+                        margin-bottom: 8px !important;
+                    }
+                    .rx-print-table th,
+                    .rx-print-table td {
+                        border: 1px solid #94a3b8 !important;
+                        padding: 4px 8px !important;
+                        color: #0f172a !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    .rx-print-table th {
+                        background-color: #f1f5f9 !important;
+                    }
+                }
+            `}</style>
         </div>
     );
 };

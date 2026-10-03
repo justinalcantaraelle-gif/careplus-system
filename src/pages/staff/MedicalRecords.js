@@ -622,14 +622,15 @@ const MedicalRecords = () => {
 
         const medicalHistoryRows = Object.entries(record)
             .filter(([key]) => key.startsWith('q'))
-            .map(([key, value]) => {
+            .map(([key, value], idx) => {
                 const isYes = value === 'Yes' || value === true;
                 const displayVal = isYes ? 'Yes' : (value === 'No' || value === false ? 'No' : String(value || 'N/A'));
                 return `
-                    <div class="history-row">
-                        <span>${escapeHtml(formatLabel(key))}</span>
-                        <strong>${escapeHtml(displayVal)}</strong>
-                    </div>
+                    <tr>
+                        <td style="text-align: center; font-weight: bold; width: 8%;">${idx + 1}</td>
+                        <td style="width: 72%;">${escapeHtml(formatLabel(key))}</td>
+                        <td style="text-align: center; width: 20%; font-weight: bold; color: ${isYes ? '#dc2626' : '#166534'};">${escapeHtml(displayVal)}</td>
+                    </tr>
                 `;
             })
             .join('');
@@ -763,70 +764,57 @@ const MedicalRecords = () => {
                         .title { font-size: 12px; font-weight: 700; margin: 2px 0; }
                         .muted { color: #666; }
                         h3 {
-                            color: #b8860b;
+                            color: #0369a1;
                             font-size: 11px;
-                            margin: 15px 0 6px;
+                            margin: 14px 0 6px;
                             text-transform: uppercase;
-                            border-bottom: 1px dashed #ddd;
+                            border-bottom: 1.5px solid #cbd5e1;
                             padding-bottom: 3px;
-                        }
-                        .grid {
-                            display: grid;
-                            grid-template-columns: repeat(3, 1fr);
-                            gap: 6px;
-                        }
-                        .field {
-                            border: 1px solid #ddd;
-                            border-radius: 4px;
-                            padding: 5px 6px;
-                            min-height: 34px;
-                        }
-                        .field.full { grid-column: 1 / -1; }
-                        .label {
-                            display: block;
-                            color: #777;
-                            font-size: 8px;
                             font-weight: 700;
-                            text-transform: uppercase;
-                            margin-bottom: 2px;
                         }
-                        .history-box {
-                            border: 1px solid #ddd;
-                            border-radius: 4px;
-                            padding: 8px;
-                            columns: 2;
-                            column-gap: 15px;
-                        }
-                        .history-row {
-                            display: flex;
-                            justify-content: space-between;
-                            gap: 8px;
-                            border-bottom: 1px solid #eee;
-                            padding: 3px 0;
-                            break-inside: avoid;
+                        .record-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-bottom: 10px;
                             page-break-inside: avoid;
                         }
-                        .history-row:last-child { border-bottom: 0; }
+                        .record-table th,
+                        .record-table td {
+                            border: 1px solid #94a3b8;
+                            padding: 4px 8px;
+                            font-size: 9.5px;
+                            vertical-align: middle;
+                        }
+                        .record-table th {
+                            background-color: #f1f5f9;
+                            color: #1e293b;
+                            font-weight: 700;
+                            text-transform: uppercase;
+                            font-size: 8.5px;
+                        }
                         .conditions-table {
                             width: 100%;
                             border-collapse: collapse;
-                            border: 1px solid #ddd;
+                            border: 1px solid #94a3b8;
+                            margin-bottom: 10px;
                         }
                         .conditions-table th,
                         .conditions-table td {
-                            border: 1px solid #ddd;
-                            padding: 5px 6px;
+                            border: 1px solid #94a3b8;
+                            padding: 4px 8px;
                             text-align: left;
-                            vertical-align: top;
+                            vertical-align: middle;
+                            font-size: 9.5px;
                         }
                         .conditions-table th {
-                            background: #f8f4e8;
-                            color: #6f5200;
-                            font-size: 8px;
+                            background: #f1f5f9;
+                            color: #1e293b;
+                            font-size: 8.5px;
                             text-transform: uppercase;
+                            font-weight: 700;
                         }
                         .condition-number {
-                            width: 42px;
+                            width: 38px;
                             text-align: center;
                             font-weight: 700;
                         }
@@ -904,7 +892,7 @@ const MedicalRecords = () => {
                         .xray-print-title {
                             font-size: 9.5px;
                             font-weight: bold;
-                            color: #b8860b;
+                            color: #0369a1;
                         }
                         .xray-print-notes {
                             font-size: 8px;
@@ -919,80 +907,187 @@ const MedicalRecords = () => {
                     <!-- DOCUMENT 1: Patient Informed Consent -->
                     ${showConsent ? `
                     <div class="page ${isMultiDoc ? 'page-break' : ''}">
-                        <div class="header">
-                            <img class="logo" src="${escapeHtml(logo)}" alt="Doc Dental Logo" />
-                            <h1 class="clinic">Doc Dental Care</h1>
-                            <div class="title">Patient Informed Consent</div>
-                            <div class="muted">${isMultiDoc ? 'Document 1 of 4 &bull; ' : ''}Printed on ${escapeHtml(new Date().toLocaleDateString())}</div>
-                        </div>
+                        <table class="record-table" style="margin-bottom: 12px;">
+                            <tbody>
+                                <tr>
+                                    <td style="width: 15%; text-align: center; vertical-align: middle; background: #f8fafc;">
+                                        <img src="${escapeHtml(logo)}" alt="CarePlus Logo" style="max-height: 52px; max-width: 100%; object-fit: contain;" />
+                                    </td>
+                                    <td style="width: 55%; vertical-align: middle;">
+                                        <div style="font-size: 16px; font-weight: 800; color: #0369a1;">CAREPLUS CLINIC MANAGEMENT SYSTEM</div>
+                                        <div style="font-size: 11px; font-weight: 600; color: #475569;">Department of Dental Medicine &amp; Clinical Healthcare</div>
+                                        <div style="font-size: 9px; color: #64748b;">Patient Informed Consent &amp; Clinical Authorization Record</div>
+                                    </td>
+                                    <td style="width: 30%; font-size: 9px; background: #f8fafc; vertical-align: middle;">
+                                        <div><strong>Document Type:</strong> Form CP-CNS-01</div>
+                                        <div><strong>Encounter Status:</strong> ${record.hasConsented ? 'AUTHORIZED & VALID' : 'PENDING SIGNATURE'}</div>
+                                        <div><strong>Date Issued:</strong> ${escapeHtml(new Date().toLocaleDateString())}</div>
+                                        <div><strong>Page:</strong> ${isMultiDoc ? 'Document 1 of 4' : 'Single Document'}</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                        <h3>Consent Information</h3>
-                        <div class="grid">
-                            <div class="field"><span class="label">Patient Name</span>${escapeHtml(patientName)}</div>
-                            <div class="field"><span class="label">Email Address</span>${escapeHtml(selectedPatient.email)}</div>
-                            <div class="field"><span class="label">Contact No.</span>${escapeHtml(contactNo)}</div>
-                            <div class="field"><span class="label">Consent Status</span><strong>${record.hasConsented ? 'SIGNED & AGREED' : 'PENDING SIGNATURE / UNSIGNED'}</strong></div>
-                            <div class="field"><span class="label">Date Signed</span>${escapeHtml(record.consentTimestamp || 'N/A')}</div>
-                            <div class="field"><span class="label">Recorded By Clinic</span>${escapeHtml(record.recordedByClinic ? 'Yes (Clinical File)' : 'No (Patient Profile)')}</div>
-                        </div>
+                        <h3>Section 1: Patient Demographics &amp; Consent Profile</h3>
+                        <table class="record-table">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 20%;">Patient Full Name</th>
+                                    <td style="width: 30%; font-weight: bold;">${escapeHtml(patientName)}</td>
+                                    <th style="width: 20%;">Patient Email</th>
+                                    <td style="width: 30%;">${escapeHtml(selectedPatient.email)}</td>
+                                </tr>
+                                <tr>
+                                    <th>Contact Telephone</th>
+                                    <td>${escapeHtml(contactNo)}</td>
+                                    <th>Consent Status</th>
+                                    <td style="font-weight: bold; color: ${record.hasConsented ? '#166534' : '#b91c1c'};">
+                                        ${record.hasConsented ? 'SIGNED & DIGITALLY VERIFIED' : 'PENDING SIGNATURE'}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Date Signed</th>
+                                    <td>${escapeHtml(record.consentTimestamp || 'N/A')}</td>
+                                    <th>Archive Record</th>
+                                    <td>${escapeHtml(record.recordedByClinic ? 'Recorded by Clinical Desk' : 'Self-Submitted Patient Profile')}</td>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                        <div class="consent-text-box" style="border: 1px solid #d4af37; border-left: 5px solid #b8860b; border-radius: 4px; padding: 12px 15px; margin-top: 15px; margin-bottom: 20px; font-size: 9px; line-height: 1.4; color: #444; background: #fffdf6;">
-                            <h4 style="margin-top:0; color:#b8860b; font-size:10px; font-weight:bold; text-transform:uppercase; margin-bottom: 6px;">Consent Agreement Terms</h4>
-                            <p style="margin-bottom: 8px;">I understand and consent to have any treatment done by the dentist after the procedure, the risk and benefits and costs have been fully explained. These treatment include cleaning, periodontal treatment, fillings, crowns, bridges, and all type of restorations, root canal treatment, dentures, local anaesthetics, surgical cases, and orthodontic treatment.</p>
-                            <p style="margin-bottom: 8px;">I understand that dentistry is not science and no dentist can properly guarantee accurate results all the time.</p>
-                            <p style="margin-bottom: 8px;">I hereby authorised any of the doctors/dental auxiliaries to proceed with and perform the dental restorations and treatments as explained to me. I understand that these are subject to modification depending on the undiagnosable circumstances that may arise during the course of treatment.</p>
-                            <p style="margin-bottom:0;">All treatment are properly explained to me and any untold circumstances that arise during the procedure, the attending dentist will not be held liable since it is my free will, full trust and confidence in him/her.</p>
-                        </div>
+                        <h3>Section 2: Scope of Treatment &amp; Informed Consent Terms</h3>
+                        <table class="record-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 25%;">Clinical Category</th>
+                                    <th style="width: 63%;">Scope &amp; Clinical Disclosures</th>
+                                    <th style="width: 12%; text-align: center;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="font-weight: 600;">Dental Restorations &amp; Care</td>
+                                    <td>I consent to dental procedures including cleaning, periodontal therapy, restorations, crowns, bridges, dentures, root canal, extractions, and orthodontics as explained.</td>
+                                    <td style="text-align: center; font-weight: bold; color: #166534;">AGREED</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: 600;">Biological Variables</td>
+                                    <td>I understand that clinical dentistry and surgery involve biological variables and individual physiological responses. No clinician can guarantee exact results at all times.</td>
+                                    <td style="text-align: center; font-weight: bold; color: #166534;">AGREED</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: 600;">Procedural Modification</td>
+                                    <td>I authorize attending clinicians and auxiliaries to modify dental treatments depending on undiagnosable conditions that arise during active care.</td>
+                                    <td style="text-align: center; font-weight: bold; color: #166534;">AGREED</td>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                        <div style="text-align: center; margin-top: 30px;">
-                            <div style="display: inline-block;">
-                                <div style="border-bottom: 2px solid #222; width: 260px; height: 80px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 5px; background: #fafafa;">
-                                     ${record.signature 
-                                         ? ((record.signature.startsWith('data:') || record.signature.startsWith('http'))
-                                             ? `<img src="${record.signature}" style="max-height: 75px; max-width: 100%; object-fit: contain;" />`
-                                             : `<span style="font-family: 'Brush Script MT', cursive, sans-serif; font-size: 28px; font-weight: bold; color: #155724; font-style: italic;">${record.signature}</span>`)
-                                         : `<span style="color:#aaa; font-style:italic; font-size:9px; margin-bottom: 10px;">Awaiting Digital Signature</span>`
-                                     }
-                                </div>
-                                <span style="font-weight: bold; color: #555; font-size: 9px; text-transform: uppercase; display: block; text-align: center;">Signature of Patient</span>
-                            </div>
-                        </div>
+                        <h3>Section 3: Verification &amp; Official Signatures</h3>
+                        <table class="record-table" style="margin-top: 15px;">
+                            <tbody>
+                                <tr style="background: #f8fafc;">
+                                    <th style="width: 50%; text-align: center;">Patient / Authorized Representative</th>
+                                    <th style="width: 50%; text-align: center;">Attending Dental Clinician / Witness</th>
+                                </tr>
+                                <tr>
+                                    <td style="height: 70px; vertical-align: bottom; text-align: center; padding-bottom: 6px;">
+                                        <div style="min-height: 40px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 2px;">
+                                            ${record.signature 
+                                                ? ((record.signature.startsWith('data:') || record.signature.startsWith('http'))
+                                                    ? `<img src="${record.signature}" style="max-height: 45px; max-width: 85%; object-fit: contain;" />`
+                                                    : `<span style="font-family: 'Brush Script MT', cursive, sans-serif; font-size: 22px; font-weight: bold; color: #155724; font-style: italic;">${record.signature}</span>`)
+                                                : `<span style="color:#aaa; font-style:italic; font-size:8px;">Awaiting Digital Signature</span>`
+                                            }
+                                        </div>
+                                        <div style="border-top: 1px solid #111; width: 75%; margin: 0 auto;"></div>
+                                        <div style="font-weight: bold; font-size: 9.5px; margin-top: 2px;">${escapeHtml(patientName)}</div>
+                                        <div style="font-size: 8px; color: #64748b;">Signature of Patient • Verified Electronic Consent</div>
+                                    </td>
+                                    <td style="height: 70px; vertical-align: bottom; text-align: center; padding-bottom: 6px;">
+                                        <div style="min-height: 40px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 2px;">
+                                            <span style="font-family: 'Brush Script MT', cursive, sans-serif; font-size: 20px; font-weight: bold; color: #0369a1; font-style: italic;">Dr. Elena Cruz, DMD</span>
+                                        </div>
+                                        <div style="border-top: 1px solid #111; width: 75%; margin: 0 auto;"></div>
+                                        <div style="font-weight: bold; font-size: 9.5px; margin-top: 2px;">Dr. Elena Cruz, DMD / Attending Dentist</div>
+                                        <div style="font-size: 8px; color: #64748b;">PRC Lic. No. 0089281 • CarePlus Multi-Branch Clinical Archive</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>` : ''}
 
                     <!-- DOCUMENT 2: Patient Medical Record -->
                     ${showMedical ? `
                     <div class="page ${isMultiDoc ? 'page-break' : ''}">
-                        <div class="header">
-                            <img class="logo" src="${escapeHtml(logo)}" alt="Doc Dental Logo" />
-                            <h1 class="clinic">Doc Dental Care</h1>
-                            <div class="title">Patient Medical Record</div>
-                            <div class="muted">${isMultiDoc ? 'Document 2 of 4 &bull; ' : ''}Printed on ${escapeHtml(new Date().toLocaleDateString())}</div>
-                        </div>
+                        <table class="record-table" style="margin-bottom: 12px;">
+                            <tbody>
+                                <tr>
+                                    <td style="width: 15%; text-align: center; vertical-align: middle; background: #f8fafc;">
+                                        <img src="${escapeHtml(logo)}" alt="CarePlus Logo" style="max-height: 52px; max-width: 100%; object-fit: contain;" />
+                                    </td>
+                                    <td style="width: 55%; vertical-align: middle;">
+                                        <div style="font-size: 16px; font-weight: 800; color: #0369a1;">CAREPLUS CLINIC MANAGEMENT SYSTEM</div>
+                                        <div style="font-size: 11px; font-weight: 600; color: #475569;">Official Patient Medical Health History &amp; Clinical Folder</div>
+                                        <div style="font-size: 9px; color: #64748b;">Comprehensive Systematic Review &amp; Identified Conditions</div>
+                                    </td>
+                                    <td style="width: 30%; font-size: 9px; background: #f8fafc; vertical-align: middle;">
+                                        <div><strong>Folder ID:</strong> MED-REC-${String(selectedPatient.id || '101').slice(-5)}</div>
+                                        <div><strong>Date Generated:</strong> ${escapeHtml(new Date().toLocaleDateString())}</div>
+                                        <div><strong>Classification:</strong> Confidential Clinical Record</div>
+                                        <div><strong>Page:</strong> ${isMultiDoc ? 'Document 2 of 4' : 'Single Document'}</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                        <h3>Patient Information</h3>
-                        <div class="grid">
-                            <div class="field"><span class="label">Full Name</span>${escapeHtml(patientName)}</div>
-                            <div class="field"><span class="label">Email Address</span>${escapeHtml(selectedPatient.email)}</div>
-                            <div class="field"><span class="label">Sex</span>${escapeHtml(record.sex || selectedPatient.sex || 'Not provided')}</div>
-                            <div class="field"><span class="label">Birthday</span>${escapeHtml(record.birthday || selectedPatient.birthday || 'Not provided')}</div>
-                            <div class="field"><span class="label">Age</span>${escapeHtml(record.age || selectedPatient.age || 'Not provided')}</div>
-                            <div class="field"><span class="label">Contact No.</span>${escapeHtml(contactNo)}</div>
-                            <div class="field full"><span class="label">Home Address</span>${escapeHtml(record.homeAddress || record.address || selectedPatient.address || 'Not provided')}</div>
-                            <div class="field"><span class="label">Religion</span>${escapeHtml(record.religion || 'Not provided')}</div>
-                            <div class="field"><span class="label">Nationality</span>${escapeHtml(record.nationality || 'Not provided')}</div>
-                        </div>
+                        <h3>Section 1: Patient Demographic &amp; Registration Particulars</h3>
+                        <table class="record-table">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 18%;">Patient Full Name</th>
+                                    <td style="width: 32%; font-weight: bold;">${escapeHtml(patientName)}</td>
+                                    <th style="width: 18%;">Email Address</th>
+                                    <td style="width: 32%;">${escapeHtml(selectedPatient.email)}</td>
+                                </tr>
+                                <tr>
+                                    <th>Gender / Sex</th>
+                                    <td>${escapeHtml(record.sex || selectedPatient.sex || 'Not provided')}</td>
+                                    <th>Date of Birth / Age</th>
+                                    <td>${escapeHtml(record.birthday || selectedPatient.birthday || 'N/A')} (${escapeHtml(record.age || selectedPatient.age || 'N/A')} yrs old)</td>
+                                </tr>
+                                <tr>
+                                    <th>Contact Telephone</th>
+                                    <td>${escapeHtml(contactNo)}</td>
+                                    <th>Civil / Nationality</th>
+                                    <td>${escapeHtml(record.nationality || 'Filipino')} • ${escapeHtml(record.religion || 'Not provided')}</td>
+                                </tr>
+                                <tr>
+                                    <th>Residential Address</th>
+                                    <td colspan="3">${escapeHtml(record.homeAddress || record.address || selectedPatient.address || 'Not provided')}</td>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                        <h3>Medical History</h3>
-                        <div class="history-box">
-                            ${medicalHistoryRows || '<span class="muted">No medical history answers found.</span>'}
-                        </div>
+                        <h3>Section 2: Systematic Medical History Review Checklist</h3>
+                        <table class="record-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 8%; text-align: center;">Item</th>
+                                    <th style="width: 72%;">Medical Condition / Health Assessment Question</th>
+                                    <th style="width: 20%; text-align: center;">Clinical Response</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${medicalHistoryRows || '<tr><td colspan="3" style="text-align:center; color:#999;">No medical history entries found.</td></tr>'}
+                            </tbody>
+                        </table>
 
-                        <h3>Identified Conditions</h3>
+                        <h3>Section 3: Identified Medical Conditions &amp; Clinical Alerts</h3>
                         <table class="conditions-table">
                             <thead>
                                 <tr>
                                     <th class="condition-number">No.</th>
-                                    <th>Condition / Details</th>
+                                    <th>Identified Clinical Condition / Patient Details</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1004,27 +1099,58 @@ const MedicalRecords = () => {
                     <!-- DOCUMENT 3: Intraoral Dental Chart -->
                     ${showChart ? `
                     <div class="page ${isMultiDoc ? 'page-break' : ''}">
-                        <div class="header">
-                            <img class="logo" src="${escapeHtml(logo)}" alt="Doc Dental Logo" />
-                            <h1 class="clinic">Doc Dental Care</h1>
-                            <div class="title">Intraoral Dental Chart & Examination</div>
-                            <div class="muted">${isMultiDoc ? 'Document 3 of 4 &bull; ' : ''}Printed on ${escapeHtml(new Date().toLocaleDateString())}</div>
-                        </div>
+                        <table class="record-table" style="margin-bottom: 12px;">
+                            <tbody>
+                                <tr>
+                                    <td style="width: 15%; text-align: center; vertical-align: middle; background: #f8fafc;">
+                                        <img src="${escapeHtml(logo)}" alt="CarePlus Logo" style="max-height: 52px; max-width: 100%; object-fit: contain;" />
+                                    </td>
+                                    <td style="width: 55%; vertical-align: middle;">
+                                        <div style="font-size: 16px; font-weight: 800; color: #0369a1;">CAREPLUS CLINIC MANAGEMENT SYSTEM</div>
+                                        <div style="font-size: 11px; font-weight: 600; color: #475569;">Intraoral Dental Chart &amp; Clinical Odontogram</div>
+                                        <div style="font-size: 9px; color: #64748b;">Tooth-by-Tooth Diagnostic Status &amp; Treatment Assessment</div>
+                                    </td>
+                                    <td style="width: 30%; font-size: 9px; background: #f8fafc; vertical-align: middle;">
+                                        <div><strong>Chart Reference:</strong> DNT-${String(selectedPatient.id || '101').slice(-5)}</div>
+                                        <div><strong>Exam Date:</strong> ${escapeHtml(dentalChart.lastExamDate || 'No exam recorded')}</div>
+                                        <div><strong>Page:</strong> ${isMultiDoc ? 'Document 3 of 4' : 'Single Document'}</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                        <h3>Examination Overview</h3>
-                        <div class="grid">
-                            <div class="field"><span class="label">Patient Name</span>${escapeHtml(patientName)}</div>
-                            <div class="field"><span class="label">Last Exam Date</span>${escapeHtml(dentalChart.lastExamDate || 'No exam recorded')}</div>
-                            <div class="field"><span class="label">Dental Health Status</span><strong>${escapeHtml(dentalHealthStatus)}</strong> - ${escapeHtml(dentalHealthDesc)}</div>
-                            <div class="field"><span class="label">Braces Clearance</span><strong>${dentalChart.clearedForBraces ? 'Cleared for Braces' : 'Not Cleared'}</strong></div>
-                            <div class="field"><span class="label">Braces Color Selected</span><strong>${escapeHtml(bracesColor)}</strong></div>
-                            <div class="field"><span class="label">Contact No.</span>${escapeHtml(contactNo)}</div>
-                        </div>
+                        <h3>Section 1: Dental Examination Overview</h3>
+                        <table class="record-table">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 20%;">Patient Full Name</th>
+                                    <td style="width: 30%; font-weight: bold;">${escapeHtml(patientName)}</td>
+                                    <th style="width: 20%;">Dental Health Status</th>
+                                    <td style="width: 30%; font-weight: bold; color: ${cariesCount === 0 ? '#166534' : '#b91c1c'};">
+                                        ${escapeHtml(dentalHealthStatus)} (${escapeHtml(dentalHealthDesc)})
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Braces Clearance</th>
+                                    <td style="font-weight: bold; color: ${dentalChart.clearedForBraces ? '#166534' : '#b91c1c'};">
+                                        ${dentalChart.clearedForBraces ? 'CLEARED FOR ORTHODONTICS' : 'NOT CLEARED'}
+                                    </td>
+                                    <th>Selected Braces Color</th>
+                                    <td style="font-weight: bold;">${escapeHtml(bracesColor)}</td>
+                                </tr>
+                                <tr>
+                                    <th>Contact Telephone</th>
+                                    <td>${escapeHtml(contactNo)}</td>
+                                    <th>Last Examination Date</th>
+                                    <td>${escapeHtml(dentalChart.lastExamDate || 'N/A')}</td>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                        <h3>Intraoral Teeth Status</h3>
-                        <div class="chart-canvas-container" style="border: 1px solid #ddd; border-radius: 4px; padding: 20px 10px; margin-top: 10px; margin-bottom: 15px; text-align: center; background: #fffdf8;">
+                        <h3>Section 2: Intraoral Teeth Status</h3>
+                        <div class="chart-canvas-container" style="border: 1px solid #cbd5e1; border-radius: 4px; padding: 15px 10px; margin-top: 8px; margin-bottom: 12px; text-align: center; background: #fffdf8;">
                             <!-- Upper teeth -->
-                            <div class="teeth-row-print" style="display: flex; justify-content: center; margin-bottom: 20px;">
+                            <div class="teeth-row-print" style="display: flex; justify-content: center; margin-bottom: 15px;">
                                 ${upperTeethHtml}
                             </div>
                             <!-- Lower teeth -->
@@ -1033,7 +1159,7 @@ const MedicalRecords = () => {
                             </div>
                         </div>
 
-                        <h3>Clinical Status Legend</h3>
+                        <h3>Section 3: Clinical Status Legend</h3>
                         <div class="legend-grid-print">
                             ${legendItemsHtml}
                         </div>
@@ -1042,36 +1168,73 @@ const MedicalRecords = () => {
                     <!-- DOCUMENT 4: Dental X-Rays & Radiographs -->
                     ${showXray ? `
                     <div class="page">
-                        <div class="header">
-                            <img class="logo" src="${escapeHtml(logo)}" alt="Doc Dental Logo" />
-                            <h1 class="clinic">Doc Dental Care</h1>
-                            <div class="title">Dental X-Rays & Radiographs Diagnostic Report</div>
-                            <div class="muted">${isMultiDoc ? 'Document 4 of 4 &bull; ' : ''}Printed on ${escapeHtml(new Date().toLocaleDateString())}</div>
-                        </div>
+                        <table class="record-table" style="margin-bottom: 12px;">
+                            <tbody>
+                                <tr>
+                                    <td style="width: 15%; text-align: center; vertical-align: middle; background: #f8fafc;">
+                                        <img src="${escapeHtml(logo)}" alt="CarePlus Logo" style="max-height: 52px; max-width: 100%; object-fit: contain;" />
+                                    </td>
+                                    <td style="width: 55%; vertical-align: middle;">
+                                        <div style="font-size: 16px; font-weight: 800; color: #0369a1;">CAREPLUS CLINIC MANAGEMENT SYSTEM</div>
+                                        <div style="font-size: 11px; font-weight: 600; color: #475569;">Dental Radiographs &amp; Diagnostic Scans Diagnostic Report</div>
+                                        <div style="font-size: 9px; color: #64748b;">Department of Clinical Radiology &amp; Diagnostic Imaging</div>
+                                    </td>
+                                    <td style="width: 30%; font-size: 9px; background: #f8fafc; vertical-align: middle;">
+                                        <div><strong>Imaging ID:</strong> RAD-${String(selectedPatient.id || '101').slice(-5)}</div>
+                                        <div><strong>Total Scans:</strong> ${xrays.length} Scan${xrays.length === 1 ? '' : 's'}</div>
+                                        <div><strong>Page:</strong> ${isMultiDoc ? 'Document 4 of 4' : 'Single Document'}</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                        <h3>Diagnostic Imaging Overview</h3>
-                        <div class="grid">
-                            <div class="field"><span class="label">Patient Name</span>${escapeHtml(patientName)}</div>
-                            <div class="field"><span class="label">Email Address</span>${escapeHtml(selectedPatient.email)}</div>
-                            <div class="field"><span class="label">Contact No.</span>${escapeHtml(contactNo)}</div>
-                            <div class="field"><span class="label">Total Scans on File</span><strong>${xrays.length} Scan${xrays.length === 1 ? '' : 's'}</strong></div>
-                            <div class="field"><span class="label">Latest Scan Date</span>${escapeHtml(xrays[0]?.date || dentalChart.lastExamDate || 'N/A')}</div>
-                            <div class="field"><span class="label">Imaging Status</span><strong>${xrays.length > 0 ? 'Diagnostic Scans Available' : 'No Scans Uploaded'}</strong></div>
-                        </div>
+                        <h3>Section 1: Diagnostic Imaging Overview</h3>
+                        <table class="record-table">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 20%;">Patient Full Name</th>
+                                    <td style="width: 30%; font-weight: bold;">${escapeHtml(patientName)}</td>
+                                    <th style="width: 20%;">Email Address</th>
+                                    <td style="width: 30%;">${escapeHtml(selectedPatient.email)}</td>
+                                </tr>
+                                <tr>
+                                    <th>Contact Telephone</th>
+                                    <td>${escapeHtml(contactNo)}</td>
+                                    <th>Total Scans on File</th>
+                                    <td style="font-weight: bold;">${xrays.length} Scan${xrays.length === 1 ? '' : 's'}</td>
+                                </tr>
+                                <tr>
+                                    <th>Latest Scan Date</th>
+                                    <td>${escapeHtml(xrays[0]?.date || dentalChart.lastExamDate || 'N/A')}</td>
+                                    <th>Radiology Status</th>
+                                    <td style="font-weight: bold; color: ${xrays.length > 0 ? '#166534' : '#64748b'};">
+                                        ${xrays.length > 0 ? 'Diagnostic Scans Available' : 'No Scans Uploaded'}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                        <h3>Dental Radiographs & Diagnostic Scans</h3>
+                        <h3>Section 2: Dental Radiographs &amp; Diagnostic Scans</h3>
                         ${xraysHtml}
 
-                        <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #ddd; display: flex; justify-content: space-between; align-items: flex-end;">
-                            <div style="font-size: 8px; color: #777;">
-                                Doc Dental Care Clinical Diagnostic Archive<br />
-                                Confidential Medical Dental Record &bull; Radiographic Assessment
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="border-bottom: 1px solid #333; width: 200px; height: 35px;"></div>
-                                <span style="font-size: 8px; font-weight: bold; color: #444; text-transform: uppercase;">Attending Dentist / Radiologist</span>
-                            </div>
-                        </div>
+                        <table class="record-table" style="margin-top: 25px; page-break-inside: avoid;">
+                            <tbody>
+                                <tr style="background: #f8fafc;">
+                                    <th style="width: 50%; text-align: center;">Clinical Diagnostic Archive Stamp</th>
+                                    <th style="width: 50%; text-align: center;">Attending Dentist / Radiologist Certification</th>
+                                </tr>
+                                <tr>
+                                    <td style="height: 60px; vertical-align: middle; text-align: center; font-size: 8.5px; color: #64748b;">
+                                        CarePlus Clinical Diagnostic Archive • Confidential Medical Radiographic Assessment
+                                    </td>
+                                    <td style="height: 60px; vertical-align: bottom; text-align: center; padding-bottom: 6px;">
+                                        <div style="border-top: 1px solid #111; width: 75%; margin: 0 auto;"></div>
+                                        <div style="font-weight: bold; font-size: 9.5px; margin-top: 2px;">Attending Dentist / Radiologist</div>
+                                        <div style="font-size: 8px; color: #64748b;">CarePlus Multi-Branch Clinical Network</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>` : ''}
                 </body>
             </html>
@@ -1273,7 +1436,7 @@ const MedicalRecords = () => {
             </div>
 
             {selectedPatient && (
-                <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3" style={{ backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1050 }}>
+                <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3" style={{ backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 2000 }}>
                     <div className="card border-0 shadow-lg w-100 animate__animated animate__zoomIn" style={{ maxWidth: '900px', borderRadius: '25px', maxHeight: '90vh', overflowY: 'auto', backgroundColor: theme.cardBg }}>
                         
                         <div className="card-header border-0 p-4 pb-2 d-flex justify-content-between align-items-center sticky-top shadow-sm no-print" style={{ backgroundColor: theme.cardBg }}>

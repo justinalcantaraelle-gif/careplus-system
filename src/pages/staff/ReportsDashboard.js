@@ -117,68 +117,114 @@ const ReportsDashboard = () => {
                 <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; font-size: 12px; font-weight: 600;">${appt.date || ''} | ${appt.time || ''}</td>
                 <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; font-size: 12px; font-weight: bold; color: #111827;">${appt.patientName || appt.fullName || appt.name || 'Patient'}</td>
                 <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; font-size: 12px; color: #4b5563;">${appt.service || appt.treatment || 'General Consultation'}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; font-size: 12px; text-align: center;">${(appt.status === 'Done' || appt.status === 'Completed') ? '<span style="color: #059669; font-weight: 600;">Completed</span>' : '<span style="color: #6b7280;">Pending</span>'}</td>
-                <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center;">
-                    <span style="padding: 4px 10px; border-radius: 9999px; background: ${(appt.status === 'Done' || appt.status === 'Completed') ? '#D1FAE5' : appt.status === 'Approved' ? '#D4EFDF' : appt.status === 'Cancelled' ? '#FADBD8' : '#FEF3C7'}; font-size: 10px; font-weight: bold; color: #111827;">${(appt.status || '').toUpperCase()}</span>
+                <td style="padding: 8px 10px; border: 1px solid #cbd5e1; font-size: 11px; text-align: center;">${(appt.status === 'Done' || appt.status === 'Completed') ? '<span style="color: #059669; font-weight: bold;">Completed</span>' : '<span style="color: #64748b;">Pending</span>'}</td>
+                <td style="padding: 8px 10px; border: 1px solid #cbd5e1; text-align: center;">
+                    <span style="padding: 3px 8px; border-radius: 4px; background: ${(appt.status === 'Done' || appt.status === 'Completed') ? '#dcfce7; color: #166534;' : appt.status === 'Approved' ? '#e0f2fe; color: #0369a1;' : appt.status === 'Cancelled' ? '#fee2e2; color: #991b1b;' : '#fef3c7; color: #92400e;'}; font-size: 10px; font-weight: bold;">${(appt.status || 'PENDING').toUpperCase()}</span>
                 </td>
             </tr>
         `).join('');
+
+        const completionRate = summary.total > 0 ? ((summary.done / summary.total) * 100).toFixed(1) : '0.0';
+        const pendingCount = Math.max(0, summary.total - summary.done);
 
         return `
             <!DOCTYPE html>
             <html>
             <head>
-                <title>CarePlus Clinic - Performance & Operations Report</title>
+                <title>CarePlus Clinic - Clinical Performance &amp; Operations Report</title>
                 <style>
-                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 30px; color: #1f2937; line-height: 1.5; background: #ffffff; }
-                    .header { text-align: center; border-bottom: 2px solid #0284c7; padding-bottom: 15px; margin-bottom: 20px; }
-                    .header h1 { color: #0369a1; margin: 0 0 5px 0; font-size: 26px; font-weight: 800; letter-spacing: 1px; }
-                    .header .period { background-color: #f0f9ff; display: inline-block; padding: 6px 18px; border-radius: 6px; font-size: 13px; font-weight: 600; color: #0369a1; margin-top: 8px; }
-                    .meta { display: flex; justify-content: space-between; font-size: 11px; color: #4b5563; margin-top: 15px; border-top: 1px solid #f3f4f6; padding-top: 10px; }
-                    .summary-grid { display: flex; gap: 15px; margin: 20px 0; }
-                    .summary-card { flex: 1; padding: 12px 18px; background: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb; }
-                    .summary-card .label { font-size: 10px; text-transform: uppercase; color: #6b7280; font-weight: bold; margin-bottom: 4px; }
-                    .summary-card .val { font-size: 22px; font-weight: 800; color: #111827; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-                    th { background-color: #f9fafb; text-align: left; padding: 10px; font-size: 10px; text-transform: uppercase; color: #6b7280; font-weight: bold; border-bottom: 1.5px solid #e5e7eb; }
+                    @page { size: A4 landscape; margin: 12mm 15mm; }
+                    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 20px; color: #0f172a; line-height: 1.4; background: #ffffff; font-size: 12px; }
+                    .rpt-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+                    .rpt-table th, .rpt-table td { border: 1px solid #94a3b8; padding: 6px 10px; vertical-align: middle; }
+                    .rpt-table th { background-color: #f1f5f9; color: #334155; font-size: 11px; text-transform: uppercase; font-weight: bold; }
                     @media print {
-                        body { margin: 15px; }
+                        body { margin: 0; }
+                        .rpt-table th { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; background-color: #f1f5f9 !important; }
                     }
                 </style>
             </head>
             <body>
-                <div class="header">
-                    <h1>CAREPLUS CLINIC MANAGEMENT SYSTEM</h1>
-                    <div class="period">Clinical Report: ${fromDate} to ${toDate}</div>
-                    <div class="meta">
-                        <span><strong>Issued By:</strong> ${session.fullName || session.name || 'Authorized Personnel'}</span>
-                        <span><strong>Generated Date:</strong> ${new Date().toLocaleDateString()}</span>
-                    </div>
-                </div>
+                <!-- Header Table -->
+                <table class="rpt-table">
+                    <tbody>
+                        <tr>
+                            <td style="width: 65%;">
+                                <div style="font-size: 20px; font-weight: 800; color: #0369a1; letter-spacing: 0.5px;">CAREPLUS CLINIC MANAGEMENT SYSTEM</div>
+                                <div style="font-weight: 600; color: #475569; font-size: 13px;">Clinical Operations &amp; Appointment Performance Analytics</div>
+                                <div style="font-size: 11px; color: #64748b;">Integrated Multi-Branch Healthcare Network • Performance &amp; Audit Trail</div>
+                            </td>
+                            <td style="width: 35%; background: #f8fafc; font-size: 11px;">
+                                <div><strong>Reporting Period:</strong> ${fromDate} to ${toDate}</div>
+                                <div><strong>Generated By:</strong> ${session.fullName || session.name || 'Authorized Clinical Staff'}</div>
+                                <div><strong>Generation Date:</strong> ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</div>
+                                <div><strong>Classification:</strong> Official Operational Record</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
 
-                <div class="summary-grid">
-                    <div class="summary-card">
-                        <div class="label">Total Appointments</div>
-                        <div class="val">${summary.total}</div>
-                    </div>
-                    <div class="summary-card">
-                        <div class="label">Completed Transactions</div>
-                        <div class="val">${summary.done}</div>
-                    </div>
+                <!-- Executive Summary Table -->
+                <div style="font-weight: bold; font-size: 11.5px; text-transform: uppercase; margin-bottom: 5px; color: #0369a1;">
+                    Executive Summary &amp; Key Performance Indicators (KPI)
                 </div>
-
-                <table>
+                <table class="rpt-table" style="text-align: center;">
                     <thead>
                         <tr>
-                            <th>Date & Time</th>
-                            <th>Patient Name</th>
-                            <th>Treatment</th>
-                            <th style="text-align: center;">Completed Transaction</th>
-                            <th style="text-align: center;">Status</th>
+                            <th style="width: 25%;">Total Appointments</th>
+                            <th style="width: 25%;">Completed Transactions</th>
+                            <th style="width: 25%;">Pending / In-Progress</th>
+                            <th style="width: 25%;">Clinical Completion Rate</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${rowsHtml || '<tr><td colSpan="5" style="text-align:center; padding: 30px; color: #9ca3af;">No appointments found for the selected period.</td></tr>'}
+                        <tr style="font-size: 16px; font-weight: bold;">
+                            <td style="color: #0369a1;">${summary.total}</td>
+                            <td style="color: #166534;">${summary.done}</td>
+                            <td style="color: #d97706;">${pendingCount}</td>
+                            <td style="color: #166534;">${completionRate}%</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Detailed Records Table -->
+                <div style="font-weight: bold; font-size: 11.5px; text-transform: uppercase; margin-bottom: 5px; color: #0369a1;">
+                    Detailed Clinical Appointment &amp; Encounter Ledger (${filteredAppointments.length} Record${filteredAppointments.length === 1 ? '' : 's'})
+                </div>
+                <table class="rpt-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 18%;">Date &amp; Time</th>
+                            <th style="width: 28%;">Patient Name &amp; Contact</th>
+                            <th style="width: 26%;">Service / Treatment Category</th>
+                            <th style="width: 14%; text-align: center;">Transaction Status</th>
+                            <th style="width: 14%; text-align: center;">Clinical Attendance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rowsHtml || '<tr><td colspan="5" style="text-align:center; padding: 25px; color: #94a3b8;">No appointment records found for the selected reporting period.</td></tr>'}
+                    </tbody>
+                </table>
+
+                <!-- Attestation Signatures Table -->
+                <table class="rpt-table" style="margin-top: 25px; page-break-inside: avoid;">
+                    <tbody>
+                        <tr style="background: #f8fafc;">
+                            <th style="width: 50%; text-align: center;">Prepared &amp; Verified By</th>
+                            <th style="width: 50%; text-align: center;">Medical Director / Clinical Operations Endorsement</th>
+                        </tr>
+                        <tr>
+                            <td style="height: 65px; vertical-align: bottom; text-align: center; padding-bottom: 8px;">
+                                <div style="border-top: 1px solid #0f172a; width: 70%; margin: 0 auto;"></div>
+                                <div style="font-weight: bold; font-size: 11.5px; margin-top: 4px;">${session.fullName || session.name || 'Authorized Staff'}</div>
+                                <div style="font-size: 10px; color: #64748b;">Clinical Operations &amp; Records Officer</div>
+                            </td>
+                            <td style="height: 65px; vertical-align: bottom; text-align: center; padding-bottom: 8px;">
+                                <div style="border-top: 1px solid #0f172a; width: 70%; margin: 0 auto;"></div>
+                                <div style="font-weight: bold; font-size: 11.5px; margin-top: 4px;">Dr. Elena Cruz, MD / Medical Director</div>
+                                <div style="font-size: 10px; color: #64748b;">CarePlus Multi-Branch Clinical Governance</div>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </body>
@@ -190,14 +236,7 @@ const ReportsDashboard = () => {
         addAuditLog('Printed Performance Report', `Printed clinic performance report for period ${fromDate} to ${toDate}.`);
         const printHtml = generateReportHtml();
 
-        try {
-            if (window.self === window.top) {
-                window.print();
-                return;
-            }
-        } catch (e) {}
-
-        const printWindow = window.open('', '_blank', 'width=900,height=750');
+        const printWindow = window.open('', '_blank', 'width=950,height=750');
         if (printWindow) {
             printWindow.document.write(printHtml + '<script>window.onload = function() { window.print(); };</script>');
             printWindow.document.close();
@@ -236,21 +275,18 @@ const ReportsDashboard = () => {
         <div className="report-container p-3 p-md-4 p-lg-5 animate__animated animate__fadeIn" style={{ backgroundColor: '#f8fafc', minHeight: '100vh', width: '100%' }}>
             <style>{`
                 @media print {
-                    body { background-color: white !important; -webkit-print-color-adjust: exact; }
-                    body * { visibility: hidden; }
-                    .report-container, .report-container * { visibility: visible; }
+                    @page { size: A4 landscape; margin: 10mm; }
+                    body { background-color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    .d-print-none, nav, .sidebar, .navbar, header, footer, .doc-btn-toolbar, .doc-btn { display: none !important; }
                     .report-container {
-                        position: absolute;
-                        left: 0;
-                        top: 0;
-                        width: 100% !important;
-                        padding: 10mm 15mm !important;
+                        position: static !important;
+                        padding: 0 !important;
                         margin: 0 !important;
                         background-color: white !important;
                     }
-                    .d-print-none { display: none !important; }
-                    .card { border: 1px solid #eee !important; box-shadow: none !important; }
-                    .print-badge { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+                    .card { border: 1px solid #cbd5e1 !important; box-shadow: none !important; }
+                    .table { width: 100% !important; border-collapse: collapse !important; }
+                    .table th, .table td { border: 1px solid #cbd5e1 !important; }
                 }
             `}</style>
 

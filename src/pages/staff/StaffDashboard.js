@@ -322,10 +322,10 @@ const StaffDashboard = () => {
                             <tr>
                                 <th className="ps-3 py-3 fw-medium" style={{ width: '15%' }}>Schedule</th>
                                 <th className="py-3 fw-medium" style={{ width: '22%' }}>Patient Name</th>
-                                <th className="py-3 fw-medium" style={{ width: '20%' }}>Physician &amp; Branch</th>
-                                <th className="py-3 fw-medium" style={{ width: '18%' }}>Service</th>
+                                <th className="py-3 fw-medium" style={{ width: '19%' }}>Physician &amp; Branch</th>
+                                <th className="py-3 fw-medium" style={{ width: '17%' }}>Service</th>
                                 <th className="py-3 fw-medium" style={{ width: '12%' }}>Status</th>
-                                <th className="pe-3 py-3 text-end fw-medium" style={{ width: '13%' }}>Triage Actions</th>
+                                <th className="pe-4 py-3 text-end fw-medium" style={{ width: '15%' }}>Triage Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -370,26 +370,29 @@ const StaffDashboard = () => {
                                                 {app.status || 'Pending'}
                                             </span>
                                         </td>
-                                        <td className="pe-3 py-3 text-end">
-                                            <div className="d-inline-flex align-items-center gap-1">
+                                        <td className="pe-4 py-3 text-end">
+                                            <div className="d-inline-flex align-items-center gap-1.5 justify-content-end">
                                                 <button
                                                     onClick={() => handleTriageAction(app.id, 'Completed')}
-                                                    className="btn btn-sm btn-light border text-success p-1 px-2 rounded-2"
+                                                    className="btn btn-sm btn-light border text-success rounded-2 d-inline-flex align-items-center justify-content-center shadow-none"
                                                     title="Mark Complete"
+                                                    style={{ width: '28px', height: '28px', padding: 0 }}
                                                 >
                                                     <RiCheckDoubleLine size={15} />
                                                 </button>
                                                 <button
                                                     onClick={() => navigate('/staff/consultations')}
-                                                    className="btn btn-sm btn-light border text-primary p-1 px-2 rounded-2"
+                                                    className="btn btn-sm btn-light border text-primary rounded-2 d-inline-flex align-items-center justify-content-center shadow-none"
                                                     title="To Consultation"
+                                                    style={{ width: '28px', height: '28px', padding: 0 }}
                                                 >
                                                     <RiStethoscopeLine size={15} />
                                                 </button>
                                                 <button
                                                     onClick={() => navigate('/staff/laboratory')}
-                                                    className="btn btn-sm btn-light border text-warning p-1 px-2 rounded-2"
+                                                    className="btn btn-sm btn-light border text-warning rounded-2 d-inline-flex align-items-center justify-content-center shadow-none"
                                                     title="To Laboratory"
+                                                    style={{ width: '28px', height: '28px', padding: 0 }}
                                                 >
                                                     <RiFlaskLine size={15} />
                                                 </button>

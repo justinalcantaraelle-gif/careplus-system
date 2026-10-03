@@ -1179,3 +1179,13 @@ a:focus-visible,
   filter: drop-shadow(0 4px 10px rgba(180, 130, 30, 0.25));
   letter-spacing: 0.12em;
 }
+
+/* ==========================================================================
+   GLOBAL MODAL FIX: Ensure all modals render cleanly above Sidebar & Navbar
+   ========================================================================== */
+.modal {
+  z-index: 2000 !important;
+}
+.modal-backdrop {
+  z-index: 1990 !important;
+}

@@ -401,54 +401,171 @@ const MedicalReports = () => {
 
             {/* TAB 3: Official Medical Certificate Generator */}
             {activeTab === 'medicalCert' && activePatient && (
-                <div className="card border-0 shadow-sm rounded-4 p-4 bg-white" style={{ maxWidth: '850px', margin: '0 auto' }}>
-                    <div className="border p-5 rounded-3 bg-white" id="printable-medical-cert">
-                        {/* Clinic Header */}
-                        <div className="text-center border-bottom pb-4 mb-4">
-                            <h3 className="fw-bold text-primary mb-1">CarePlus Clinic Management System</h3>
-                            <div className="fw-semibold text-secondary">{activePatient.branch || 'CarePlus Metro Branch'}</div>
-                            <div className="text-muted small">Outpatient Medical Services, Diagnostic Laboratory & Preventive Health</div>
+                <div className="card border-0 shadow-sm rounded-4 p-4 bg-white" style={{ maxWidth: '920px', margin: '0 auto' }}>
+                    <div className="border p-4 rounded-3 bg-white" id="printable-medical-cert">
+                        {/* Certificate Header Table */}
+                        <table className="table table-bordered mb-3 cert-print-table" style={{ borderColor: '#cbd5e1' }}>
+                            <tbody>
+                                <tr>
+                                    <td style={{ width: '65%', verticalAlign: 'middle' }}>
+                                        <div className="fw-bold fs-5 text-primary" style={{ letterSpacing: '0.5px' }}>
+                                            CAREPLUS CLINIC MANAGEMENT SYSTEM
+                                        </div>
+                                        <div className="fw-semibold text-secondary small">
+                                            {activePatient.branch || 'CarePlus Multi-Branch Clinical Network'}
+                                        </div>
+                                        <div className="text-muted small" style={{ fontSize: '11px' }}>
+                                            Outpatient Healthcare Services • Clinical Diagnostics • Medical Certification
+                                        </div>
+                                    </td>
+                                    <td style={{ width: '35%', verticalAlign: 'middle', fontSize: '11px', background: '#f8fafc' }}>
+                                        <div><strong>Certificate No:</strong> MC-2026-{String(activePatient.id || '101').slice(-5)}</div>
+                                        <div><strong>Date Issued:</strong> {new Date().toLocaleDateString()}</div>
+                                        <div><strong>Attending Doctor:</strong> {patientConsultations[0]?.doctorName || 'Dr. Robert Chen, MD'}</div>
+                                        <div><strong>Validity:</strong> 30 Days from Issuance</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div className="text-center py-2 mb-3 rounded-2" style={{ background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)', color: '#ffffff' }}>
+                            <h5 className="fw-bold mb-0 text-uppercase" style={{ letterSpacing: '1px' }}>
+                                Official Medical Certificate
+                            </h5>
+                            <div className="small opacity-90">Clinical Diagnostic Attestation &amp; Health Evaluation</div>
                         </div>
 
-                        <div className="text-center mb-5">
-                            <h4 className="fw-bold text-dark text-decoration-underline">MEDICAL CERTIFICATE</h4>
-                            <div className="small text-muted">Date of Examination: {new Date().toLocaleDateString()}</div>
-                        </div>
-
-                        <div className="fs-6 text-dark lh-lg mb-5">
-                            <p><strong>TO WHOM IT MAY CONCERN:</strong></p>
-                            <p>
-                                This is to certify that <strong>{activePatient.fullName}</strong>, 
-                                {activePatient.gender || 'Female'}, residing at {activePatient.address || 'Metro City'}, 
-                                was examined and treated at <strong>{activePatient.branch || 'CarePlus Metro Branch'}</strong>.
-                            </p>
-                            <p>
-                                <strong>Clinical Diagnosis:</strong><br />
-                                <span className="p-2 px-3 bg-light rounded border d-inline-block fw-bold text-primary">
-                                    {patientConsultations[0]?.diagnosis || 'Acute Respiratory Infection / Clinically Evaluated and Treated'}
-                                </span>
-                            </p>
-                            <p>
-                                <strong>Physician's Remarks & Recommendation:</strong><br />
-                                {patientConsultations[0]?.clinicalAdvice || 'Patient advised rest for 2 to 3 days, regular hydration, and completion of prescribed oral antibiotic course.'}
-                            </p>
-                            <p className="mt-4">
-                                This certification is issued upon the request of the patient for whatever legal or medical purpose it may serve.
-                            </p>
-                        </div>
-
-                        <div className="d-flex justify-content-end text-center mt-5 pt-4">
-                            <div style={{ width: '280px' }}>
-                                <div className="border-bottom pb-1 fw-bold text-dark">
-                                    {patientConsultations[0]?.doctorName || 'Dr. Robert Chen, MD'}
-                                </div>
-                                <div className="small text-muted">Attending Physician</div>
-                                <div className="small text-muted">PRC Lic. No. 0089281 • S2 Valid 2026</div>
+                        {/* Section 1: Patient Demographics Table */}
+                        <div className="mb-3">
+                            <div className="fw-bold text-dark small text-uppercase mb-1">
+                                Section 1: Patient Demographic &amp; Encounter Verification
                             </div>
+                            <table className="table table-bordered table-sm mb-0 cert-print-table" style={{ borderColor: '#cbd5e1', fontSize: '12px' }}>
+                                <tbody>
+                                    <tr>
+                                        <th style={{ width: '20%', background: '#f1f5f9', color: '#334155' }}>Patient Full Name</th>
+                                        <td style={{ width: '30%', fontWeight: 'bold' }}>{activePatient.fullName}</td>
+                                        <th style={{ width: '20%', background: '#f1f5f9', color: '#334155' }}>Gender / Sex</th>
+                                        <td style={{ width: '30%' }}>{activePatient.gender || 'Not specified'}</td>
+                                    </tr>
+                                    <tr>
+                                        <th style={{ background: '#f1f5f9', color: '#334155' }}>Residential Address</th>
+                                        <td style={{ fontWeight: '500' }}>{activePatient.address || 'Metro City'}</td>
+                                        <th style={{ background: '#f1f5f9', color: '#334155' }}>Clinical Facility</th>
+                                        <td>{activePatient.branch || 'CarePlus Metro Branch'}</td>
+                                    </tr>
+                                    <tr>
+                                        <th style={{ background: '#f1f5f9', color: '#334155' }}>Date of Examination</th>
+                                        <td>{patientConsultations[0]?.date || new Date().toLocaleDateString()}</td>
+                                        <th style={{ background: '#f1f5f9', color: '#334155' }}>Contact Telephone</th>
+                                        <td>{activePatient.phone || activePatient.contact || 'Registered on file'}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Section 2: Clinical Assessment & Diagnosis Table */}
+                        <div className="mb-3">
+                            <div className="fw-bold text-dark small text-uppercase mb-1">
+                                Section 2: Clinical Examination &amp; Official Diagnosis
+                            </div>
+                            <table className="table table-bordered table-sm mb-0 cert-print-table" style={{ borderColor: '#cbd5e1', fontSize: '11.5px' }}>
+                                <tbody>
+                                    <tr>
+                                        <th style={{ width: '24%', background: '#f1f5f9', color: '#334155' }}>Clinical Chief Complaint</th>
+                                        <td style={{ width: '76%' }}>{patientConsultations[0]?.chiefComplaint || 'Consultation and clinical diagnostic assessment'}</td>
+                                    </tr>
+                                    <tr>
+                                        <th style={{ background: '#f1f5f9', color: '#334155' }}>Clinical Examination Findings</th>
+                                        <td>{patientConsultations[0]?.symptoms || 'Patient clinically evaluated with vital signs within acceptable ambulatory limits.'}</td>
+                                    </tr>
+                                    <tr>
+                                        <th style={{ background: '#f1f5f9', color: '#334155' }}>Official Clinical Diagnosis</th>
+                                        <td className="fw-bold text-primary" style={{ fontSize: '12.5px' }}>
+                                            {patientConsultations[0]?.diagnosis || 'Acute Respiratory Infection / Clinically Evaluated and Managed'}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Section 3: Recommendations & Medical Disposition Table */}
+                        <div className="mb-3">
+                            <div className="fw-bold text-dark small text-uppercase mb-1">
+                                Section 3: Medical Disposition &amp; Physician Recommendations
+                            </div>
+                            <table className="table table-bordered table-sm mb-0 cert-print-table" style={{ borderColor: '#cbd5e1', fontSize: '11.5px' }}>
+                                <thead style={{ background: '#f1f5f9' }}>
+                                    <tr>
+                                        <th style={{ width: '30%' }}>Assessment Item</th>
+                                        <th style={{ width: '70%' }}>Physician Instructions &amp; Clinical Direction</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td className="fw-semibold">Recommended Rest Period</td>
+                                        <td className="fw-bold text-dark">
+                                            {patientConsultations[0]?.clinicalAdvice ? 'Rest and Recuperation as indicated' : '2 to 3 Days Convalescence / Rest Advised'}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td className="fw-semibold">Treatment &amp; Pharmacotherapy</td>
+                                        <td>
+                                            {patientConsultations[0]?.clinicalAdvice || 'Complete full prescribed course of oral antibiotics, anti-inflammatory medications, and maintain oral hydration.'}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td className="fw-semibold">Physical Activity Fitness</td>
+                                        <td>Excuse from strenuous physical exertion, contact sports, and prolonged hazardous activities until asymptomatic.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Section 4: Legal Undertaking & Attestation Table */}
+                        <div className="mb-3">
+                            <table className="table table-bordered table-sm mb-0 cert-print-table" style={{ borderColor: '#cbd5e1', fontSize: '10.5px' }}>
+                                <tbody>
+                                    <tr>
+                                        <td style={{ background: '#f8fafc', color: '#475569' }}>
+                                            <strong>Certification Purpose:</strong> This medical certification is issued upon the request of the patient for employment, academic, or personal health documentation purposes and is valid without alteration.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Section 5: Physician Signature Table */}
+                        <div className="mt-4 pt-1">
+                            <table className="table table-bordered mb-0 cert-print-table" style={{ borderColor: '#cbd5e1' }}>
+                                <tbody>
+                                    <tr style={{ background: '#f8fafc' }}>
+                                        <th style={{ width: '50%', textAlign: 'center' }}>Patient / Subject Acknowledgment</th>
+                                        <th style={{ width: '50%', textAlign: 'center' }}>Attending Physician Certification &amp; Licensure</th>
+                                    </tr>
+                                    <tr>
+                                        <td style={{ height: '80px', verticalAlign: 'bottom', textAlign: 'center', paddingBottom: '8px' }}>
+                                            <div className="border-top border-dark mx-auto" style={{ width: '75%' }}></div>
+                                            <div className="fw-bold text-dark small mt-1">{activePatient.fullName}</div>
+                                            <div className="text-muted small" style={{ fontSize: '10px' }}>Patient Signature • Acknowledged Receipt</div>
+                                        </td>
+                                        <td style={{ height: '80px', verticalAlign: 'bottom', textAlign: 'center', paddingBottom: '8px' }}>
+                                            <div className="fw-bold text-primary mb-1" style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: '16px' }}>
+                                                {patientConsultations[0]?.doctorName || 'Dr. Robert Chen, MD'}
+                                            </div>
+                                            <div className="border-top border-dark mx-auto" style={{ width: '75%' }}></div>
+                                            <div className="fw-bold text-dark small mt-1">{patientConsultations[0]?.doctorName || 'Dr. Robert Chen, MD'}</div>
+                                            <div className="text-muted small" style={{ fontSize: '10px' }}>
+                                                Attending Physician • PRC Lic. No. 0089281 • S2 Valid 2026
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
-                    <div className="text-center mt-4">
+                    <div className="text-center mt-4 no-print">
                         <button
                             onClick={() => window.print()}
                             className="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-sm"
@@ -458,6 +575,56 @@ const MedicalReports = () => {
                     </div>
                 </div>
             )}
+
+            <style>{`
+                @media print {
+                    @page {
+                        size: A4 portrait;
+                        margin: 10mm 12mm;
+                    }
+                    body, html {
+                        background-color: #ffffff !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    .no-print, nav, .sidebar, .navbar, header, footer, .nav-pills, .btn {
+                        display: none !important;
+                    }
+                    .card {
+                        border: none !important;
+                        box-shadow: none !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                        max-width: 100% !important;
+                    }
+                    #printable-medical-cert {
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        border: none !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                    }
+                    .cert-print-table {
+                        width: 100% !important;
+                        border-collapse: collapse !important;
+                        page-break-inside: avoid !important;
+                        margin-bottom: 8px !important;
+                    }
+                    .cert-print-table th,
+                    .cert-print-table td {
+                        border: 1px solid #94a3b8 !important;
+                        padding: 4px 8px !important;
+                        color: #0f172a !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    .cert-print-table th {
+                        background-color: #f1f5f9 !important;
+                    }
+                }
+            `}</style>
         </div>
     );
 };

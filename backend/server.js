@@ -18,6 +18,7 @@ const { verifyAuth, requireRole, JWT_SECRET } = require('./middleware/auth');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
+const { router: realtimeRouter, broadcast } = require('./api/realtime');
 
 // Helper for Bcrypt Password Hashing
 const hashPassword = async (plainText) => {
@@ -1033,6 +1034,7 @@ app.post(['/api/sync', '/sync'], verifyAuth, async (req, res) => {
             }
         }
 
+        broadcast('db_updated', { type: 'sync_completed', timestamp: new Date().toISOString() });
         res.json({ success: true, message: 'CarePlus MySQL Database sync completed.' });
     } catch (err) {
         console.error('[Backend API] Error executing MySQL database sync:', err);
@@ -1212,6 +1214,7 @@ app.post(['/api/restore', '/restore'], verifyAuth, requireRole('superadmin', 'ad
                 pricelist: (backupDb.pricelist || []).length
             }
         });
+        broadcast('db_updated', { type: 'database_restored', mode, restoredBy, timestamp: new Date().toISOString() });
     } catch (err) {
         console.error('[Backend API] Error executing Emergency Database Restore:', err);
         res.status(500).json({ success: false, error: err.message });
@@ -1343,6 +1346,7 @@ app.post(['/api/register-patient', '/register-patient'], async (req, res) => {
                 createdAt: createdAt.toISOString()
             }
         });
+        broadcast('db_updated', { type: 'patient_registered', email: emailNorm, timestamp: new Date().toISOString() });
     } catch (err) {
         console.error('[Backend API] Error registering patient in MySQL:', err);
         res.status(500).json({ success: false, error: err.message });
@@ -1376,6 +1380,7 @@ app.post(['/api/pricelist', '/pricelist'], verifyAuth, requireRole('superadmin',
                 VALUES (?, ?, ?, NOW())
             `, [p.category, p.name || p.service || '', String(p.price)]);
         }
+        broadcast('db_updated', { type: 'pricelist_updated', timestamp: new Date().toISOString() });
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -1415,6 +1420,7 @@ app.post(['/api/profile-pic', '/profile-pic'], verifyAuth, async (req, res) => {
             VALUES (?, ?, NOW())
             ON DUPLICATE KEY UPDATE photo_data = VALUES(photo_data), updated_at = NOW()
         `, [email, pic]);
+        broadcast('db_updated', { type: 'profile_pic_updated', email, timestamp: new Date().toISOString() });
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -1479,6 +1485,7 @@ app.delete(['/api/users/:id', '/users/:id'], verifyAuth, requireRole('superadmin
         await mysqlPool.query('DELETE FROM appointments WHERE patient_email = ?', [uEmail]).catch(() => {});
         await mysqlPool.query('DELETE FROM profile_pics WHERE email = ?', [uEmail]).catch(() => {});
 
+        broadcast('db_updated', { type: 'user_deleted', id: uId, email: uEmail, timestamp: new Date().toISOString() });
         res.json({ success: true, message: `User ${uEmail} permanently deleted from MySQL database.` });
     } catch (err) {
         console.error('[Permanent User Deletion Error]:', err);
@@ -1509,6 +1516,7 @@ app.delete(['/api/appointments/:id', '/appointments/:id'], verifyAuth, async (re
         }
 
         await mysqlPool.query('DELETE FROM appointments WHERE id = ?', [id]);
+        broadcast('db_updated', { type: 'appointment_deleted', id, timestamp: new Date().toISOString() });
         res.json({ success: true, message: `Appointment ${id} permanently deleted from MySQL.` });
     } catch (err) {
         console.error('[Delete Appointment Error]:', err);
@@ -1789,7 +1797,6 @@ app.post(['/api/auth/reset-password', '/auth/reset-password'], async (req, res) 
 app.use(['/api', '/'], require('./api/email'));
 
 // 12. Real-Time Event Stream & Broadcast Router
-const { router: realtimeRouter } = require('./api/realtime');
 app.use(['/api', '/'], realtimeRouter);
 
 // 13. Global Centralized Error Handler Middleware

@@ -472,12 +472,13 @@ const Notifications = () => {
         }, 60000);
 
         const handleStorageChange = (e) => {
-            if (!e || !e.key || e.key === 'doc_dental_db') {
+            if (!e || !e.key || e.key === 'doc_dental_db' || e.key === 'careplus_clinic_db') {
                 checkUpdates();
             }
         };
 
         window.addEventListener('storage', handleStorageChange);
+        window.addEventListener('careplus_db_updated', checkUpdates);
         window.addEventListener('doc_dental_db_updated', checkUpdates);
         window.addEventListener('notificationUpdated', checkUpdates);
         window.addEventListener('auditLogsUpdated', checkUpdates);
@@ -487,6 +488,7 @@ const Notifications = () => {
             clearInterval(localInterval);
             clearInterval(remoteInterval);
             window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('careplus_db_updated', checkUpdates);
             window.removeEventListener('doc_dental_db_updated', checkUpdates);
             window.removeEventListener('notificationUpdated', checkUpdates);
             window.removeEventListener('auditLogsUpdated', checkUpdates);

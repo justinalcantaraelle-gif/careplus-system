@@ -13,6 +13,8 @@ let lastSyncedDb = null;
 let pricelistCache = null;
 const picCache = {};
 
+export const REALTIME_SYNC_CHANNEL = 'careplus_realtime_sync';
+
 export const getApiBaseUrl = () => {
     const rawUrl = process.env.REACT_APP_API_URL || process.env.REACT_APP_BACKEND_URL;
     if (rawUrl && !rawUrl.includes('localhost:5000')) {
@@ -419,7 +421,7 @@ export const writeDatabase = async (data) => {
         // Broadcast to other tabs
         try {
             if (typeof BroadcastChannel !== 'undefined') {
-                const bc = new BroadcastChannel('careplus_sync_channel');
+                const bc = new BroadcastChannel(REALTIME_SYNC_CHANNEL);
                 bc.postMessage({ type: 'db_updated', db: finalData });
                 bc.close();
             }
@@ -496,12 +498,13 @@ export const restoreDatabase = async (backupData, mode = 'merge', restoredBy = '
         // Dispatch window event for immediate UI update
         try {
             window.dispatchEvent(new CustomEvent('doc_dental_db_updated', { detail: finalData }));
+            window.dispatchEvent(new CustomEvent('careplus_db_updated', { detail: finalData }));
         } catch (e) {}
 
         // Dispatch cross-tab broadcast
         try {
             if (typeof BroadcastChannel !== 'undefined') {
-                const bc = new BroadcastChannel('doc_dental_sync_channel');
+                const bc = new BroadcastChannel(REALTIME_SYNC_CHANNEL);
                 bc.postMessage({ type: 'db_updated', db: finalData });
                 bc.close();
             }
@@ -602,13 +605,18 @@ export const deleteAppointmentDirectly = async (id) => {
 let broadcastChannel = null;
 try {
     if (typeof BroadcastChannel !== 'undefined') {
-        broadcastChannel = new BroadcastChannel('doc_dental_sync_channel');
+        broadcastChannel = new BroadcastChannel(REALTIME_SYNC_CHANNEL);
         broadcastChannel.onmessage = (event) => {
             if (event.data && event.data.type === 'db_updated' && event.data.db) {
                 dbCache = event.data.db;
                 lastSyncedDb = JSON.parse(JSON.stringify(event.data.db));
+                try {
+                    localStorage.setItem('careplus_clinic_db', JSON.stringify(event.data.db));
+                } catch (e) {}
+                window.dispatchEvent(new CustomEvent('careplus_db_updated', { detail: event.data.db }));
                 window.dispatchEvent(new CustomEvent('doc_dental_db_updated', { detail: event.data.db }));
                 window.dispatchEvent(new CustomEvent('notificationUpdated', { detail: event.data.db }));
+                window.dispatchEvent(new Event('storage'));
             }
         };
     }
@@ -788,25 +796,53 @@ export const clearDatabase = async () => {
 };
 
 let realtimeConnected = false;
+let syncDebounceTimer = null;
 
-export const subscribeToRealtimeDb = () => {
+export const subscribeToRealtimeDb = (userEmail = '', role = '') => {
+    try {
+        connectRealtime(userEmail, role);
+    } catch (e) {
+        console.warn('[Realtime SSE] Error connecting stream:', e);
+    }
+
     if (realtimeConnected) return;
     realtimeConnected = true;
 
     try {
-        connectRealtime();
-        onRealtimeEvent('db_updated', async () => {
-            console.log('[Realtime SSE] Live database change event received');
-            const freshDb = await getDatabase(true);
-            if (freshDb) {
-                window.dispatchEvent(new CustomEvent('doc_dental_db_updated', { detail: freshDb }));
-                window.dispatchEvent(new CustomEvent('notificationUpdated', { detail: freshDb }));
+        onRealtimeEvent('db_updated', async (payload) => {
+            console.log('[Realtime SSE] Live database change event received:', payload);
+            if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+            syncDebounceTimer = setTimeout(async () => {
+                const freshDb = await getDatabase(true);
+                if (freshDb) {
+                    try {
+                        localStorage.setItem('careplus_clinic_db', JSON.stringify(freshDb));
+                    } catch (e) {}
+                    window.dispatchEvent(new CustomEvent('careplus_db_updated', { detail: freshDb }));
+                    window.dispatchEvent(new CustomEvent('doc_dental_db_updated', { detail: freshDb }));
+                    window.dispatchEvent(new CustomEvent('notificationUpdated', { detail: freshDb }));
+                    window.dispatchEvent(new Event('storage'));
+                }
+            }, 200);
+        });
+
+        // Forward server notifications & alerts to window listeners
+        onRealtimeEvent('*', (eventName, payload) => {
+            if (eventName !== 'db_updated' && eventName !== 'connected') {
+                window.dispatchEvent(new CustomEvent(`realtime_${eventName}`, { detail: payload }));
             }
         });
     } catch (e) {
         console.error('[Realtime SSE] Failed to initialize live stream listener:', e);
     }
 };
+
+// Automatically initialize real-time subscription on client load
+if (typeof window !== 'undefined') {
+    try {
+        subscribeToRealtimeDb();
+    } catch (e) {}
+}
 
 export const forceSyncIntraoralCharts = async () => {
     try {
