@@ -1,4 +1,5 @@
 import { connectRealtime, onRealtimeEvent, broadcastRealtimeEvent } from './realtimeClient';
+import { broadcastFirebaseSync, subscribeToFirebaseRealtime } from './firebase';
 import {
     INITIAL_CAREPLUS_USERS,
     INITIAL_CAREPLUS_APPOINTMENTS,
@@ -429,6 +430,10 @@ export const writeDatabase = async (data) => {
 
         // Non-blocking sync to backend
         syncDocDentalDb(finalData, oldState);
+
+        // Global multi-device real-time sync via Firebase
+        broadcastFirebaseSync('db_updated', { type: 'database_write', timestamp: Date.now() });
+
         return true;
     } catch (e) {
         console.error('Error writing to database:', e);
@@ -517,6 +522,12 @@ export const restoreDatabase = async (backupData, mode = 'merge', restoredBy = '
                 mode,
                 restoredBy,
                 timestamp: new Date().toISOString()
+            });
+            broadcastFirebaseSync('db_updated', {
+                type: 'database_restored',
+                mode,
+                restoredBy,
+                timestamp: Date.now()
             });
         } catch (e) {}
 
@@ -831,6 +842,24 @@ export const subscribeToRealtimeDb = (userEmail = '', role = '') => {
             if (eventName !== 'db_updated' && eventName !== 'connected') {
                 window.dispatchEvent(new CustomEvent(`realtime_${eventName}`, { detail: payload }));
             }
+        });
+
+        // Global Realtime Cloud Listener via Firebase Realtime Database
+        subscribeToFirebaseRealtime((payload) => {
+            console.log('[Firebase Realtime] Live cloud synchronization received:', payload);
+            if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+            syncDebounceTimer = setTimeout(async () => {
+                const freshDb = await getDatabase(true);
+                if (freshDb) {
+                    try {
+                        localStorage.setItem('careplus_clinic_db', JSON.stringify(freshDb));
+                    } catch (e) {}
+                    window.dispatchEvent(new CustomEvent('careplus_db_updated', { detail: freshDb }));
+                    window.dispatchEvent(new CustomEvent('doc_dental_db_updated', { detail: freshDb }));
+                    window.dispatchEvent(new CustomEvent('notificationUpdated', { detail: freshDb }));
+                    window.dispatchEvent(new Event('storage'));
+                }
+            }, 200);
         });
     } catch (e) {
         console.error('[Realtime SSE] Failed to initialize live stream listener:', e);
