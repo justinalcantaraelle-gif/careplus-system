@@ -189,7 +189,7 @@ const ReportsDashboard = () => {
 
                 <!-- Detailed Records Table -->
                 <div style="font-weight: bold; font-size: 11.5px; text-transform: uppercase; margin-bottom: 5px; color: #0369a1;">
-                    Detailed Clinical Appointment &amp; Encounter Ledger (${filteredAppointments.length} Record${filteredAppointments.length === 1 ? '' : 's'})
+                    Detailed Clinical Appointment &amp; Encounter Ledger (${searchedAppointments.length} Record${searchedAppointments.length === 1 ? '' : 's'})
                 </div>
                 <table class="rpt-table">
                     <thead>
