@@ -643,15 +643,25 @@ export const getPricelist = async () => {
         if (response.ok) {
             const data = await response.json();
             if (Array.isArray(data) && data.length > 0) {
-                pricelistCache = data;
-                return data;
+                pricelistCache = data.map(item => ({
+                    ...item,
+                    name: item?.name || item?.service || '',
+                    service: item?.service || item?.name || '',
+                    category: item?.category || 'General Services'
+                }));
+                return pricelistCache;
             }
         }
     } catch (e) {
         console.error('Error fetching pricelist from MySQL API:', e);
     }
 
-    pricelistCache = CLINIC_SERVICES_CATALOG;
+    pricelistCache = CLINIC_SERVICES_CATALOG.map(item => ({
+        ...item,
+        name: item?.name || item?.service || '',
+        service: item?.service || item?.name || '',
+        category: item?.category || 'General Services'
+    }));
     return pricelistCache;
 };
 

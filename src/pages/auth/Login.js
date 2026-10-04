@@ -416,8 +416,8 @@ const Login = ({ mode }) => {
                 <div>
                     {/* Brand Header */}
                     <div className="d-flex align-items-center gap-3 mb-4">
-                        <div className="p-2 rounded-3 bg-white bg-opacity-20 backdrop-blur shadow-sm">
-                            <RiBuilding4Line size={32} />
+                        <div className="rounded-3 overflow-hidden bg-white shadow-sm border p-1 d-flex align-items-center justify-content-center" style={{ width: '48px', height: '48px', flexShrink: 0 }}>
+                            <img src="/careplus-logo.png" alt="CarePlus Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                         </div>
                         <div>
                             <span className="badge bg-white bg-opacity-20 text-white rounded-pill px-3 py-1 fw-semibold small">

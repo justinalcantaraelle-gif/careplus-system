@@ -1359,9 +1359,10 @@ app.get(['/api/pricelist', '/pricelist'], async (req, res) => {
         const [rows] = await mysqlPool.query('SELECT * FROM clinic_pricelist ORDER BY category ASC, service ASC');
         const mapped = (rows || []).map(r => ({
             id: r.id,
-            category: r.category,
-            name: r.service,
-            price: r.price
+            category: r.category || 'General Services',
+            service: r.service || '',
+            name: r.service || '',
+            price: r.price !== null && r.price !== undefined ? r.price : ''
         }));
         res.json(mapped);
     } catch (err) {

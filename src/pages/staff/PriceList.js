@@ -8,7 +8,7 @@ import { addAuditLog } from '../../services/auditLogger';
 import { getPricelist, writePricelist } from '../../utils/storage';
 
 const romanToInt = (roman) => {
-    if (!roman) return 0;
+    if (!roman || typeof roman !== 'string') return 0;
     const romanMap = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
     let num = 0;
     for (let i = 0; i < roman.length; i++) {
@@ -21,6 +21,7 @@ const romanToInt = (roman) => {
 };
 
 const getCategorySortValue = (categoryString) => {
+    if (!categoryString || typeof categoryString !== 'string') return Infinity;
     const match = categoryString.match(/^([IVXLCDM]+)[.\s]/i);
     return match ? romanToInt(match[1]) : Infinity;
 };
@@ -51,7 +52,12 @@ const PriceList = () => {
     useEffect(() => {
         const loadPrices = async () => {
             const dbPrices = await getPricelist();
-            setPriceData(Array.isArray(dbPrices) ? dbPrices : []);
+            const normalized = (Array.isArray(dbPrices) ? dbPrices : []).map(p => ({
+                ...p,
+                name: p?.name || p?.service || '',
+                service: p?.service || p?.name || ''
+            }));
+            setPriceData(normalized);
         };
         loadPrices();
 
@@ -64,8 +70,13 @@ const PriceList = () => {
     }, []);
 
     const updateStorage = (newData) => {
-        setPriceData(newData);
-        writePricelist(newData);
+        const normalized = (Array.isArray(newData) ? newData : []).map(p => ({
+            ...p,
+            name: p?.name || p?.service || '',
+            service: p?.service || p?.name || ''
+        }));
+        setPriceData(normalized);
+        writePricelist(normalized);
         window.dispatchEvent(new Event('storage'));
     };
 
@@ -94,7 +105,7 @@ const PriceList = () => {
                     Swal.showValidationMessage('All fields (Category, Name, and Price) are required.');
                     return false;
                 }
-                return { category, name, price };
+                return { category, name, service: name, price };
             }
         }).then((result) => {
             if (result.isConfirmed && result.value) {
@@ -114,13 +125,24 @@ const PriceList = () => {
     };
 
     const handleSaveEdit = (id) => {
-        if (!editForm.name.trim() || !editForm.category.trim() || !editForm.price.trim()) {
+        const trimmedName = (editForm.name || '').trim();
+        const trimmedCategory = (editForm.category || '').trim();
+        const trimmedPrice = String(editForm.price ?? '').trim();
+
+        if (!trimmedName || !trimmedCategory || !trimmedPrice) {
             return Swal.fire('Error', 'Fields cannot be blank.', 'warning');
         }
         const originalItem = priceData.find(item => item.id === id);
-        const updated = priceData.map(item => item.id === id ? { ...item, ...editForm } : item);
+        const updated = priceData.map(item => item.id === id ? { 
+            ...item, 
+            ...editForm, 
+            name: trimmedName, 
+            service: trimmedName,
+            category: trimmedCategory,
+            price: trimmedPrice
+        } : item);
         updateStorage(updated);
-        addAuditLog('Updated Price List Item', `${originalItem?.name || 'Procedure'} updated to ${editForm.name} - ${editForm.price}`);
+        addAuditLog('Updated Price List Item', `${originalItem?.name || originalItem?.service || 'Procedure'} updated to ${trimmedName} - ${trimmedPrice}`);
         setIsEditing(null);
     };
 
@@ -134,9 +156,10 @@ const PriceList = () => {
 
     const handleDelete = (id) => {
         const itemToDelete = priceData.find(item => item.id === id);
+        const procName = itemToDelete?.name || itemToDelete?.service || 'this procedure';
         Swal.fire({
             title: 'Delete Procedure?',
-            text: `Are you sure you want to remove "${itemToDelete?.name || 'this procedure'}" from the pricelist?`,
+            text: `Are you sure you want to remove "${procName}" from the pricelist?`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
@@ -144,7 +167,7 @@ const PriceList = () => {
         }).then((result) => {
             if (result.isConfirmed) {
                 updateStorage(priceData.filter(item => item.id !== id));
-                addAuditLog('Deleted Price List Item', `${itemToDelete?.name || 'Procedure'} was removed from the price list.`);
+                addAuditLog('Deleted Price List Item', `${procName} was removed from the price list.`);
                 Swal.fire({
                     toast: true,
                     position: 'top-end',
@@ -157,16 +180,23 @@ const PriceList = () => {
         });
     };
 
-    const filteredAndSorted = priceData
-        .filter(item => 
-            item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-            item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            String(item.price).toLowerCase().includes(searchTerm.toLowerCase())
-        )
+    const filteredAndSorted = (priceData || [])
+        .filter(item => {
+            if (!item) return false;
+            const term = (searchTerm || '').trim().toLowerCase();
+            if (!term) return true;
+            const name = String(item.name || item.service || '').toLowerCase();
+            const category = String(item.category || '').toLowerCase();
+            const price = String(item.price ?? '').toLowerCase();
+            return name.includes(term) || category.includes(term) || price.includes(term);
+        })
         .sort((a, b) => {
-            const valA = getCategorySortValue(a.category);
-            const valB = getCategorySortValue(b.category);
-            return valA !== valB ? valA - valB : a.name.localeCompare(b.name);
+            const valA = getCategorySortValue(a?.category || '');
+            const valB = getCategorySortValue(b?.category || '');
+            if (valA !== valB) return valA - valB;
+            const nameA = String(a?.name || a?.service || '');
+            const nameB = String(b?.name || b?.service || '');
+            return nameA.localeCompare(nameB);
         });
 
     return (
@@ -235,7 +265,7 @@ const PriceList = () => {
                                                     onKeyDown={e => handleKeyDown(e, item.id)}
                                                 />
                                             ) : (
-                                                item.name
+                                                item.name || item.service || 'Unnamed Procedure'
                                             )}
                                         </td>
                                         <td className="fw-bold" style={{ color: theme.goldDark }}>
@@ -265,7 +295,14 @@ const PriceList = () => {
                                                     <button 
                                                         className="doc-btn doc-btn-info doc-btn-sm shadow-sm" 
                                                         style={{ padding: '4px 8px' }}
-                                                        onClick={() => { setIsEditing(item.id); setEditForm(item); }}
+                                                        onClick={() => { 
+                                                            setIsEditing(item.id); 
+                                                            setEditForm({
+                                                                category: item.category || '',
+                                                                name: item.name || item.service || '',
+                                                                price: item.price !== undefined ? String(item.price) : ''
+                                                            }); 
+                                                        }}
                                                         title="Edit Procedure"
                                                     >
                                                         <RiEdit2Line size={14}/>

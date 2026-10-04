@@ -238,8 +238,8 @@ const Layout = ({ children, role }) => {
             >
                 {/* Brand Header */}
                 <div className="p-3 border-bottom d-flex align-items-center gap-3" style={{ height: '72px' }}>
-                    <div className="p-2 rounded-3 bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: '40px', height: '40px' }}>
-                        <RiBuilding4Line size={24} />
+                    <div className="rounded-3 overflow-hidden bg-white shadow-sm border d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: '42px', height: '42px' }}>
+                        <img src="/careplus-logo.png" alt="CarePlus Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </div>
                     {(!collapsed || isMobile) && (
                         <div className="overflow-hidden">

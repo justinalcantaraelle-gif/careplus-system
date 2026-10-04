@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { RiSearchLine, RiCloseLine, RiMoneyDollarCircleLine, RiPriceTag3Line } from 'react-icons/ri';
 
 const romanToInt = (roman) => {
-    if (!roman) return 0;
+    if (!roman || typeof roman !== 'string') return 0;
     const romanMap = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
     let num = 0;
     for (let i = 0; i < roman.length; i++) {
@@ -19,6 +19,7 @@ const romanToInt = (roman) => {
 };
 
 const getCategorySortValue = (categoryString) => {
+    if (!categoryString || typeof categoryString !== 'string') return Infinity;
     const match = categoryString.match(/^([IVXLCDM]+)[.\s]/i);
     if (match) {
         return romanToInt(match[1]);
@@ -52,24 +53,26 @@ const PriceListView = () => {
             const raw = await getPricelist();
             if (raw && raw.length > 0) {
                 const grouped = raw.reduce((acc, item) => {
-                    const itemName = item.service || item.name || 'Clinical Service';
-                    const found = acc.find(c => c.category === item.category);
+                    if (!item) return acc;
+                    const catName = item.category || 'General Services';
+                    const itemName = item.name || item.service || 'Clinical Service';
+                    const found = acc.find(c => c.category === catName);
                     if (found) {
                         found.items.push({ name: itemName, price: item.price });
                     } else {
-                        acc.push({ category: item.category, items: [{ name: itemName, price: item.price }] });
+                        acc.push({ category: catName, items: [{ name: itemName, price: item.price }] });
                     }
                     return acc;
                 }, []);
 
                 const sortedGrouped = grouped.sort((a, b) => {
-                    const valA = getCategorySortValue(a.category);
-                    const valB = getCategorySortValue(b.category);
+                    const valA = getCategorySortValue(a?.category || '');
+                    const valB = getCategorySortValue(b?.category || '');
                     return valA - valB;
                 });
 
                 sortedGrouped.forEach(section => {
-                    section.items.sort((a, b) => a.name.localeCompare(b.name));
+                    section.items.sort((a, b) => String(a?.name || '').localeCompare(String(b?.name || '')));
                 });
 
                 setPriceData(sortedGrouped);
@@ -87,13 +90,15 @@ const PriceListView = () => {
     }, []);
 
     const filteredData = useMemo(() => {
-        const query = searchTerm.trim().toLowerCase();
+        const query = (searchTerm || '').trim().toLowerCase();
         return priceData
             .map(cat => {
+                if (!cat) return null;
+                const catTitle = String(cat.category || '');
                 if (!query) return cat;
-                const matchesCategory = cat.category.toLowerCase().includes(query);
-                const matchingItems = cat.items.filter(i => 
-                    i.name.toLowerCase().includes(query) || String(i.price).toLowerCase().includes(query)
+                const matchesCategory = catTitle.toLowerCase().includes(query);
+                const matchingItems = (cat.items || []).filter(i => 
+                    String(i?.name || '').toLowerCase().includes(query) || String(i?.price ?? '').toLowerCase().includes(query)
                 );
                 if (matchesCategory) return cat;
                 if (matchingItems.length > 0) return { ...cat, items: matchingItems };
@@ -109,7 +114,7 @@ const PriceListView = () => {
                     
                     {/* Header */}
                     <div className="text-center mb-4">
-                        <img src="/dental-logo.png" alt="Clinic Logo" className="img-fluid mb-2" style={{ maxWidth: '100px', height: 'auto' }} />
+                        <img src="/careplus-logo.png" alt="CarePlus Clinic Logo" className="img-fluid mb-2 shadow-sm rounded-3 border" style={{ maxWidth: '90px', height: 'auto' }} />
                         <h2 className="fw-bold mt-2 mb-1" style={{ color: theme.goldDark, letterSpacing: '3px' }}>Clinical Services &amp; Price List</h2>
                         <p className="text-muted small">Standard service rates and procedural fees</p>
                         <div style={{ width: '60px', height: '4px', backgroundColor: theme.gold, margin: '10px auto', borderRadius: '2px' }}></div>

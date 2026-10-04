@@ -439,11 +439,11 @@ const PatientIntakeModal = ({ onComplete }) => {
                         <div className="d-flex align-items-center gap-3">
                             <img
                                 src={logo}
-                                alt="Doc Dental Logo"
+                                alt="CarePlus Logo"
                                 style={{ height: '48px', width: '48px', objectFit: 'contain', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}
                             />
                             <div>
-                                <h5 className="fw-bold mb-0 text-white">DOC DENTAL CARE</h5>
+                                <h5 className="fw-bold mb-0 text-white">CAREPLUS CLINIC</h5>
                                 <span className="small text-white-50 text-uppercase fw-semibold" style={{ letterSpacing: '1.5px', fontSize: '11px' }}>
                                     Patient Clinical Registration
                                 </span>
@@ -538,10 +538,10 @@ const PatientIntakeModal = ({ onComplete }) => {
                                     I understand that clinical dentistry involves biological responses and that no dental practitioner can guarantee exact surgical or therapeutic outcomes at all times.
                                 </p>
                                 <p className="mb-2">
-                                    I hereby authorize the clinical team and dental auxiliaries of Doc Dental Care to proceed with and perform dental treatments as discussed. I understand that these procedures are subject to clinical modification depending on diagnoses that may arise during the course of treatment.
+                                    I hereby authorize the clinical team and healthcare staff of CarePlus Clinic to proceed with and perform clinical treatments as discussed. I understand that these procedures are subject to clinical modification depending on diagnoses that may arise during the course of treatment.
                                 </p>
                                 <p className="mb-0">
-                                    All treatments are explained to me and any unexpected circumstances that arise during clinical care will be managed with my informed consent and best dental practice standards.
+                                    All treatments are explained to me and any unexpected circumstances that arise during clinical care will be managed with my informed consent and best clinical practice standards.
                                 </p>
                             </div>
 

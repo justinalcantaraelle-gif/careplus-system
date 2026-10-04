@@ -284,12 +284,16 @@ export const parseDentalChartsFromCsv = (items = []) => {
 };
 
 export const parsePricelistFromCsv = (items = []) => {
-    return items.map((item, idx) => ({
-        id: Number(item['Item ID'] || item['id'] || (idx + 1)),
-        category: item['Category'] || 'General Services',
-        service: item['Procedure / Service Name'] || item['service'] || item['name'] || 'Dental Procedure',
-        price: item['Price (PHP)'] || item['price'] || '0'
-    }));
+    return items.map((item, idx) => {
+        const sName = item['Procedure / Service Name'] || item['service'] || item['name'] || 'Clinical Procedure';
+        return {
+            id: Number(item['Item ID'] || item['id'] || (idx + 1)),
+            category: item['Category'] || 'General Services',
+            service: sName,
+            name: sName,
+            price: item['Price (PHP)'] || item['price'] || '0'
+        };
+    });
 };
 
 export const parseAuditLogsFromCsv = (items = []) => {

@@ -183,7 +183,7 @@ const ConsentForm = () => {
                             >
                                 <img 
                                     src={logo} 
-                                    alt="Doc Dental Logo" 
+                                    alt="CarePlus Logo" 
                                     style={{ 
                                         width: '100%', 
                                         height: '100%', 
@@ -200,10 +200,10 @@ const ConsentForm = () => {
                         <div className="card-body p-4 p-md-5">
                             <div className="p-4 bg-light rounded-3 mb-4 text-secondary shadow-sm" style={{ fontSize: '1.08rem', lineHeight: '1.65', borderLeft: `5px solid ${colors.gold}` }}>
                                 <h6 className="fw-bold text-dark mb-3">Treatment Authorization &amp; Acknowledgement</h6>
-                                <p>I understand and consent to have any necessary treatment performed by the attending dentist after the procedure, risks, benefits, and associated fees have been fully explained to me. These treatments may include prophylactic cleaning, periodontal scaling, composite or amalgam restorations, crowns, bridges, root canal therapy, prosthodontics, local anaesthetics, surgical extractions, and orthodontic alignment.</p>
-                                <p>I understand that clinical dentistry involves biological responses and that no dental practitioner can guarantee exact surgical or therapeutic outcomes at all times.</p>
-                                <p>I hereby authorize the clinical team and dental auxiliaries of Doc Dental Care to proceed with and perform dental treatments as discussed. I understand that these procedures are subject to clinical modification depending on diagnoses that may arise during the course of treatment.</p>
-                                <p className="mb-0">All treatments are explained to me and any unexpected circumstances that arise during clinical care will be managed with my informed consent and best dental practice standards.</p>
+                                <p>I understand and consent to have any necessary treatment performed by the attending physician or healthcare provider after the procedure, risks, benefits, and associated fees have been fully explained to me. These treatments may include clinical consultations, diagnostic laboratory examinations, imaging, preventive health checkups, local treatments, and health certifications.</p>
+                                <p>I understand that clinical healthcare involves biological responses and that no medical practitioner can guarantee exact therapeutic outcomes at all times.</p>
+                                <p>I hereby authorize the clinical team and healthcare staff of CarePlus Clinic to proceed with and perform clinical treatments as discussed. I understand that these procedures are subject to clinical modification depending on diagnoses that may arise during the course of treatment.</p>
+                                <p className="mb-0">All treatments are explained to me and any unexpected circumstances that arise during clinical care will be managed with my informed consent and best clinical practice standards.</p>
                             </div>
 
                             {isAlreadySigned ? (
