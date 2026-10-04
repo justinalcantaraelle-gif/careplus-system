@@ -277,7 +277,7 @@ const ReportsDashboard = () => {
                 @media print {
                     @page { size: A4 landscape; margin: 10mm; }
                     body { background-color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                    .d-print-none, nav, .sidebar, .navbar, header, footer, .doc-btn-toolbar, .doc-btn { display: none !important; }
+                    .d-print-none, nav, .sidebar, .app-sidebar, .navbar, .app-navbar, header, footer, .doc-btn-toolbar, .doc-btn { display: none !important; }
                     .report-container {
                         position: static !important;
                         padding: 0 !important;

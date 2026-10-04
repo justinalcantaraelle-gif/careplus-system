@@ -4,7 +4,8 @@ import Swal from 'sweetalert2';
 import {
     RiMoneyDollarCircleLine, RiAddLine, RiSearchLine, RiPrinterLine,
     RiFileTextLine, RiBuilding4Line, RiCheckDoubleLine, RiTimeLine,
-    RiBankCardLine, RiCloseLine, RiCoinsLine, RiPercentLine, RiUserLine
+    RiBankCardLine, RiCloseLine, RiCoinsLine, RiPercentLine, RiUserLine,
+    RiQrCodeLine, RiSmartphoneLine, RiCheckLine, RiShieldCheckLine
 } from 'react-icons/ri';
 import { readDatabase, writeDatabase, readSession } from '../../utils/storage';
 import { CLINIC_BRANCHES, LAB_TEST_CATALOG } from '../../utils/careplusData';
@@ -18,6 +19,7 @@ const BillingManagement = () => {
     const [selectedStatus, setSelectedStatus] = useState('All');
     const [activeModal, setActiveModal] = useState(null); // 'create' | 'pay' | 'receipt'
     const [selectedInvoice, setSelectedInvoice] = useState(null);
+    const [qrSimulated, setQrSimulated] = useState(false);
 
     // Create Invoice Form State
     const [invoiceForm, setInvoiceForm] = useState({
@@ -198,7 +200,34 @@ const BillingManagement = () => {
             amountTendered: invoice.totalAmount - (invoice.amountPaid || 0),
             referenceNo: ''
         });
+        setQrSimulated(false);
         setActiveModal('pay');
+    };
+
+    const handleSimulateQrPayment = () => {
+        const mockTrace = `QRPH-BSP-${Math.floor(100000 + Math.random() * 900000)}`;
+        setPaymentForm(prev => ({
+            ...prev,
+            referenceNo: mockTrace
+        }));
+        setQrSimulated(true);
+
+        Swal.fire({
+            icon: 'success',
+            title: 'QR Ph Scan Detected!',
+            html: `<div class="text-start small p-3 bg-light rounded border mt-2">
+                     <div class="mb-1"><strong>Merchant:</strong> CarePlus Health Systems Inc.</div>
+                     <div class="mb-1"><strong>Branch:</strong> ${selectedInvoice?.branch || 'Metro Branch'}</div>
+                     <div class="mb-1"><strong>Terminal ID:</strong> <code>CP-QRPH-94021</code></div>
+                     <div class="mb-1"><strong>Amount Received:</strong> ₱${Number(paymentForm.amountTendered || 0).toLocaleString()}</div>
+                     <div class="mb-2"><strong>Gateway Trace No:</strong> <code class="text-primary fw-bold">${mockTrace}</code></div>
+                     <div class="text-success fw-bold d-flex align-items-center gap-1">
+                       <span>✓</span> National QR Ph authorization confirmed via customer mobile wallet.
+                     </div>
+                   </div>`,
+            timer: 2400,
+            showConfirmButton: false
+        });
     };
 
     const handleProcessPayment = (e) => {
@@ -658,17 +687,186 @@ const BillingManagement = () => {
                                     <div className="mb-3">
                                         <label className="form-label small fw-semibold">Payment Method *</label>
                                         <select
-                                            className="form-select"
+                                            className="form-select fw-semibold"
                                             value={paymentForm.paymentMethod}
-                                            onChange={(e) => setPaymentForm(prev => ({ ...prev, paymentMethod: e.target.value }))}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                setPaymentForm(prev => ({
+                                                    ...prev,
+                                                    paymentMethod: val,
+                                                    referenceNo: val.includes('QR') && !prev.referenceNo ? `QRPH-${Math.floor(100000 + Math.random() * 900000)}` : prev.referenceNo
+                                                }));
+                                            }}
                                             required
                                         >
-                                            <option value="Cash">Cash (Billing Counter)</option>
-                                            <option value="Credit / Debit Card">Credit / Debit Card (POS)</option>
-                                            <option value="GCash / Maya">GCash / Maya (QR Ph)</option>
-                                            <option value="HMO / Insurance Guarantee">HMO / Corporate Insurance Guarantee</option>
+                                            <option value="Cash">💵 Cash (Billing Counter)</option>
+                                            <option value="QR Ph">📱 QR Ph (GCash, Maya, ShopeePay, Mobile Banks)</option>
+                                            <option value="Credit / Debit Card">💳 Credit / Debit Card (POS Terminal)</option>
+                                            <option value="HMO / Insurance Guarantee">🏥 HMO / Corporate Insurance Guarantee</option>
                                         </select>
                                     </div>
+
+                                    {/* DECOY QR PH CODE SECTION */}
+                                    {(paymentForm.paymentMethod === 'QR Ph' || paymentForm.paymentMethod.includes('QR')) && (
+                                        <div className="p-3 mb-3 rounded-4 border bg-white shadow-sm text-center animate__animated animate__fadeIn">
+                                            {/* Official QR Ph Banner */}
+                                            <div 
+                                                className="d-flex align-items-center justify-content-between p-2 px-3 rounded-3 mb-3 text-white shadow-sm"
+                                                style={{ background: 'linear-gradient(135deg, #0284c7 0%, #1e40af 50%, #b91c1c 100%)' }}
+                                            >
+                                                <div className="d-flex align-items-center gap-2 text-start">
+                                                    <div className="bg-white text-primary p-1 px-2 rounded-2 fw-black" style={{ fontSize: '12px', fontWeight: '900', letterSpacing: '0.5px' }}>
+                                                        QR Ph
+                                                    </div>
+                                                    <div>
+                                                        <div className="fw-bold small mb-0 lh-1">National QR Code Standard</div>
+                                                        <div className="text-white-50" style={{ fontSize: '10px' }}>BSP Circular No. 1055 Compliant</div>
+                                                    </div>
+                                                </div>
+                                                <span className="badge bg-warning text-dark font-monospace fw-bold" style={{ fontSize: '10px' }}>
+                                                    DECOY MERCHANT
+                                                </span>
+                                            </div>
+
+                                            {/* Decoy QR Code Matrix SVG */}
+                                            <div className="p-3 bg-light rounded-4 d-inline-block border mb-2 position-relative shadow-sm" style={{ width: '220px' }}>
+                                                <svg width="180" height="180" viewBox="0 0 180 180" className="mx-auto" style={{ display: 'block' }}>
+                                                    {/* Background */}
+                                                    <rect width="180" height="180" fill="#ffffff" rx="10" />
+                                                    
+                                                    {/* Top-Left Finder */}
+                                                    <rect x="15" y="15" width="40" height="40" fill="#0f172a" rx="4" />
+                                                    <rect x="21" y="21" width="28" height="28" fill="#ffffff" rx="2" />
+                                                    <rect x="27" y="27" width="16" height="16" fill="#0284c7" rx="2" />
+
+                                                    {/* Top-Right Finder */}
+                                                    <rect x="125" y="15" width="40" height="40" fill="#0f172a" rx="4" />
+                                                    <rect x="131" y="21" width="28" height="28" fill="#ffffff" rx="2" />
+                                                    <rect x="137" y="27" width="16" height="16" fill="#0284c7" rx="2" />
+
+                                                    {/* Bottom-Left Finder */}
+                                                    <rect x="15" y="125" width="40" height="40" fill="#0f172a" rx="4" />
+                                                    <rect x="21" y="131" width="28" height="28" fill="#ffffff" rx="2" />
+                                                    <rect x="27" y="137" width="16" height="16" fill="#0284c7" rx="2" />
+
+                                                    {/* Alignment Pattern */}
+                                                    <rect x="125" y="125" width="24" height="24" fill="#0f172a" rx="3" />
+                                                    <rect x="129" y="129" width="16" height="16" fill="#ffffff" rx="1" />
+                                                    <rect x="133" y="133" width="8" height="8" fill="#dc2626" rx="1" />
+
+                                                    {/* Timing Pattern Lines */}
+                                                    <line x1="60" y1="35" x2="120" y2="35" stroke="#334155" strokeWidth="4" strokeDasharray="5,5" />
+                                                    <line x1="35" y1="60" x2="35" y2="120" stroke="#334155" strokeWidth="4" strokeDasharray="5,5" />
+
+                                                    {/* Dense Matrix Modules */}
+                                                    <rect x="65" y="18" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="75" y="18" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="85" y="18" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="105" y="18" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="65" y="28" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="95" y="28" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="115" y="28" width="6" height="6" fill="#0f172a" />
+                                                    
+                                                    <rect x="60" y="45" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="72" y="45" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="84" y="45" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="96" y="45" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="110" y="45" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="130" y="60" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="145" y="60" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="160" y="60" width="6" height="6" fill="#0f172a" />
+
+                                                    <rect x="18" y="65" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="18" y="80" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="18" y="95" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="18" y="110" width="6" height="6" fill="#0f172a" />
+                                                    
+                                                    <rect x="45" y="70" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="55" y="85" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="45" y="100" width="6" height="6" fill="#0f172a" />
+                                                    
+                                                    <rect x="120" y="75" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="135" y="75" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="150" y="75" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="125" y="90" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="140" y="90" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="155" y="90" width="6" height="6" fill="#0f172a" />
+
+                                                    <rect x="65" y="125" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="80" y="125" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="95" y="125" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="110" y="125" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="70" y="140" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="85" y="140" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="100" y="140" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="65" y="155" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="80" y="155" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="95" y="155" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="110" y="155" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="155" y="130" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="155" y="145" width="6" height="6" fill="#0f172a" />
+                                                    <rect x="155" y="160" width="6" height="6" fill="#0f172a" />
+
+                                                    {/* Central Official QR Ph Emblem Badge */}
+                                                    <rect x="66" y="66" width="48" height="48" fill="#ffffff" rx="8" stroke="#cbd5e1" strokeWidth="2" />
+                                                    <rect x="70" y="70" width="40" height="40" fill="#0284c7" rx="6" />
+                                                    <text x="90" y="86" fill="#ffffff" fontSize="11" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">QR</text>
+                                                    <text x="90" y="99" fill="#fde047" fontSize="10" fontWeight="900" textAnchor="middle" fontFamily="sans-serif">Ph</text>
+                                                    <rect x="82" y="102" width="16" height="2" fill="#ef4444" rx="1" />
+                                                </svg>
+
+                                                <div className="small fw-bold text-dark mt-2 mb-0">
+                                                    CarePlus Healthcare
+                                                </div>
+                                                <div className="text-muted" style={{ fontSize: '11px' }}>
+                                                    {selectedInvoice.branch || 'CarePlus Metro Branch'}
+                                                </div>
+                                                <div className="text-muted font-monospace" style={{ fontSize: '10px' }}>
+                                                    MID: CP-QRPH-94021
+                                                </div>
+                                            </div>
+
+                                            {/* Dynamic Payable Badge */}
+                                            <div className="p-2 px-3 bg-success bg-opacity-10 border border-success border-opacity-25 rounded-3 mb-2 d-flex justify-content-between align-items-center">
+                                                <span className="small text-muted fw-semibold">Payable via QR:</span>
+                                                <span className="fs-5 fw-bold text-success font-monospace">
+                                                    ₱{Number(paymentForm.amountTendered || selectedInvoice.totalAmount || 0).toLocaleString()}
+                                                </span>
+                                            </div>
+
+                                            {/* Supported Mobile Banking Apps */}
+                                            <div className="small text-muted mb-1" style={{ fontSize: '11px' }}>
+                                                Scan using GCash, Maya, ShopeePay, GoTyme, BPI, BDO Pay or any bank:
+                                            </div>
+                                            <div className="d-flex flex-wrap justify-content-center gap-1 mb-3">
+                                                {['GCash', 'Maya', 'GoTyme', 'BDO Pay', 'BPI Mobile', 'UnionBank', 'ShopeePay'].map(app => (
+                                                    <span key={app} className="badge bg-light text-secondary border px-2 py-1" style={{ fontSize: '10px' }}>
+                                                        {app}
+                                                    </span>
+                                                ))}
+                                            </div>
+
+                                            {/* Simulation Action Box */}
+                                            <div className="p-2 px-3 bg-light rounded-3 border d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2 text-start">
+                                                <div>
+                                                    <div className="small fw-semibold text-dark d-flex align-items-center gap-1">
+                                                        <span className={`spinner-grow spinner-grow-sm ${qrSimulated ? 'text-success' : 'text-warning'}`} role="status" style={{ width: '8px', height: '8px' }}></span>
+                                                        <span>{qrSimulated ? 'Payment Verified by QR Ph Gateway' : 'Decoy Standby: Ready for Scan'}</span>
+                                                    </div>
+                                                    <div className="text-muted" style={{ fontSize: '11px' }}>
+                                                        {qrSimulated ? `Trace Code: ${paymentForm.referenceNo}` : 'Click simulate below to autofill mock e-wallet reference'}
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={handleSimulateQrPayment}
+                                                    className="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold text-nowrap shadow-sm"
+                                                >
+                                                    ⚡ Simulate Patient Scanned &amp; Paid
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
 
                                     <div className="mb-3">
                                         <label className="form-label small fw-semibold">Amount Tendered / Paid (₱) *</label>
@@ -758,7 +956,14 @@ const BillingManagement = () => {
                                                 <th style={{ background: '#f1f5f9', color: '#334155' }}>Facility Location</th>
                                                 <td>{selectedInvoice.branch}</td>
                                                 <th style={{ background: '#f1f5f9', color: '#334155' }}>Payment Method</th>
-                                                <td className="fw-semibold">{selectedInvoice.paymentMethod || 'Counter Cash/Card'}</td>
+                                                <td className="fw-semibold">
+                                                    {selectedInvoice.paymentMethod || 'Counter Cash/Card'}
+                                                    {selectedInvoice.paymentMethod?.includes('QR') && (
+                                                        <span className="badge bg-primary bg-opacity-10 text-primary ms-2 small">
+                                                            ✓ QR Ph Verified
+                                                        </span>
+                                                    )}
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -887,7 +1092,7 @@ const BillingManagement = () => {
                         -webkit-print-color-adjust: exact !important;
                         print-color-adjust: exact !important;
                     }
-                    .no-print, nav, .sidebar, .navbar, header, footer, .modal-backdrop, .modal-header, .modal-footer, .btn {
+                    .no-print, nav, .sidebar, .app-sidebar, .navbar, .app-navbar, header, footer, .modal-backdrop, .modal-header, .modal-footer, .btn {
                         display: none !important;
                     }
                     .modal {

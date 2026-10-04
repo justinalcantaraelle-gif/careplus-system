@@ -855,7 +855,7 @@ const LaboratoryManagement = () => {
                         -webkit-print-color-adjust: exact !important;
                         print-color-adjust: exact !important;
                     }
-                    .no-print, nav, .sidebar, .navbar, header, footer, .modal-backdrop, .modal-header, .modal-footer, .btn {
+                    .no-print, nav, .sidebar, .app-sidebar, .navbar, .app-navbar, header, footer, .modal-backdrop, .modal-header, .modal-footer, .btn {
                         display: none !important;
                     }
                     .modal {

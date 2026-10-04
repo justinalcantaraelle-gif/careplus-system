@@ -785,7 +785,7 @@ const AdminDashboard = () => {
                         color: #111827 !important;
                         box-sizing: border-box !important;
                     }
-                    .navbar, .sidebar, .btn, .input-group, .btn-group, select, input {
+                    .navbar, .app-navbar, .sidebar, .app-sidebar, .btn, .input-group, .btn-group, select, input {
                         display: none !important;
                     }
                     @page {

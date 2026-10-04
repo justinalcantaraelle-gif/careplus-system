@@ -91,9 +91,18 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<RootRedirect />} />
-      <Route path="/login" element={<Login mode="patient" />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/patient/login" element={<Login mode="patient" />} />
+      <Route path="/doctor/login" element={<Login mode="doctor" />} />
+      <Route path="/physician/login" element={<Login mode="doctor" />} />
+      <Route path="/staff/login" element={<Login mode="staff" />} />
+      <Route path="/nurse/login" element={<Login mode="staff" />} />
       <Route path="/admin/login" element={<Login mode="admin" />} />
-      <Route path="/superadmin/login" element={<Login mode="superadmin" />} />
+      <Route path="/superadmin/login" element={<Login mode="admin" />} />
+      <Route path="/lab/login" element={<Login mode="laboratory" />} />
+      <Route path="/laboratory/login" element={<Login mode="laboratory" />} />
+      <Route path="/billing/login" element={<Login mode="billing" />} />
+      <Route path="/cashier/login" element={<Login mode="billing" />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
 
@@ -120,7 +129,6 @@ function DashboardWrapper() {
             <Route path="book" element={<BookAppointment />} />
             <Route path="consultations" element={<DoctorConsultations />} />
             <Route path="laboratory" element={<LaboratoryManagement />} />
-            <Route path="billing" element={<BillingManagement />} />
             <Route path="reports" element={<MedicalReports />} />
             <Route path="ea-blueprint" element={<EnterpriseArchitecturePortal />} />
             <Route path="price-list" element={<PriceListView />} />

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import logo from '../../assets/images/final-logo.png';
 import { 
     RiFileTextLine, RiSearchLine, 
-    RiUserHeartLine, RiCheckboxCircleLine, RiCloseCircleLine
+    RiUserHeartLine, RiCheckboxCircleLine, RiCloseCircleLine, RiPrinterLine
 } from 'react-icons/ri';
 import Swal from 'sweetalert2';
 import { addAuditLog } from '../../services/auditLogger';
@@ -181,6 +181,15 @@ const ConsentForms = () => {
                                 <span className="fw-bold text-muted d-flex align-items-center">
                                     <RiFileTextLine className="me-2"/> Document Viewer
                                 </span>
+                                {selectedHasConsent && (
+                                    <button
+                                        type="button"
+                                        className="btn btn-primary btn-sm rounded-pill px-3 fw-bold shadow-sm d-flex align-items-center gap-2"
+                                        onClick={() => window.print()}
+                                    >
+                                        <RiPrinterLine size={16} /> Print Official Form
+                                    </button>
+                                )}
                             </div>
 
                             <div className="card-body p-4 d-flex justify-content-center align-items-start overflow-auto print-body-reset">
@@ -453,7 +462,7 @@ const ConsentForms = () => {
                         -webkit-print-color-adjust: exact !important;
                         print-color-adjust: exact !important;
                     }
-                    .no-print, nav, .sidebar, .navbar, header, footer, .btn, .doc-btn {
+                    .no-print, nav, .sidebar, .app-sidebar, .navbar, .app-navbar, header, footer, .btn, .doc-btn {
                         display: none !important;
                     }
                     .main-wrapper {

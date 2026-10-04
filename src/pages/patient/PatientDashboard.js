@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     RiCalendarCheckLine, RiStethoscopeLine, RiFlaskLine,
-    RiMoneyDollarCircleLine, RiTimeLine, RiBuilding4Line,
+    RiTimeLine, RiBuilding4Line,
     RiFileTextLine, RiUserHeartLine, RiHeartPulseLine,
     RiAlertLine, RiCheckDoubleLine, RiArrowRightLine,
     RiHospitalLine, RiDownloadLine, RiQrCodeLine
@@ -15,8 +15,7 @@ const PatientDashboard = () => {
     const [dbData, setDbData] = useState({
         appointments: [],
         consultations: [],
-        laboratory_requests: [],
-        billing_records: []
+        laboratory_requests: []
     });
 
     const loadData = useCallback(() => {
@@ -24,8 +23,7 @@ const PatientDashboard = () => {
         setDbData({
             appointments: db.appointments || [],
             consultations: db.consultations || [],
-            laboratory_requests: db.laboratory_requests || [],
-            billing_records: db.billing_records || []
+            laboratory_requests: db.laboratory_requests || []
         });
     }, []);
 
@@ -68,14 +66,6 @@ const PatientDashboard = () => {
             return lEmail === userEmail || lName === userName.toLowerCase() || (!userEmail && true);
         });
     }, [dbData.laboratory_requests, userEmail, userName]);
-
-    const myBilling = useMemo(() => {
-        return (dbData.billing_records || []).filter(b => {
-            const bEmail = (b.patientEmail || '').toLowerCase();
-            const bName = (b.patientName || '').toLowerCase();
-            return bEmail === userEmail || bName === userName.toLowerCase() || (!userEmail && true);
-        });
-    }, [dbData.billing_records, userEmail, userName]);
 
     const nextUpcomingAppt = useMemo(() => {
         const upcoming = myAppointments.filter(a => a.status === 'Approved' || a.status === 'Pending');
@@ -198,20 +188,20 @@ const PatientDashboard = () => {
 
                 <div className="col-12 col-sm-6 col-xl-3">
                     <div
-                        onClick={() => navigate('/patient/billing')}
+                        onClick={() => navigate('/patient/medical')}
                         className="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 transition-hover border-start border-info border-4 cursor-pointer"
                         style={{ cursor: 'pointer' }}
                     >
                         <div className="d-flex align-items-center justify-content-between mb-2">
-                            <span className="text-muted small fw-bold text-uppercase">Invoices &amp; Receipts</span>
+                            <span className="text-muted small fw-bold text-uppercase">Medical History</span>
                             <div className="p-2 rounded-3 bg-info bg-opacity-10 text-info">
-                                <RiMoneyDollarCircleLine size={22} />
+                                <RiFileTextLine size={22} />
                             </div>
                         </div>
-                        <h2 className="fw-bold mb-1 text-dark">{myBilling.length}</h2>
+                        <h2 className="fw-bold mb-1 text-dark">EHR Chart</h2>
                         <div className="d-flex align-items-center justify-content-between text-muted small">
-                            <span>Settled: <strong className="text-success">{myBilling.filter(b => b.status === 'Paid').length}</strong></span>
-                            <span className="text-info fw-semibold">ORs &rarr;</span>
+                            <span>Clinical Vitals &amp; Intake</span>
+                            <span className="text-info fw-semibold">View Record &rarr;</span>
                         </div>
                     </div>
                 </div>

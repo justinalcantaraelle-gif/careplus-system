@@ -1189,3 +1189,188 @@ a:focus-visible,
 .modal-backdrop {
   z-index: 1990 !important;
 }
+
+/* ==========================================================================
+   GLOBAL PRINT STYLESHEET: CLEAN, TABLE-ORGANIZED CLINICAL DOCUMENTS
+   Hides sidebars, navigation bars, chrome, search bars, and action buttons.
+   Ensures all printable views render as neat, bordered clinical tables.
+   ========================================================================== */
+@media print {
+  @page {
+    size: auto;
+    margin: 10mm 12mm;
+  }
+
+  /* 1. Hide all navigation, sidebars, buttons, chrome, backdrops, modals extras */
+  .no-print,
+  .d-print-none,
+  .sidebar,
+  .app-sidebar,
+  nav,
+  .navbar,
+  .app-navbar,
+  header:not(.print-header),
+  footer:not(.print-footer),
+  .doc-btn,
+  .doc-btn-toolbar,
+  .btn:not(.print-keep),
+  button:not(.print-keep),
+  .btn-group,
+  .dropdown-menu,
+  .modal-backdrop,
+  .modal-footer,
+  .modal-header .btn-close,
+  .nav-pills,
+  .nav-tabs,
+  .pagination,
+  .swal2-container,
+  .toast,
+  input[type="search"],
+  .input-group:not(.print-keep),
+  .form-select:not(.print-keep),
+  .breadcrumb,
+  .alert:not(.print-alert) {
+    display: none !important;
+  }
+
+  /* 2. Reset Layout Root & Scrollers to expand naturally across pages without clipping */
+  html,
+  body,
+  #root,
+  .app-layout-root,
+  .app-main-wrapper,
+  .app-main-content,
+  main,
+  .container,
+  .container-fluid,
+  .main-wrapper,
+  .report-container {
+    height: auto !important;
+    min-height: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: static !important;
+    box-shadow: none !important;
+    border: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* 3. Card & Container Resets for Print */
+  .card,
+  .shadow-sm,
+  .shadow-md,
+  .shadow-lg,
+  .rounded-4,
+  .rounded-3 {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  /* 4. Modal In-Place Expansion for Printable Dialogs */
+  .modal {
+    position: static !important;
+    display: block !important;
+    background: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+  .modal-dialog {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    transform: none !important;
+  }
+  .modal-content {
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+  .modal-body {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* 5. Standardized Clinical Table Typography, Headers, and Clean Borders */
+  table,
+  .table,
+  .rpt-table,
+  .clinical-print-table,
+  .rx-print-table,
+  .lab-print-table,
+  .billing-print-table,
+  .cert-print-table,
+  .consent-print-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin-bottom: 12px !important;
+    page-break-inside: auto;
+    font-size: 11px !important;
+    background: #ffffff !important;
+  }
+
+  table thead,
+  .table thead {
+    display: table-header-group !important;
+  }
+
+  table tr,
+  .table tr {
+    page-break-inside: avoid !important;
+    page-break-after: auto;
+  }
+
+  table th,
+  table td,
+  .table th,
+  .table td,
+  .rpt-table th,
+  .rpt-table td,
+  .clinical-print-table th,
+  .clinical-print-table td,
+  .rx-print-table th,
+  .rx-print-table td,
+  .lab-print-table th,
+  .lab-print-table td,
+  .billing-print-table th,
+  .billing-print-table td,
+  .cert-print-table th,
+  .cert-print-table td {
+    border: 1px solid #cbd5e1 !important;
+    padding: 6px 10px !important;
+    color: #0f172a !important;
+    vertical-align: middle !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  table th,
+  .table th,
+  .rpt-table th,
+  .clinical-print-table th,
+  .rx-print-table th,
+  .lab-print-table th,
+  .billing-print-table th,
+  .cert-print-table th {
+    background-color: #f1f5f9 !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    text-transform: uppercase;
+    font-size: 10.5px !important;
+  }
+
+  /* 6. Signature Blocks and Certificate Seals */
+  .signature-box,
+  .signature-cell,
+  .cert-signature-area {
+    page-break-inside: avoid !important;
+  }
+}

@@ -101,40 +101,77 @@ const Layout = ({ children, role }) => {
 
     const menuConfigs = {
         patient: [
-            { path: '/patient', icon: <RiDashboardLine />, label: 'Dashboard' },
+            { path: '/patient', icon: <RiDashboardLine />, label: 'Health Dashboard' },
             { path: '/patient/book', icon: <RiCalendarCheckLine />, label: 'Book Appointment' },
             { path: '/patient/consultations', icon: <RiStethoscopeLine />, label: 'Doctor Consultations & Rx' },
-            { path: '/patient/laboratory', icon: <RiFlaskLine />, label: 'My Lab Results' },
-            { path: '/patient/billing', icon: <RiMoneyDollarCircleLine />, label: 'Billing & Receipts' },
-            { path: '/patient/medical', icon: <RiFileTextLine />, label: 'Medical History' },
+            { path: '/patient/laboratory', icon: <RiFlaskLine />, label: 'My Diagnostic Lab Results' },
+            { path: '/patient/medical', icon: <RiFileTextLine />, label: 'My Medical History' },
             { path: '/patient/ea-blueprint', icon: <RiNodeTree />, label: 'EA Blueprint (ENTARC)' }
         ],
+        doctor: [
+            { path: '/staff/consultations', icon: <RiStethoscopeLine />, label: 'Doctor Consultations & Rx' },
+            { path: '/staff/patients', icon: <RiUserHeartLine />, label: 'Patient Master Records' },
+            { path: '/staff/laboratory', icon: <RiFlaskLine />, label: 'Diagnostic Lab Results' },
+            { path: '/staff/book', icon: <RiCalendarCheckLine />, label: 'Appointment Queue' },
+            { path: '/staff/medical-reports', icon: <RiFileChartLine />, label: 'Clinical Medical Reports' },
+            { path: '/staff/ea-blueprint', icon: <RiNodeTree />, label: 'EA Blueprint (ENTARC)' }
+        ],
+        laboratory: [
+            { path: '/staff/laboratory', icon: <RiFlaskLine />, label: 'Laboratory & Specimen Desk' },
+            { path: '/staff/medical-reports', icon: <RiFileChartLine />, label: 'Diagnostic Lab Reports' },
+            { path: '/staff/patients', icon: <RiUserHeartLine />, label: 'Patient Master Directory' },
+            { path: '/staff/ea-blueprint', icon: <RiNodeTree />, label: 'EA Blueprint (ENTARC)' }
+        ],
+        billing: [
+            { path: '/staff/billing', icon: <RiMoneyDollarCircleLine />, label: 'Billing & Payments POS' },
+            { path: '/staff/price-list', icon: <RiPriceTag3Line />, label: 'Services & Price List' },
+            { path: '/staff/patients', icon: <RiUserHeartLine />, label: 'Patient Accounts Roster' },
+            { path: '/staff/medical-reports', icon: <RiFileChartLine />, label: 'Revenue & Billing Reports' },
+            { path: '/staff/ea-blueprint', icon: <RiNodeTree />, label: 'EA Blueprint (ENTARC)' }
+        ],
         staff: [
-            { path: '/staff', icon: <RiDashboardLine />, label: 'Clinic Dashboard' },
+            { path: '/staff', icon: <RiDashboardLine />, label: 'Clinic Triage Dashboard' },
             { path: '/staff/registration', icon: <RiUserAddLine />, label: 'Patient Registration' },
             { path: '/staff/book', icon: <RiCalendarCheckLine />, label: 'Appointment Scheduling' },
-            { path: '/staff/consultations', icon: <RiStethoscopeLine />, label: 'Doctor Consultations' },
-            { path: '/staff/laboratory', icon: <RiFlaskLine />, label: 'Laboratory & Results' },
-            { path: '/staff/billing', icon: <RiMoneyDollarCircleLine />, label: 'Billing & Payments' },
-            { path: '/staff/medical-reports', icon: <RiFileChartLine />, label: 'Medical Reports' },
             { path: '/staff/patients', icon: <RiUserHeartLine />, label: 'Patient Master Roster' },
+            { path: '/staff/medical', icon: <RiFileTextLine />, label: 'Medical Records Intake' },
+            { path: '/staff/consent-forms', icon: <RiFileList3Line />, label: 'Patient Consent Forms' },
             { path: '/staff/ea-blueprint', icon: <RiNodeTree />, label: 'EA Blueprint (ENTARC)' }
         ],
         admin: [
             { path: '/admin', icon: <RiDashboardLine />, label: 'Executive Dashboard' },
+            { path: '/admin/users', icon: <RiGroupLine />, label: 'User Roles & Security' },
+            { path: '/admin/audit-logs', icon: <RiFileList3Line />, label: 'Compliance Audit Logs' },
+            { path: '/admin/reports', icon: <RiFileChartLine />, label: 'Executive Reports' },
+            { path: '/admin/patients', icon: <RiUserHeartLine />, label: 'Patient Master Roster' },
             { path: '/admin/registration', icon: <RiUserAddLine />, label: 'Patient Registration' },
-            { path: '/admin/book', icon: <RiCalendarCheckLine />, label: 'Appointment Scheduling' },
             { path: '/admin/consultations', icon: <RiStethoscopeLine />, label: 'Doctor Consultations' },
             { path: '/admin/laboratory', icon: <RiFlaskLine />, label: 'Laboratory & Results' },
             { path: '/admin/billing', icon: <RiMoneyDollarCircleLine />, label: 'Billing & Payments' },
-            { path: '/admin/medical-reports', icon: <RiFileChartLine />, label: 'Medical Reports' },
-            { path: '/admin/users', icon: <RiGroupLine />, label: 'User Roles & Security' },
-            { path: '/admin/audit-logs', icon: <RiFileList3Line />, label: 'Compliance Audit Logs' },
             { path: '/admin/ea-blueprint', icon: <RiNodeTree />, label: 'EA Blueprint (ENTARC)' }
         ]
     };
 
-    const currentMenu = menuConfigs[role?.toLowerCase()] || menuConfigs.staff;
+    const activeUserRole = (session?.role || role || '').toLowerCase().replace(/[\s_-]+/g, '');
+
+    const currentMenu = useMemo(() => {
+        if (activeUserRole === 'doctor' || activeUserRole === 'physician') {
+            return menuConfigs.doctor;
+        }
+        if (activeUserRole === 'laboratory' || activeUserRole === 'lab' || activeUserRole === 'medtech') {
+            return menuConfigs.laboratory;
+        }
+        if (activeUserRole === 'billing' || activeUserRole === 'cashier') {
+            return menuConfigs.billing;
+        }
+        if (activeUserRole === 'admin' || activeUserRole === 'superadmin' || activeUserRole === 'director') {
+            return menuConfigs.admin;
+        }
+        if (activeUserRole === 'patient') {
+            return menuConfigs.patient;
+        }
+        return menuConfigs.staff;
+    }, [activeUserRole]);
 
     const globalSearchResults = currentMenu.filter((item) => {
         const query = globalSearch.toLowerCase();
@@ -173,11 +210,11 @@ const Layout = ({ children, role }) => {
     };
 
     return (
-        <div className="d-flex overflow-hidden bg-light" style={{ height: '100vh', width: '100vw' }}>
+        <div className="app-layout-root d-flex overflow-hidden bg-light" style={{ height: '100vh', width: '100vw' }}>
             {/* Mobile backdrop */}
             {isMobile && !collapsed && (
                 <div
-                    className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 animate__animated animate__fadeIn"
+                    className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 animate__animated animate__fadeIn no-print d-print-none"
                     style={{ zIndex: 1040 }}
                     onClick={() => setCollapsed(true)}
                 />
@@ -185,7 +222,7 @@ const Layout = ({ children, role }) => {
 
             {/* SIDEBAR */}
             <div
-                className={`d-flex flex-column bg-white border-end shadow-sm ${
+                className={`app-sidebar sidebar no-print d-print-none d-flex flex-column bg-white border-end shadow-sm ${
                     isMobile ? 'position-fixed top-0 bottom-0' : 'position-relative'
                 }`}
                 style={{
@@ -207,8 +244,12 @@ const Layout = ({ children, role }) => {
                     {(!collapsed || isMobile) && (
                         <div className="overflow-hidden">
                             <h6 className="fw-bold mb-0 text-dark text-truncate">CarePlus Clinic</h6>
-                            <span className="text-muted text-uppercase small" style={{ fontSize: '10px', letterSpacing: '1px' }}>
-                                Multi-Branch System
+                            <span className="text-muted text-uppercase small" style={{ fontSize: '10px', letterSpacing: '0.8px' }}>
+                                {activeUserRole === 'doctor' ? 'Clinical Specialty' :
+                                 activeUserRole === 'laboratory' ? 'Diagnostic Laboratory' :
+                                 activeUserRole === 'billing' ? 'Cashier & Billing Desk' :
+                                 activeUserRole === 'patient' ? 'Patient Portal' :
+                                 activeUserRole === 'admin' ? 'Executive Director' : 'Admissions & Triage'}
                             </span>
                         </div>
                     )}
@@ -254,9 +295,9 @@ const Layout = ({ children, role }) => {
             </div>
 
             {/* MAIN VIEW AREA */}
-            <div className="flex-grow-1 d-flex flex-column overflow-hidden h-100" style={{ minWidth: 0 }}>
+            <div className="app-main-wrapper flex-grow-1 d-flex flex-column overflow-hidden h-100" style={{ minWidth: 0 }}>
                 {/* TOP NAVIGATION BAR */}
-                <nav className="navbar navbar-expand bg-white border-bottom px-3 px-md-4 shadow-sm" style={{ height: '72px', flexShrink: 0 }}>
+                <nav className="app-navbar navbar navbar-expand no-print d-print-none bg-white border-bottom px-3 px-md-4 shadow-sm" style={{ height: '72px', flexShrink: 0 }}>
                     <div className="container-fluid p-0 d-flex justify-content-between align-items-center">
                         {/* Left: Sidebar Toggle & Branch Selector */}
                         <div className="d-flex align-items-center gap-3">
@@ -364,7 +405,7 @@ const Layout = ({ children, role }) => {
                 </nav>
 
                 {/* SCROLLABLE ROUTE CONTENT */}
-                <main className="flex-grow-1 overflow-auto bg-light">
+                <main className="app-main-content flex-grow-1 overflow-auto bg-light">
                     {children}
                 </main>
             </div>

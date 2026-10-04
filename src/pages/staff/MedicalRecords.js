@@ -2159,7 +2159,7 @@ const MedicalRecords = () => {
                         padding: 0 !important;
                         background: white !important;
                     }
-                    .no-print {
+                    .no-print, .sidebar, .app-sidebar, nav, .navbar, .app-navbar, header, footer {
                         display: none !important;
                     }
                     .print-only {
