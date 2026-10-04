@@ -406,7 +406,7 @@ const Login = ({ mode }) => {
             {/* LEFT HERO BRANDING PANE (DYNAMICALLY THEMED BY ACTIVE ROLE) */}
             {/* ========================================================= */}
             <div 
-                className="col-12 col-lg-5 col-xl-5 d-flex flex-column justify-content-between p-4 p-md-5 text-white" 
+                className="d-none d-lg-flex col-lg-5 col-xl-5 flex-column justify-content-between p-4 p-md-5 text-white" 
                 style={{
                     background: activeConfig.heroGradient,
                     minHeight: '480px',
@@ -481,9 +481,22 @@ const Login = ({ mode }) => {
             {/* ========================================================= */}
             {/* RIGHT AUTHENTICATION & DEMO CREDENTIALS PANE              */}
             {/* ========================================================= */}
-            <div className="col-12 col-lg-7 col-xl-7 d-flex flex-column justify-content-center p-3 p-md-4 p-xl-5 bg-white">
+            <div className="col-12 col-lg-7 col-xl-7 d-flex flex-column justify-content-center p-3 p-md-4 p-xl-5 bg-white min-vh-100">
                 <div style={{ maxWidth: '620px', width: '100%', margin: '0 auto' }}>
                     
+                    {/* Mobile Brand Header */}
+                    <div className="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom d-lg-none">
+                        <div className="rounded-3 overflow-hidden bg-white shadow-sm border p-1 d-flex align-items-center justify-content-center" style={{ width: '44px', height: '44px', flexShrink: 0 }}>
+                            <img src="/careplus-logo.png" alt="CarePlus Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                        </div>
+                        <div>
+                            <h4 className="fw-bold mb-0 text-dark">CarePlus Clinic</h4>
+                            <span className="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-0 small fw-semibold" style={{ fontSize: '11px' }}>
+                                {activeConfig.portalBadge}
+                            </span>
+                        </div>
+                    </div>
+
                     {/* Top Switcher Instructions */}
                     <div className="d-flex justify-content-between align-items-start mb-3">
                         <div>
